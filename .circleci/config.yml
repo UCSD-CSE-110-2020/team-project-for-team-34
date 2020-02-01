@@ -1,3 +1,4 @@
+# Check that this file allows for androidTest tests to run
 version: 2
 jobs:
   build:
