@@ -1,4 +1,3 @@
-# Check that this file allows for androidTest tests to run
 version: 2
 jobs:
   build:
@@ -72,3 +71,10 @@ jobs:
             sudo gsutil -m cp -r -U `sudo gsutil ls gs://$TEST_RESULTS | tail -1` test_results/ | true
       - store_artifacts:
           path: test_results
+
+workflows:
+  version: 2
+  build_and_android_test:
+    jobs:
+      - build
+      - android_test
