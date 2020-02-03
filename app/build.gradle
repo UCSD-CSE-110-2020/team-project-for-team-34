@@ -30,12 +30,14 @@ android {
             }
         }
     }
-
+/* Isn't working now; will fix later
     signingConfigs {
         debug {
-            storeFile file("~/.android/debug.keystore")
+            storeFile file(System.getProperty("user.home") + "/")
         }
     }
+
+ */
 }
 
 dependencies {
