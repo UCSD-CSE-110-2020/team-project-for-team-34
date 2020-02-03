@@ -15,7 +15,7 @@ source /opt/google-cloud-sdk/path.bash.inc
 
 echo "Authorizing gcloud and setting config defaults..."
 gcloud -q components update
-gcloud auth activate-service-account --key-file=gcloud-service-key.json
+gcloud auth activate-service-account --key-file=gcloud-service-key.json.enc
 gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
 
 echo "Running Android Tests with Firebase Test Lab..."
