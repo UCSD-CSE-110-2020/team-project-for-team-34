@@ -1,5 +1,6 @@
 package com.example.wwrapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -27,6 +28,21 @@ public class HomeScreenActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        if(!checkHasHeight()){
+            Intent askHeight = new Intent(HomeScreenActivity.this,MainActivity.class);
+            startActivity(askHeight);
+        }
+    }
+
+    //implement after getting real data
+    private boolean checkHasHeight(){
+        //if data exist
+        boolean hasHeight = true;
+        //else if data doesn't exist
+        //boolean hasHeight = false;
+        return hasHeight;
     }
 
 }
+
