@@ -10,8 +10,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 public class HomeScreenActivity extends AppCompatActivity {
+
+    private Button startNewWalkBtn = findViewById(R.id.startNewWalkButton);
+    private TextView stepView = findViewById(R.id.homeStepsTextView);
+    private TextView mileView = findViewById(R.id.homeMilesTextView);
+    private int steps,miles;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,20 +28,22 @@ public class HomeScreenActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         if(!checkHasHeight()){
             Intent askHeight = new Intent(HomeScreenActivity.this,MainActivity.class);
             startActivity(askHeight);
         }
+
+        final Button startNewWalkBtn = findViewById(R.id.startNewWalkButton);
+        startNewWalkBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent walk = new Intent(HomeScreenActivity.this,WalkActivity.class);
+                startActivity(walk);
+            }
+        });
+
     }
+
 
     //implement after getting real data
     private boolean checkHasHeight(){
@@ -44,5 +54,14 @@ public class HomeScreenActivity extends AppCompatActivity {
         return hasHeight;
     }
 
+    private void displayInfo(int steps,int miles){
+        stepView.setText(steps);
+        mileView.setText(miles);
+    }
+
+    //read data files, implement after having data type
+    private void readStepsAndMiles(int steps,int miles){
+        return;
+    }
 }
 
