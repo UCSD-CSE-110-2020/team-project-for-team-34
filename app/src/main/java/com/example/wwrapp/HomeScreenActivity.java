@@ -14,13 +14,14 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class HomeScreenActivity extends AppCompatActivity {
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
 
     private static final String TAG = "StepCountActivity";
-    private TextView textSteps;
+    private TextView stepView;
     private FitnessService fitnessService;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +29,7 @@ public class HomeScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home_screen);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        textSteps = findViewById(R.id.homeStepsTextView);
+        stepView = findViewById(R.id.homeStepsTextView);
 
         String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
@@ -80,7 +81,7 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
 
     public void setStepCount(long totalStep) {
-        textSteps.setText(String.valueOf(totalStep));
+        stepView.setText(String.valueOf(totalStep));
     }
 }
 
