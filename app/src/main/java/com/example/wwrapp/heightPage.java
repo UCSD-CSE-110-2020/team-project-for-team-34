@@ -1,5 +1,6 @@
 package com.example.wwrapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -11,23 +12,42 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 public class heightPage extends AppCompatActivity {
 
     private Spinner feetSpinner;
     private Spinner inchSpinner;
+    private Button done;
     private static final String[] feet = {"", "0", "1", "2", "3", "4", "5", "6", "7"};
     private static final String[] inch = {"", "0","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"};
     private int userFeet;
     private int userInch;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_height_page);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        done = (Button) findViewById(R.id.height_button);
+
+        done.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                SharedPreferences saveHeight = getSharedPreferences("user_height", MODE_PRIVATE);
+                SharedPreferences.Editor editor = saveHeight.edit();
+                editor.putString("height_inch", inchSpinner.getSelectedItem().toString());
+                editor.putString("height_feet", feetSpinner.getSelectedItem().toString());
+                editor.apply();
+                String inches = saveHeight.getString("height_inch","");
+                String feet = saveHeight.getString("height_feet","");
+                Toast.makeText(heightPage.this,
+                           "Saved: Your height is " + feet + "\' " + inches + "\""
+                            , Toast.LENGTH_LONG).show();
+            }
+        });
 
         feetSpinner = (Spinner) findViewById(R.id.spinner_feet);
 
