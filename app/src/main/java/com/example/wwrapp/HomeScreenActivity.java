@@ -78,7 +78,7 @@ public class HomeScreenActivity extends AppCompatActivity {
         boolean hasHeight = true;
         //else if data doesn't exist
         SharedPreferences saveHeight = getSharedPreferences("user_height", MODE_PRIVATE);
-        String testVal = saveHeight.getString("height_feet","")
+        String testVal = saveHeight.getString("height_feet","");
         if ( testVal == null) {
             hasHeight = false;
         }
