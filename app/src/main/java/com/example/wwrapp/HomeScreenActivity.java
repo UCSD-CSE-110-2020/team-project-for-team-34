@@ -2,6 +2,7 @@ package com.example.wwrapp;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.example.wwrapp.fitness.FitnessService;
@@ -76,6 +77,11 @@ public class HomeScreenActivity extends AppCompatActivity {
         //if data exist
         boolean hasHeight = true;
         //else if data doesn't exist
+        SharedPreferences saveHeight = getSharedPreferences("user_height", MODE_PRIVATE);
+        String testVal = saveHeight.getString("height_feet","")
+        if ( testVal == null) {
+            hasHeight = false;
+        }
         //boolean hasHeight = false;
         return hasHeight;
     }
