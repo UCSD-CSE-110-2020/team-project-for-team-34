@@ -13,6 +13,10 @@
         <activity android:name=".WalkActivity" />
         <activity android:name=".RoutesActivity" />
         <activity
+            android:name=".heightPage"
+            android:label="@string/title_activity_height_page"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
