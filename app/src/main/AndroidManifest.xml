@@ -9,6 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".HomeScreenActivity"></activity>
+        <activity android:name=".WalkActivity" />
+        <activity android:name=".RoutesActivity" />
         <activity
             android:name=".heightPage"
             android:label="@string/title_activity_height_page"
