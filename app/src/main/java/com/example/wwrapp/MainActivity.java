@@ -1,5 +1,6 @@
 package com.example.wwrapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -11,6 +12,8 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
+
 //
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +24,15 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        Button goToHeight = (Button) findViewById(R.id.button);
+
+        goToHeight.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                launchActivity();
+            }
+        });
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -29,6 +41,11 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+    }
+
+    public void launchActivity(){
+        Intent intent = new Intent(this, heightPage.class);
+        startActivity(intent);
     }
 
     @Override
