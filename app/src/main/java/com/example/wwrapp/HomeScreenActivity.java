@@ -87,16 +87,9 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
     //implement after getting real data
     private boolean checkHasHeight(){
-        //if data exist
-        boolean hasHeight = true;
-        //else if data doesn't exist
         SharedPreferences saveHeight = getSharedPreferences("user_height", MODE_PRIVATE);
         String testVal = saveHeight.getString("height_feet","");
-        if (testVal.equals("")) {
-            hasHeight = false;
-        }
-        //boolean hasHeight = false;
-        return hasHeight;
+        return !testVal.equals("");
     }
 
     public void displayStepsAndMiles() {
