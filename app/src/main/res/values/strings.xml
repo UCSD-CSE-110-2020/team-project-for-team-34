@@ -1,4 +1,15 @@
 <resources>
     <string name="app_name">wwrapp</string>
     <string name="action_settings">Settings</string>
+    <string name="enter_walk_info_label_done">Done</string>
+    <string name="enter_walk_info_label_cancel">Cancel</string>
+    <string name="label_route_name">Route name *</string>
+    <string name="hint_route_name">Route name</string>
+    <string name="label_starting_point">Starting point</string>
+    <string name="hint_starting_point">Starting point</string>
+
+
+
+
+
 </resources>
