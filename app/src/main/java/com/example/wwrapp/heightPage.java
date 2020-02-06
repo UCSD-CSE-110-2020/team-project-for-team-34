@@ -34,21 +34,6 @@ public class heightPage extends AppCompatActivity {
         setSupportActionBar(toolbar);
         done = (Button) findViewById(R.id.height_button);
 
-        done.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                SharedPreferences saveHeight = getSharedPreferences("user_height", MODE_PRIVATE);
-                SharedPreferences.Editor editor = saveHeight.edit();
-                editor.putString("height_inch", inchSpinner.getSelectedItem().toString());
-                editor.putString("height_feet", feetSpinner.getSelectedItem().toString());
-                editor.apply();
-                String inches = saveHeight.getString("height_inch","");
-                String feet = saveHeight.getString("height_feet","");
-                Toast.makeText(heightPage.this,
-                           "Saved: Your height is " + feet + "\' " + inches + "\""
-                            , Toast.LENGTH_LONG).show();
-            }
-        });
-
         feetSpinner = (Spinner) findViewById(R.id.spinner_feet);
 
         final ArrayAdapter<String> feetAdapter = new ArrayAdapter<String>(heightPage.this,
@@ -65,46 +50,27 @@ public class heightPage extends AppCompatActivity {
         inchAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
         inchSpinner.setAdapter(inchAdapter);
 
-        inchSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(position == 0 || position == 1){
-                    userInch = 0;
-                } else {
-                    userInch = Integer.valueOf(parent.getItemAtPosition(position).toString());
+        done.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                String inches = inchSpinner.getSelectedItem().toString();
+                String feet = feetSpinner.getSelectedItem().toString();
+                if(inches.equals("") || feet.equals("")) {
+                    Toast.makeText(heightPage.this,
+                            "Please enter a valid height"
+                            , Toast.LENGTH_LONG).show();
                 }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                userInch = 0;
-            }
-        });
-
-        feetSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(position == 0 || position == 1){
-                    if(userInch == 0){
-                        // show a pop up alert asking user to enter a non-zero feet.
-                    } else {
-                        userFeet = 0;
-                    }
-                } else {
-                    userFeet = Integer.valueOf(parent.getItemAtPosition(position).toString());
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                if(userInch == 0){
-                    // show a pop up alert asking user to enter a proper feet that is > 0.
+                else {
+                    SharedPreferences saveHeight = getSharedPreferences("user_height", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = saveHeight.edit();
+                    editor.putString("height_inch", inches);
+                    editor.putString("height_feet", feet);
+                    editor.apply();
+                    Toast.makeText(heightPage.this,
+                            "Saved: Your height is " + feet + "\' " + inches + "\""
+                            , Toast.LENGTH_LONG).show();
+                    finish();
                 }
             }
         });
-
     }
-
-
-
 }
