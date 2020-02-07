@@ -95,9 +95,9 @@ public class GoogleFitAdapter implements FitnessService {
                                                 ? 0
                                                 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
 
-                                SharedPreferences saveSteps = activity.getSharedPreferences("user_steps",MODE_PRIVATE);
+                                SharedPreferences saveSteps = activity.getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME,MODE_PRIVATE);
                                 SharedPreferences.Editor editor = saveSteps.edit();
-                                editor.putLong("total_steps", total);
+                                editor.putLong(HomeScreenActivity.TOTAL_STEPS_KEY, total);
                                 editor.apply();
 
                                 Log.d(TAG, "Total steps: " + total);
