@@ -1,8 +1,10 @@
 package com.example.wwrapp;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.example.wwrapp.fitness.FitnessService;
@@ -72,13 +74,24 @@ public class HomeScreenActivity extends AppCompatActivity {
             }
         });
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        new AsyncTaskRunner().execute("1");
+    }
+
+    private class AsyncTaskRunner extends AsyncTask<String, String, String> {
+        private String resp;
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                resp = e.getMessage();
+            }
+            fitnessService.updateStepCount();
+            fitnessService.setup();
+            return resp;
         }
-        fitnessService.updateStepCount();
-        fitnessService.setup();
     }
 
     @Override
