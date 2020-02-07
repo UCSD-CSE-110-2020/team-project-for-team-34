@@ -11,7 +11,7 @@
 
 
 
-    <string name="title_activity_height_page">heightPage</string>
+    <string name="title_activity_height_page">HeightScreenActivity</string>
     <string name="enter_text_field">Enter Your Height</string>
     <string name="done_height_button">Done</string>
     <string name="text_feet">ft</string>
