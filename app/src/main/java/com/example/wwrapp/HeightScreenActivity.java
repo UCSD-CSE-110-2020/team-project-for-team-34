@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class heightPage extends AppCompatActivity {
+public class HeightScreenActivity extends AppCompatActivity {
 
     private Spinner feetSpinner;
     private Spinner inchSpinner;
@@ -30,18 +30,16 @@ public class heightPage extends AppCompatActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_height_page);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         done = (Button) findViewById(R.id.height_button);
 
         feetSpinner = (Spinner) findViewById(R.id.spinner_feet);
 
-        final ArrayAdapter<String> feetAdapter = new ArrayAdapter<String>(heightPage.this,
+        final ArrayAdapter<String> feetAdapter = new ArrayAdapter<String>(HeightScreenActivity.this,
                 android.R.layout.simple_spinner_item, feet);
 
         inchSpinner = (Spinner) findViewById(R.id.spinner_inch);
 
-        ArrayAdapter<String> inchAdapter = new ArrayAdapter<String>(heightPage.this,
+        ArrayAdapter<String> inchAdapter = new ArrayAdapter<String>(HeightScreenActivity.this,
                 android.R.layout.simple_spinner_item, inch);
 
         feetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
@@ -55,7 +53,7 @@ public class heightPage extends AppCompatActivity {
                 String inches = inchSpinner.getSelectedItem().toString();
                 String feet = feetSpinner.getSelectedItem().toString();
                 if(inches.equals("") || feet.equals("")) {
-                    Toast.makeText(heightPage.this,
+                    Toast.makeText(HeightScreenActivity.this,
                             "Please enter a valid height"
                             , Toast.LENGTH_LONG).show();
                 }
@@ -65,7 +63,7 @@ public class heightPage extends AppCompatActivity {
                     editor.putString("height_inch", inches);
                     editor.putString("height_feet", feet);
                     editor.apply();
-                    Toast.makeText(heightPage.this,
+                    Toast.makeText(HeightScreenActivity.this,
                             "Saved: Your height is " + feet + "\' " + inches + "\""
                             , Toast.LENGTH_LONG).show();
                     finish();

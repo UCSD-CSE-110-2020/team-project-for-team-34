@@ -1,12 +1,15 @@
 package com.example.wwrapp;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.example.wwrapp.fitness.FitnessService;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
+import com.example.wwrapp.fitness.GoogleFitAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -19,12 +22,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class HomeScreenActivity extends AppCompatActivity {
+    private String fitnessServiceKey = "GOOGLE_FIT";
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
     private static final String TAG = "StepCountActivity";
     private FitnessService fitnessService;
 
-    private TextView stepView = findViewById(R.id.homeStepsTextView);
-    private TextView mileView = findViewById(R.id.homeMilesTextView);
+    private TextView stepView;
+    private TextView mileView;
 
     public long total_steps, total_miles, steps, miles;
     public int height_feet, height_inch;
@@ -33,16 +37,26 @@ public class HomeScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
+
+        stepView = findViewById(R.id.homeStepsTextView);
+        mileView = findViewById(R.id.homeMilesTextView);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
+        FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
+            @Override
+            public FitnessService create(HomeScreenActivity homeScreenActivity) {
+                return new GoogleFitAdapter(homeScreenActivity);
+            }
+        });
+//        String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
 
         if(!checkHasHeight()){
-            Intent askHeight = new Intent(HomeScreenActivity.this,MainActivity.class);
+            Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
             startActivity(askHeight);
         }
+
 
         findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,14 +74,24 @@ public class HomeScreenActivity extends AppCompatActivity {
             }
         });
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        fitnessService.updateStepCount();
+        new AsyncTaskRunner().execute("1");
+    }
 
-        fitnessService.setup();
+    private class AsyncTaskRunner extends AsyncTask<String, String, String> {
+        private String resp;
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                resp = e.getMessage();
+            }
+            fitnessService.updateStepCount();
+            fitnessService.setup();
+            return resp;
+        }
     }
 
     @Override
