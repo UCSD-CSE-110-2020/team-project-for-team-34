@@ -37,8 +37,8 @@ public class WalkActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
         Log.d(TAG, "onCreate called");
-        stepsSharedPref = getSharedPreferences(STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
-        startSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
+        stepsSharedPref = getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
+        startSteps = stepsSharedPref.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
 
         hrView = findViewById(R.id.hrs);
         minView = findViewById(R.id.mins);
@@ -46,18 +46,22 @@ public class WalkActivity extends AppCompatActivity {
         stepView = findViewById(R.id.stepCount);
         mileView = findViewById(R.id.mileCount);
         stop = findViewById(R.id.stopButton);
-        Log.d(TAG, "Right before TimerTask");
         timer = new TimerTask();
-        timer.execute();
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 timer.cancel(false);
-                // Start enter walk info
-//                startWalkInfoActivity();
+                HomeScreenActivity.fitnessService.updateStepCount();
+
+                // startWalkInfoActivity();
                 finish();
             }
         });
+        Log.d(TAG, "Right before TimerTask");
+
+
+        timer.execute();
+
     }
 
     public void startWalkInfoActivity() {
@@ -80,17 +84,18 @@ public class WalkActivity extends AppCompatActivity {
         protected String doInBackground(String ... params) {
             Log.d(TAG, "doInBackground called");
 
-            while (true) {
+            while (!isCancelled()) {
                 try {
                     Thread.sleep(1000);
                     ++time;
                     // THIS CODE IS TO SHOW STEPS CHANGING, REMOVE IN PRODUCTION CODE
                     // REMOVE ==================================================================
-                    long currSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
-                    ++currSteps;
-                    SharedPreferences.Editor editor = stepsSharedPref.edit();
-                    editor.putLong(TOTAL_STEPS_KEY, currSteps);
-                    editor.apply();
+//                    long currSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
+//                    ++currSteps;
+//                    SharedPreferences.Editor editor = stepsSharedPref.edit();
+//                    editor.putLong(TOTAL_STEPS_KEY, currSteps);
+//                    editor.apply();
+
                     // REMOVE ===================================================================
                     publishProgress("update Time");
                 } catch (InterruptedException e) {
@@ -98,6 +103,7 @@ public class WalkActivity extends AppCompatActivity {
                     return e.getMessage();
                 }
             }
+            return null;
         }
 
         @Override
@@ -111,7 +117,6 @@ public class WalkActivity extends AppCompatActivity {
         @Override
         public void onProgressUpdate(String ... text) {
             Log.d(TAG, "onProgressUpdate called");
-
             updateTime();
             updateSteps();
         }
@@ -128,7 +133,9 @@ public class WalkActivity extends AppCompatActivity {
             secView.setText(seconds + " sec");
         }
         private void updateSteps() {
-            long currSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
+            HomeScreenActivity.fitnessService.updateStepCount();
+            long currSteps = stepsSharedPref.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
+            System.out.println("CURRENT STEPS: " + currSteps);
             long stepsTaken = currSteps - startSteps;
             double milesTravelled;
             stepView.setText(Long.toString(stepsTaken));
@@ -140,4 +147,6 @@ public class WalkActivity extends AppCompatActivity {
             mileView.setText("That's " + milesTravelled + " miles so far");
         }
     }
+
+
 }

@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,7 +21,7 @@ public class HomeScreenActivity extends AppCompatActivity {
     private String fitnessServiceKey = "GOOGLE_FIT";
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
     private static final String TAG = "StepCountActivity";
-    private FitnessService fitnessService;
+    public static FitnessService fitnessService;
 
     // SharedPreferences
     public static final String STEPS_SHARED_PREF_NAME = "user_steps";
@@ -44,14 +45,6 @@ public class HomeScreenActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
-            @Override
-            public FitnessService create(HomeScreenActivity homeScreenActivity) {
-                return new GoogleFitAdapter(homeScreenActivity);
-            }
-        });
-        fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
-
         if(!checkHasHeight()){
             Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
             startActivity(askHeight);
@@ -62,6 +55,9 @@ public class HomeScreenActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent walk = new Intent(HomeScreenActivity.this,WalkActivity.class);
+                if (!runner.isCancelled()) {
+                    runner.cancel(false);
+                }
                 startActivity(walk);
             }
         });
@@ -74,9 +70,26 @@ public class HomeScreenActivity extends AppCompatActivity {
             }
         });
 
-        runner = new FitnessAsyncTask();
+        Button addStepsBtn = findViewById(R.id.button);
+        addStepsBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                fitnessService.updateStepCount();
+                displayStepsAndMiles();
+            }
+        });
+
+        FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
+            @Override
+            public FitnessService create(HomeScreenActivity homeScreenActivity) {
+                return new GoogleFitAdapter(homeScreenActivity);
+            }
+        });
+        fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.setup();
-        runner.execute("");
+        runner = new FitnessAsyncTask();
+        runner.execute();
     }
 
 
@@ -94,22 +107,21 @@ public class HomeScreenActivity extends AppCompatActivity {
                     resp = e.getMessage();
                 }
                 fitnessService.updateStepCount();
-                publishProgress(params);
+
+                publishProgress(mTotalSteps + "");
+
             }
             return resp;
         }
 
         @Override
         protected void onProgressUpdate(String... update) {
-            setTotalStepsAndMiles();
-            displayStepsAndMiles();
+             fitnessService.updateStepCount();
+//            setTotalStepsAndMiles();
+//            displayStepsAndMiles();
         }
 
-        @Override
-        protected void onPostExecute(String result){
-            setTotalStepsAndMiles();
-            displayStepsAndMiles();
-        }
+
     }
 
     @Override
@@ -120,8 +132,8 @@ public class HomeScreenActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == fitnessService.getRequestCode()) {
                 fitnessService.updateStepCount();
-                setTotalStepsAndMiles();
-                displayStepsAndMiles();
+//                setTotalStepsAndMiles();
+//                displayStepsAndMiles();
             }
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
@@ -143,22 +155,44 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
 
 
-    public void setTotalStepsAndMiles(){
-        // Get the total number of steps
-        SharedPreferences stepsSharedPref =
-                getSharedPreferences(STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
-        this.mTotalSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
+//    public void setTotalStepsAndMiles(){
+//        // Get the total number of steps
+//        SharedPreferences stepsSharedPref =
+//                getSharedPreferences(STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
+//        this.mTotalSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
+//
+//        // Get the user's height
+//        SharedPreferences heightSharedPref =
+//                getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
+//        int feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
+//        int inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+//
+//        // Calculate the user's total miles
+//        StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
+//        this.mTotalMiles = converter.getNumMiles(this.mTotalSteps);
+//    }
+
+    public void setStepCount(long stepCount) {
+        mTotalSteps = stepCount;
 
         // Get the user's height
         SharedPreferences heightSharedPref =
                 getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-        int feet = 6;
-                //heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
+        int feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
         int inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+        feet = 6;
+        inches = 0;
 
         // Calculate the user's total miles
         StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
         this.mTotalMiles = converter.getNumMiles(this.mTotalSteps);
+        displayStepsAndMiles();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 }
 

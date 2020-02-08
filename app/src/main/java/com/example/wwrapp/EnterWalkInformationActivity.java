@@ -23,8 +23,6 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         EditText startingPoint = findViewById(R.id.starting_point_edit_text);
 
         Button doneBtn = findViewById(R.id.enter_walk_info_done_button);
-        doneBtn.setEnabled(false);
-
 
         doneBtn.setOnClickListener(new View.OnClickListener() {
 
