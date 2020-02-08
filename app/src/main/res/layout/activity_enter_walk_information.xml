@@ -32,8 +32,11 @@
         android:layout_width="409dp"
         android:layout_height="131dp"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="1dp"
-        tools:layout_editor_absoluteY="1dp">
+        app:layout_constraintBottom_toTopOf="@+id/enter_walk_info_done_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
         <TextView
             android:id="@+id/enter_walk_info_route_name_text_view"
@@ -46,10 +49,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="textPersonName"
             android:hint="@string/hint_route_name"
-            android:text=""
-             />
+            android:inputType="textPersonName"
+            android:text="" />
 
         <TextView
             android:id="@+id/starting_point_text_view"
@@ -62,10 +64,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="textPersonName"
             android:hint="@string/hint_starting_point"
-            android:text=""
-            />
+            android:inputType="textPersonName"
+            android:text="" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
