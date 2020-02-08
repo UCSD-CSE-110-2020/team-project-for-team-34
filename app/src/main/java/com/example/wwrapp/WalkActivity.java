@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
 public class WalkActivity extends AppCompatActivity {
     private TextView hrView, minView, secView;
@@ -30,36 +31,36 @@ public class WalkActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 timer.cancel(false);
-            }
+        }
 
         });
     }
 
     private class TimerTask extends AsyncTask<String,String, String> {
         private long time = 0;
-        private ProgressDialog progressDialog;
 
         @Override
         protected String doInBackground(String ... params) {
-            try {
-                Thread.sleep(1000);
-                time = time++;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return e.getMessage();
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                    time = ++time;
+                    publishProgress("update Time");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return e.getMessage();
+                }
             }
-            return "Slept for 1 second";
         }
 
         @Override
         public void onProgressUpdate(String ... text) {
-            progressDialog.dismiss();
-            long hrTime = (time / 3600000);
-            long minTime = (time / 60000) % 60;
-            long secTime = (time / 1000) % 60;
-            hrView.setText((int)hrTime + " Hr");
-            hrView.setText((int)minTime + " Min");
-            hrView.setText((int)secTime + "Sec");
+            long hrTime = (time / 3600);
+            long minTime = (time / 60) % 60;
+            long secTime = (time) % 60;
+            hrView.setText((int)hrTime + " hr");
+            minView.setText((int)minTime + " min");
+            secView.setText((int)secTime + " sec");
         }
     }
 }
