@@ -1,4 +1,3 @@
-
 package com.example.wwrapp;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,15 +9,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import android.os.Bundle;
+
 public class WalkActivity extends AppCompatActivity {
     private TextView hrView, minView, secView;
     private Button stop;
     private TimerTask timer;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
+
         hrView = findViewById(R.id.hrs);
         minView = findViewById(R.id.mins);
         secView = findViewById(R.id.secs);
@@ -60,6 +61,5 @@ public class WalkActivity extends AppCompatActivity {
             hrView.setText((int)minTime + " Min");
             hrView.setText((int)secTime + "Sec");
         }
-
     }
 }
