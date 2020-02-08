@@ -74,15 +74,12 @@ public class HomeScreenActivity extends AppCompatActivity {
             }
         });
 
+        runner = new FitnessAsyncTask();
         fitnessService.setup();
         runner.execute("");
     }
 
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        runner.cancel(true);
-    }
+
 
     private class FitnessAsyncTask extends AsyncTask<String, String, String> {
         private String resp;
@@ -97,6 +94,7 @@ public class HomeScreenActivity extends AppCompatActivity {
                     resp = e.getMessage();
                 }
                 fitnessService.updateStepCount();
+                publishProgress(params);
             }
             return resp;
         }
@@ -141,7 +139,7 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     public void displayStepsAndMiles() {
         this.mStepsView.setText(String.valueOf(this.mTotalSteps));
-        this.mMilesView.setText(String.valueOf(this.mTotalMiles));
+        this.mMilesView.setText(String.valueOf(Math.round(this.mTotalMiles * 10)/10.0));
     }
 
 
@@ -154,7 +152,8 @@ public class HomeScreenActivity extends AppCompatActivity {
         // Get the user's height
         SharedPreferences heightSharedPref =
                 getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-        int feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
+        int feet = 6;
+                //heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
         int inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
 
         // Calculate the user's total miles
