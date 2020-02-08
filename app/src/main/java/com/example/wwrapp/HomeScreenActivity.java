@@ -1,25 +1,20 @@
 package com.example.wwrapp;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import com.example.wwrapp.fitness.FitnessService;
-import com.example.wwrapp.fitness.FitnessServiceFactory;
-import com.example.wwrapp.fitness.GoogleFitAdapter;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import com.example.wwrapp.fitness.FitnessService;
+import com.example.wwrapp.fitness.FitnessServiceFactory;
+import com.example.wwrapp.fitness.GoogleFitAdapter;
 
 public class HomeScreenActivity extends AppCompatActivity {
     private String fitnessServiceKey = "GOOGLE_FIT";
@@ -27,19 +22,23 @@ public class HomeScreenActivity extends AppCompatActivity {
     private static final String TAG = "StepCountActivity";
     private FitnessService fitnessService;
 
-    private TextView stepView;
-    private TextView mileView;
+    // SharedPreferences
+    public static final String STEPS_SHARED_PREF_NAME = "user_steps";
+    public static final String TOTAL_STEPS_KEY = "totalSteps";
 
-    public long total_steps, total_miles, steps, miles;
-    public int height_feet, height_inch;
+    private TextView mStepsView;
+    private TextView mMilesView;
+
+    private long mTotalSteps;
+    private double mTotalMiles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
-        stepView = findViewById(R.id.homeStepsTextView);
-        mileView = findViewById(R.id.homeMilesTextView);
+        mStepsView = findViewById(R.id.homeStepsTextView);
+        mMilesView = findViewById(R.id.homeMilesTextView);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -49,7 +48,6 @@ public class HomeScreenActivity extends AppCompatActivity {
                 return new GoogleFitAdapter(homeScreenActivity);
             }
         });
-//        String fitnessServiceKey = getIntent().getStringExtra(FITNESS_SERVICE_KEY);
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
 
         if(!checkHasHeight()){
@@ -102,36 +100,44 @@ public class HomeScreenActivity extends AppCompatActivity {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == fitnessService.getRequestCode()) {
                 fitnessService.updateStepCount();
-                getTotalStepsAndMiles();
+                setTotalStepsAndMiles();
                 displayStepsAndMiles();
             }
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
         }
     }
+
     //implement after getting real data
     private boolean checkHasHeight(){
-        SharedPreferences saveHeight = getSharedPreferences("user_height", MODE_PRIVATE);
-        String testVal = saveHeight.getString("height_feet","");
-        return !testVal.equals("");
+        SharedPreferences saveHeight =
+                getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
+        int testVal = saveHeight.getInt(HeightScreenActivity.HEIGHT_FEET_KEY,-1);
+        // If testVal == -1, then there was no height
+        return testVal != - 1;
     }
 
     public void displayStepsAndMiles() {
-        stepView.setText(String.valueOf(total_steps));
-        mileView.setText(String.valueOf(total_miles));
+        this.mStepsView.setText(String.valueOf(this.mTotalSteps));
+        this.mMilesView.setText(String.valueOf(this.mTotalMiles));
     }
 
-    public long stepsToMiles(long steps){
-        long miles;
-        int total_height = height_feet*12 +height_inch;
-        miles = (long) ((total_height * .413 * steps) / 5280);
-        return miles;
-    }
 
-    public void getTotalStepsAndMiles(){
-        SharedPreferences totalSteps = getSharedPreferences("user_steps",MODE_PRIVATE);
-        total_steps = totalSteps.getLong("total_steps",0);
-        total_miles = stepsToMiles(total_steps);
+    public void setTotalStepsAndMiles(){
+        // Get the total number of steps
+        SharedPreferences stepsSharedPref =
+                getSharedPreferences(STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
+        this.mTotalSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
+
+        // Get the user's height
+        SharedPreferences heightSharedPref =
+                getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
+        int feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
+        int inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+
+        // Calculate the user's total miles
+        StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
+        this.mTotalMiles = converter.getNumMiles(this.mTotalSteps);
     }
 }
 
