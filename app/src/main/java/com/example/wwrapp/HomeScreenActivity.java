@@ -32,6 +32,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     private long mTotalSteps;
     private double mTotalMiles;
 
+    private FitnessAsyncTask runner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,23 +74,43 @@ public class HomeScreenActivity extends AppCompatActivity {
             }
         });
 
-        new AsyncTaskRunner().execute("1");
+        fitnessService.setup();
+        runner.execute("");
     }
 
-    private class AsyncTaskRunner extends AsyncTask<String, String, String> {
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        runner.cancel(true);
+    }
+
+    private class FitnessAsyncTask extends AsyncTask<String, String, String> {
         private String resp;
 
         @Override
         protected String doInBackground(String... params) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                resp = e.getMessage();
+            while(!isCancelled()) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    resp = e.getMessage();
+                }
+                fitnessService.updateStepCount();
             }
-            fitnessService.updateStepCount();
-            fitnessService.setup();
             return resp;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... update) {
+            setTotalStepsAndMiles();
+            displayStepsAndMiles();
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            setTotalStepsAndMiles();
+            displayStepsAndMiles();
         }
     }
 
