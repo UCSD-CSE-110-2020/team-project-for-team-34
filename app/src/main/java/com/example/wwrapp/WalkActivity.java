@@ -94,7 +94,7 @@ public class WalkActivity extends AppCompatActivity {
             // Calculate the user's total miles
             StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
             milesTravelled = converter.getNumMiles(stepsTaken);
-            mileView.setText("That's" + milesTravelled + "miles so far");
+            mileView.setText("That's " + milesTravelled + " miles so far");
         }
     }
 }
