@@ -1,19 +1,20 @@
 package com.example.wwrapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import android.os.Bundle;
-import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class WalkActivity extends AppCompatActivity {
+
+    private static final String TAG = "WalkActivity";
+
     private TextView hrView, minView, secView, stepView, mileView;
     private Button stop;
     private TimerTask timer;
@@ -22,10 +23,20 @@ public class WalkActivity extends AppCompatActivity {
     public static final String STEPS_SHARED_PREF_NAME = "user_steps";
     public static final String TOTAL_STEPS_KEY = "totalSteps";
 
+    private int hours;
+    private int minutes;
+    private int seconds;
+
+    public static final String HOURS_KEY = "HOURS_KEY";
+    public static final String MINUTES_KEY = "MINUTES_KEY";
+    public static final String SECONDS_KEY = "SECONDS_KEY";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
+        Log.d(TAG, "onCreate called");
         stepsSharedPref = getSharedPreferences(STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
         startSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
 
@@ -35,15 +46,29 @@ public class WalkActivity extends AppCompatActivity {
         stepView = findViewById(R.id.stepCount);
         mileView = findViewById(R.id.mileCount);
         stop = findViewById(R.id.stopButton);
+        Log.d(TAG, "Right before TimerTask");
         timer = new TimerTask();
         timer.execute();
         stop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 timer.cancel(false);
+                // Start enter walk info
+//                startWalkInfoActivity();
                 finish();
             }
         });
+    }
+
+    public void startWalkInfoActivity() {
+        Intent intent = new Intent(this, EnterWalkInformationActivity.class);
+        intent.putExtra(HOURS_KEY, hours);
+        intent.putExtra(MINUTES_KEY, minutes);
+        intent.putExtra(SECONDS_KEY, seconds);
+        Log.d(TAG, "hours is" + hours);
+        Log.d(TAG, "minutes is" + minutes);
+        Log.d(TAG, "seconds is" + seconds);
+        startActivity(intent);
     }
 
     private class TimerTask extends AsyncTask<String,String, String> {
@@ -53,6 +78,8 @@ public class WalkActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String ... params) {
+            Log.d(TAG, "doInBackground called");
+
             while (true) {
                 try {
                     Thread.sleep(1000);
@@ -83,17 +110,22 @@ public class WalkActivity extends AppCompatActivity {
 
         @Override
         public void onProgressUpdate(String ... text) {
+            Log.d(TAG, "onProgressUpdate called");
+
             updateTime();
             updateSteps();
         }
 
         private void updateTime() {
-            long hrTime = (time / 3600);
-            long minTime = (time / 60) % 60;
-            long secTime = (time) % 60;
-            hrView.setText((int)hrTime + " hr");
-            minView.setText((int)minTime + " min");
-            secView.setText((int)secTime + " sec");
+            Log.d(TAG, "updateTime called");
+
+            hours = (int) (time / 3600);
+            minutes = (int) ((time / 60) % 60);
+            seconds = (int) (time % 60);
+            Log.d(TAG, "time is " + time);
+            hrView.setText(hours + " hr");
+            minView.setText(minutes + " min");
+            secView.setText(seconds + " sec");
         }
         private void updateSteps() {
             long currSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);

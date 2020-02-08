@@ -1,15 +1,17 @@
 package com.example.wwrapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class EnterWalkInformationActivity extends AppCompatActivity {
+import androidx.appcompat.app.AppCompatActivity;
 
+public class EnterWalkInformationActivity extends AppCompatActivity {
+    private static String TAG = "EnterWalkInformationActivity";
     private static String ENTER_ROUTE_NAME_TOAST = "Please enter the route name";
 
     @Override
@@ -31,8 +33,15 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 if (routeName.getText().toString().isEmpty()) {
                     Toast.makeText(getApplicationContext(), ENTER_ROUTE_NAME_TOAST, Toast.LENGTH_LONG).show();
                 } else {
+                    int hours = getIntent().getIntExtra(WalkActivity.HOURS_KEY, -1);
+                    int minutes = getIntent().getIntExtra(WalkActivity.MINUTES_KEY, -1);
+                    int seconds = getIntent().getIntExtra(WalkActivity.SECONDS_KEY, -1);
+                    Log.d(TAG, "hours is" + hours);
+                    Log.d(TAG, "minutes is" + minutes);
+                    Log.d(TAG, "seconds is" + seconds);
                     // Save data and go to routes screen
                     Toast.makeText(getApplicationContext(), "Save data and go to routes screen", Toast.LENGTH_LONG).show();
+                    launchRoutesActivity();
                 }
             }
         });
@@ -48,4 +57,10 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
             }
         });
     }
+
+    public void launchRoutesActivity() {
+        Intent intent = new Intent(this, RoutesActivity.class);
+        startActivity(intent);
+    }
+
 }
