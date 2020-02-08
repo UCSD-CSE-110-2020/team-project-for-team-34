@@ -55,7 +55,15 @@ public class WalkActivity extends AppCompatActivity {
             while (true) {
                 try {
                     Thread.sleep(1000);
-                    time = ++time;
+                    ++time;
+                    // THIS CODE IS TO SHOW STEPS CHANGING, REMOVE IN PRODUCTION CODE
+                    // REMOVE ==================================================================
+                    long currSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
+                    ++currSteps;
+                    SharedPreferences.Editor editor = stepsSharedPref.edit();
+                    editor.putLong(TOTAL_STEPS_KEY, currSteps);
+                    editor.apply();
+                    // REMOVE ===================================================================
                     publishProgress("update Time");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -94,6 +102,8 @@ public class WalkActivity extends AppCompatActivity {
             // Calculate the user's total miles
             StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
             milesTravelled = converter.getNumMiles(stepsTaken);
+            //https://www.quora.com/How-can-I-round-a-number-to-1-decimal-digit-in-Java
+            milesTravelled = Math.round(milesTravelled * 10) / 10.0;
             mileView.setText("That's " + milesTravelled + " miles so far");
         }
     }
