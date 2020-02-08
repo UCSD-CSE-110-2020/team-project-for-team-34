@@ -41,6 +41,7 @@ public class WalkActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 timer.cancel(false);
+                finish();
             }
         });
     }
