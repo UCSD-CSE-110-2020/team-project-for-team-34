@@ -7,9 +7,23 @@
     <string name="hint_route_name">Route name</string>
     <string name="label_starting_point">Starting point</string>
     <string name="hint_starting_point">Starting point</string>
+    <string name="title_activity_home_screen">HomeScreenActivity</string>
+    <string name="home_screen_step_string">Your steps for the day:</string>
+    <string name="home_screen_miles_string">Your miles for the day:</string>
+    <string name="home_toolbar_string">Home</string>
+    <string name="start_new_walk_string">Start new walk/run</string>
 
 
 
 
 
+    <string name="title_activity_height_page">HeightScreenActivity</string>
+    <string name="enter_text_field">Enter Your Height</string>
+    <string name="done_height_button">Done</string>
+    <string name="text_feet">ft</string>
+    <string name="text_inch">inches</string>
+
+    <string name="last_walk_steps">Last walk\'s steps</string>
+    <string name="last_walk_time">Last walk\'s time</string>
+    <string name="last_walk_distance">Last walk\'s distance</string>
 </resources>
