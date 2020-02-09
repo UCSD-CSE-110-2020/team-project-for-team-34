@@ -18,7 +18,9 @@ public class WalkActivity extends AppCompatActivity {
     private TextView mHoursTextView, mMinutesTextView, mSecondsTextView, mStepsView, mMilesView;
     private Button mStopBtn;
     private TimerTask mWalkTimer;
-    private long mStartSteps;
+
+    private long mStartSteps, mCurrSteps, mStepsTaken;
+    private double mMiles;
 
     private SharedPreferences mStepsSharedPreference;
 
@@ -38,6 +40,9 @@ public class WalkActivity extends AppCompatActivity {
     public static final String HOURS_KEY = "HOURS_KEY";
     public static final String MINUTES_KEY = "MINUTES_KEY";
     public static final String SECONDS_KEY = "SECONDS_KEY";
+    public static final String STEPS_KEY = "STEPS_KEY";
+    public static final String MILES_KEY = "MILES_KEY";
+
 
 
     @Override
@@ -92,9 +97,16 @@ public class WalkActivity extends AppCompatActivity {
         intent.putExtra(HOURS_KEY, mHours);
         intent.putExtra(MINUTES_KEY, mMinutes);
         intent.putExtra(SECONDS_KEY, mSeconds);
+        intent.putExtra(STEPS_KEY, mStepsTaken);
+        intent.putExtra(MILES_KEY, mMiles);
+
+
         Log.d(TAG, "mHours is" + mHours);
-        Log.d(TAG, "mMinutes is" + mMinutes);
-        Log.d(TAG, "mSeconds is" + mSeconds);
+        Log.d(TAG, "mMinutes is " + mMinutes);
+        Log.d(TAG, "mSeconds is " + mSeconds);
+        Log.d(TAG, "mStepsTaken is " + mStepsTaken);
+        Log.d(TAG, "mMiles is " + mMiles);
+
         startActivity(intent);
         finish();
     }
@@ -111,6 +123,8 @@ public class WalkActivity extends AppCompatActivity {
                     getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
             feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
             inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+            Log.d(TAG, "Feet: " + feet);
+            Log.d(TAG, "Inches: " + inches);
         }
 
         @Override
@@ -149,16 +163,16 @@ public class WalkActivity extends AppCompatActivity {
 
         private void updateSteps() {
             HomeScreenActivity.getFitnessService().updateStepCount();
-            long currSteps = mStepsSharedPreference.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
-            long stepsTaken = currSteps - mStartSteps;
-            mStepsView.setText(Long.toString(stepsTaken));
+            mCurrSteps = mStepsSharedPreference.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
+            mStepsTaken = mCurrSteps - mStartSteps;
+            mStepsView.setText(Long.toString(mStepsTaken));
 
             // Calculate the user's total miles
             StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
-            double milesTravelled = converter.getNumMiles(stepsTaken);
+            mMiles = converter.getNumMiles(mStepsTaken);
             //https://www.quora.com/How-can-I-round-a-number-to-1-decimal-digit-in-Java
-            milesTravelled = Math.round(milesTravelled * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
-            mMilesView.setText("That's " + milesTravelled + " miles so far");
+            mMiles = Math.round(mMiles * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
+            mMilesView.setText("That's " + mMiles + " miles so far");
         }
     }
 

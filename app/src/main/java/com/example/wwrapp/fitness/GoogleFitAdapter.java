@@ -25,7 +25,7 @@ public class GoogleFitAdapter implements FitnessService {
     private final String TAG = "GoogleFitAdapter";
     private GoogleSignInAccount account;
 
-    private int offset = 10;
+    private int offset = 5;
 
     private HomeScreenActivity activity;
 
@@ -105,7 +105,7 @@ public class GoogleFitAdapter implements FitnessService {
                                 long savedSteps = testSave.getLong(HomeScreenActivity.TOTAL_STEPS_KEY, -1);
                                 // Testing only
                                 savedSteps += offset;
-                                total += savedSteps;
+//                                total += savedSteps;
                                 activity.setStepCount(total);
                                 editor.putLong(HomeScreenActivity.TOTAL_STEPS_KEY, total);
                                 editor.apply();

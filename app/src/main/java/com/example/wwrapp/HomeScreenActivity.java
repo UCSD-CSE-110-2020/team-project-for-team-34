@@ -34,11 +34,21 @@ public class HomeScreenActivity extends AppCompatActivity {
     public static final String STEPS_SHARED_PREF_NAME = "user_steps";
     public static final String TOTAL_STEPS_KEY = "totalSteps";
 
+    public static final String LAST_WALK_SHARED_PREFS_NAME = "last_walk";
+    public static final String LAST_WALK_STEPS_KEY = "lastWalkSteps";
+    public static final String LAST_WALK_MILES_KEY = "lastWalkMiles";
+    public static final String LAST_WALK_TIME_KEY = "lastWalkTime";
+
+    public static final String CALLER_ID = "Home";
+
     private TextView mStepsView;
     private TextView mMilesView;
 
     private long mTotalSteps;
     private double mTotalMiles;
+
+    // User's height
+    private int mFeet, mInches;
 
     private FitnessAsyncTask mFitnessRunner;
 
@@ -47,12 +57,12 @@ public class HomeScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
 
-        mStepsView = findViewById(R.id.homeStepsTextView);
-        mMilesView = findViewById(R.id.homeMilesTextView);
+        mStepsView = findViewById(R.id.homeSteps);
+        mMilesView = findViewById(R.id.homeMiles);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Check for a saved height
+//         Check for a saved height
         if(!checkHasHeight()){
             Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
             startActivity(askHeight);
@@ -81,9 +91,25 @@ public class HomeScreenActivity extends AppCompatActivity {
                     mFitnessRunner.cancel(false);
                 }
                 Intent route = new Intent(HomeScreenActivity.this,RoutesActivity.class);
+                route.putExtra(EnterWalkInformationActivity.CALLER_ID_KEY, HomeScreenActivity.CALLER_ID);
                 startActivity(route);
             }
         });
+
+        // Update the last walk display, if applicable
+        TextView lastWalkSteps = findViewById(R.id.lastWalkSteps);
+        TextView lastWalkMiles = findViewById(R.id.lastWalkDistance);
+        TextView lastWalkTime = findViewById(R.id.lastWalkTime);
+
+        SharedPreferences sharedPreferences =
+                getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
+        int lastSteps = sharedPreferences.getInt(HomeScreenActivity.LAST_WALK_STEPS_KEY, 0);
+        float lastMiles = sharedPreferences.getFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, 0);
+        String lastTime = sharedPreferences.getString(HomeScreenActivity.LAST_WALK_TIME_KEY, "No time");
+
+        lastWalkSteps.setText(String.valueOf(lastSteps));
+        lastWalkMiles.setText(String.valueOf(lastMiles));
+        lastWalkTime.setText(lastTime);
 
 
         // Initialize the FitnessService implementation
@@ -184,13 +210,18 @@ public class HomeScreenActivity extends AppCompatActivity {
         // Get the user's height
         SharedPreferences heightSharedPref =
                 getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-        int feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
-        int inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+        mFeet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
+        mInches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
 
         // Calculate the user's total miles from their steps and height
-        StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
+        StepsAndMilesConverter converter = new StepsAndMilesConverter(mFeet, mInches);
         this.mTotalMiles = converter.getNumMiles(this.mTotalSteps);
         displayStepsAndMiles();
+    }
+
+    public void setHeight(int feet, int inches) {
+        mFeet = feet;
+        mInches = inches;
     }
 
     public static FitnessService getFitnessService() {
