@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,11 +16,19 @@ import com.example.wwrapp.fitness.FitnessService;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.GoogleFitAdapter;
 
+
+/**
+ * Home screen for the app
+ */
 public class HomeScreenActivity extends AppCompatActivity {
-    private String fitnessServiceKey = "GOOGLE_FIT";
+    private static final String TAG = "HomeScreenActivity";
+    private static final String fitnessServiceKey = "GOOGLE_FIT";
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
-    private static final String TAG = "StepCountActivity";
-    public static FitnessService fitnessService;
+    private static FitnessService fitnessService;
+
+    // Numeric constants
+    private static final int SLEEP_TIME = 1000;
+    private static final double TENTHS_PLACE_ROUNDING_FACTOR = 10.0;
 
     // SharedPreferences
     public static final String STEPS_SHARED_PREF_NAME = "user_steps";
@@ -33,7 +40,7 @@ public class HomeScreenActivity extends AppCompatActivity {
     private long mTotalSteps;
     private double mTotalMiles;
 
-    private FitnessAsyncTask runner;
+    private FitnessAsyncTask mFitnessRunner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,41 +52,41 @@ public class HomeScreenActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Check for a saved height
         if(!checkHasHeight()){
             Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
             startActivity(askHeight);
         }
 
-
+        // Register the start walk button
         findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent walk = new Intent(HomeScreenActivity.this,WalkActivity.class);
-                if (!runner.isCancelled()) {
-                    runner.cancel(false);
+                // Cancel the updating of the home screen before starting the Walk
+                if (!mFitnessRunner.isCancelled()) {
+                    Log.w(TAG, "Fitness runner to be canceled");
+                    mFitnessRunner.cancel(false);
                 }
+                Intent walk = new Intent(HomeScreenActivity.this,WalkActivity.class);
                 startActivity(walk);
             }
         });
 
+        // Register the routes screen button
         findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Cancel the updating of the home screen before starting the Routes screen
+                if (!mFitnessRunner.isCancelled()) {
+                    mFitnessRunner.cancel(false);
+                }
                 Intent route = new Intent(HomeScreenActivity.this,RoutesActivity.class);
                 startActivity(route);
             }
         });
 
-        Button addStepsBtn = findViewById(R.id.button);
-        addStepsBtn.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View v) {
-                fitnessService.updateStepCount();
-                displayStepsAndMiles();
-            }
-        });
-
+        // Initialize the FitnessService implementation
         FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
             @Override
             public FitnessService create(HomeScreenActivity homeScreenActivity) {
@@ -88,59 +95,56 @@ public class HomeScreenActivity extends AppCompatActivity {
         });
         fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
         fitnessService.setup();
-        runner = new FitnessAsyncTask();
-        runner.execute();
-    }
-
-
-
-    private class FitnessAsyncTask extends AsyncTask<String, String, String> {
-        private String resp;
-
-        @Override
-        protected String doInBackground(String... params) {
-            while(!isCancelled()) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    resp = e.getMessage();
-                }
-                fitnessService.updateStepCount();
-
-                publishProgress(mTotalSteps + "");
-
-            }
-            return resp;
-        }
-
-        @Override
-        protected void onProgressUpdate(String... update) {
-             fitnessService.updateStepCount();
-//            setTotalStepsAndMiles();
-//            displayStepsAndMiles();
-        }
-
-
+        fitnessService.updateStepCount();
+        // Start the Home screen steps/miles updating in the background
+        mFitnessRunner = new FitnessAsyncTask();
+        mFitnessRunner.execute();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "In method onActivityResult");
 
 //       If authentication was required during google fit setup, this will be called after the user authenticates
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == fitnessService.getRequestCode()) {
+                Log.d(TAG, "requestCode is from GoogleFit");
+                // Update the steps/miles if returning from a walk
                 fitnessService.updateStepCount();
-//                setTotalStepsAndMiles();
-//                displayStepsAndMiles();
+                setMiles(mTotalSteps);
+                displayStepsAndMiles();
             }
         } else {
             Log.e(TAG, "ERROR, google fit result code: " + resultCode);
         }
     }
 
-    //implement after getting real data
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (!mFitnessRunner.isCancelled()) {
+            mFitnessRunner.cancel(false);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (!mFitnessRunner.isCancelled()) {
+            mFitnessRunner.cancel(false);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!mFitnessRunner.isCancelled()) {
+            mFitnessRunner.cancel(false);
+        }
+    }
+
+
     private boolean checkHasHeight(){
         SharedPreferences saveHeight =
                 getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
@@ -151,27 +155,29 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     public void displayStepsAndMiles() {
         this.mStepsView.setText(String.valueOf(this.mTotalSteps));
-        this.mMilesView.setText(String.valueOf(Math.round(this.mTotalMiles * 10)/10.0));
+        this.mMilesView.setText(String.valueOf(Math.round(this.mTotalMiles * TENTHS_PLACE_ROUNDING_FACTOR)/ TENTHS_PLACE_ROUNDING_FACTOR));
     }
 
 
-//    public void setTotalStepsAndMiles(){
-//        // Get the total number of steps
-//        SharedPreferences stepsSharedPref =
-//                getSharedPreferences(STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
-//        this.mTotalSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
-//
-//        // Get the user's height
-//        SharedPreferences heightSharedPref =
-//                getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-//        int feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
-//        int inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
-//
-//        // Calculate the user's total miles
-//        StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
-//        this.mTotalMiles = converter.getNumMiles(this.mTotalSteps);
-//    }
+    /**
+     * Sets the miles based on the given stepCount
+     * @param stepCount the number of steps in the day
+     */
+    public void setMiles(long stepCount){
+        // Get the user's height
+        SharedPreferences heightSharedPref =
+                getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
+        int feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
+        int inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+        // Calculate the user's total miles
+        StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
+        this.mTotalMiles = converter.getNumMiles(stepCount);
+    }
 
+    /**
+     * Updates the total step count for the day
+     * @param stepCount the new step count
+     */
     public void setStepCount(long stepCount) {
         mTotalSteps = stepCount;
 
@@ -180,19 +186,48 @@ public class HomeScreenActivity extends AppCompatActivity {
                 getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
         int feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
         int inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
-        feet = 6;
-        inches = 0;
 
-        // Calculate the user's total miles
+        // Calculate the user's total miles from their steps and height
         StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
         this.mTotalMiles = converter.getNumMiles(this.mTotalSteps);
         displayStepsAndMiles();
-
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    public static FitnessService getFitnessService() {
+        return fitnessService;
+    }
+
+    /**
+     * Updates the steps/miles display on the Home screen
+     */
+    private class FitnessAsyncTask extends AsyncTask<String, String, String> {
+        private String resp;
+
+        @Override
+        protected String doInBackground(String... params) {
+            while(!isCancelled()) {
+                try {
+                    Thread.sleep(SLEEP_TIME);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    resp = e.getMessage();
+                }
+                // Check for updates to the step count
+                publishProgress();
+
+            }
+            return resp;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... update) {
+            // Ask the FitnessService to update the step count, if applicable
+            fitnessService.updateStepCount();
+            // Update the miles based on the newly set step count
+            setMiles(mTotalSteps);
+            // Update the Home screen
+            displayStepsAndMiles();
+        }
     }
 }
 

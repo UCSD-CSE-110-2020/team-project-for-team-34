@@ -15,17 +15,25 @@ public class WalkActivity extends AppCompatActivity {
 
     private static final String TAG = "WalkActivity";
 
-    private TextView hrView, minView, secView, stepView, mileView;
-    private Button stop;
-    private TimerTask timer;
-    private long startSteps;
-    private SharedPreferences stepsSharedPref;
-    public static final String STEPS_SHARED_PREF_NAME = "user_steps";
-    public static final String TOTAL_STEPS_KEY = "totalSteps";
+    private TextView mHoursTextView, mMinutesTextView, mSecondsTextView, mStepsView, mMilesView;
+    private Button mStopBtn;
+    private TimerTask mWalkTimer;
+    private long mStartSteps;
 
-    private int hours;
-    private int minutes;
-    private int seconds;
+    private SharedPreferences mStepsSharedPreference;
+
+    // Numeric constants
+    private static final int SLEEP_TIME = 1000;
+    private static final double TENTHS_PLACE_ROUNDING_FACTOR = 10.0;
+
+    // Time numeric constants
+    private static final int NUM_SECONDS_PER_HOUR = 3600;
+    private static final int NUM_MINUTES_PER_HOUR = 60;
+    private static final int NUM_SECONDS_PER_MINUTE = 60;
+
+    private int mHours;
+    private int mMinutes;
+    private int mSeconds;
 
     public static final String HOURS_KEY = "HOURS_KEY";
     public static final String MINUTES_KEY = "MINUTES_KEY";
@@ -37,81 +45,88 @@ public class WalkActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
         Log.d(TAG, "onCreate called");
-        stepsSharedPref = getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
-        startSteps = stepsSharedPref.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
 
-        hrView = findViewById(R.id.hrs);
-        minView = findViewById(R.id.mins);
-        secView = findViewById(R.id.secs);
-        stepView = findViewById(R.id.stepCount);
-        mileView = findViewById(R.id.mileCount);
-        stop = findViewById(R.id.stopButton);
-        timer = new TimerTask();
-        stop.setOnClickListener(new View.OnClickListener() {
+        mStepsSharedPreference = getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
+        mStartSteps = mStepsSharedPreference.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
+
+        mHoursTextView = findViewById(R.id.hrs);
+        mMinutesTextView = findViewById(R.id.mins);
+        mSecondsTextView = findViewById(R.id.secs);
+        mStepsView = findViewById(R.id.stepCount);
+        mMilesView = findViewById(R.id.mileCount);
+        mStopBtn = findViewById(R.id.stopButton);
+        mWalkTimer = new TimerTask();
+        mStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                timer.cancel(false);
-                HomeScreenActivity.fitnessService.updateStepCount();
-
-                // startWalkInfoActivity();
+                mWalkTimer.cancel(false);
+                HomeScreenActivity.getFitnessService().updateStepCount();
+                launchWalkInformationActivity();
                 finish();
             }
         });
-        Log.d(TAG, "Right before TimerTask");
-
-
-        timer.execute();
-
+        mWalkTimer.execute();
     }
 
-    public void startWalkInfoActivity() {
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (!mWalkTimer.isCancelled()) {
+            mWalkTimer.cancel(false);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!mWalkTimer.isCancelled()) {
+            mWalkTimer.cancel(false);
+        }
+    }
+
+    /**
+     * Launches the activity to enter walk information
+     */
+    public void launchWalkInformationActivity() {
         Intent intent = new Intent(this, EnterWalkInformationActivity.class);
-        intent.putExtra(HOURS_KEY, hours);
-        intent.putExtra(MINUTES_KEY, minutes);
-        intent.putExtra(SECONDS_KEY, seconds);
-        Log.d(TAG, "hours is" + hours);
-        Log.d(TAG, "minutes is" + minutes);
-        Log.d(TAG, "seconds is" + seconds);
+        intent.putExtra(HOURS_KEY, mHours);
+        intent.putExtra(MINUTES_KEY, mMinutes);
+        intent.putExtra(SECONDS_KEY, mSeconds);
+        Log.d(TAG, "mHours is" + mHours);
+        Log.d(TAG, "mMinutes is" + mMinutes);
+        Log.d(TAG, "mSeconds is" + mSeconds);
         startActivity(intent);
+        finish();
     }
 
     private class TimerTask extends AsyncTask<String,String, String> {
-        private long time = 0;
+        private long time;
         private int feet;
         private int inches;
 
         @Override
+        public void onPreExecute() {
+            Log.d(TAG, "onPreExecute called");
+            SharedPreferences heightSharedPref =
+                    getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
+            feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
+            inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+        }
+
+        @Override
         protected String doInBackground(String ... params) {
             Log.d(TAG, "doInBackground called");
-
             while (!isCancelled()) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(SLEEP_TIME);
                     ++time;
-                    // THIS CODE IS TO SHOW STEPS CHANGING, REMOVE IN PRODUCTION CODE
-                    // REMOVE ==================================================================
-//                    long currSteps = stepsSharedPref.getLong(TOTAL_STEPS_KEY,0);
-//                    ++currSteps;
-//                    SharedPreferences.Editor editor = stepsSharedPref.edit();
-//                    editor.putLong(TOTAL_STEPS_KEY, currSteps);
-//                    editor.apply();
-
-                    // REMOVE ===================================================================
-                    publishProgress("update Time");
+                    publishProgress();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     return e.getMessage();
                 }
             }
             return null;
-        }
-
-        @Override
-        public void onPreExecute() {
-            SharedPreferences heightSharedPref =
-                    getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-            feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
-            inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
         }
 
         @Override
@@ -123,28 +138,27 @@ public class WalkActivity extends AppCompatActivity {
 
         private void updateTime() {
             Log.d(TAG, "updateTime called");
-
-            hours = (int) (time / 3600);
-            minutes = (int) ((time / 60) % 60);
-            seconds = (int) (time % 60);
+            mHours = (int) (time / NUM_SECONDS_PER_HOUR);
+            mMinutes = (int) ((time / NUM_SECONDS_PER_MINUTE) % NUM_SECONDS_PER_MINUTE);
+            mSeconds = (int) (time % NUM_SECONDS_PER_MINUTE);
             Log.d(TAG, "time is " + time);
-            hrView.setText(hours + " hr");
-            minView.setText(minutes + " min");
-            secView.setText(seconds + " sec");
+            mHoursTextView.setText(mHours + " hr");
+            mMinutesTextView.setText(mMinutes + " min");
+            mSecondsTextView.setText(mSeconds + " sec");
         }
+
         private void updateSteps() {
-            HomeScreenActivity.fitnessService.updateStepCount();
-            long currSteps = stepsSharedPref.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
-            System.out.println("CURRENT STEPS: " + currSteps);
-            long stepsTaken = currSteps - startSteps;
-            double milesTravelled;
-            stepView.setText(Long.toString(stepsTaken));
+            HomeScreenActivity.getFitnessService().updateStepCount();
+            long currSteps = mStepsSharedPreference.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
+            long stepsTaken = currSteps - mStartSteps;
+            mStepsView.setText(Long.toString(stepsTaken));
+
             // Calculate the user's total miles
             StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
-            milesTravelled = converter.getNumMiles(stepsTaken);
+            double milesTravelled = converter.getNumMiles(stepsTaken);
             //https://www.quora.com/How-can-I-round-a-number-to-1-decimal-digit-in-Java
-            milesTravelled = Math.round(milesTravelled * 10) / 10.0;
-            mileView.setText("That's " + milesTravelled + " miles so far");
+            milesTravelled = Math.round(milesTravelled * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
+            mMilesView.setText("That's " + milesTravelled + " miles so far");
         }
     }
 

@@ -10,6 +10,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * Launched after the user ends a walk initiated from the Home screen; prompts user to enter
+ * notes about the walk.
+ */
 public class EnterWalkInformationActivity extends AppCompatActivity {
     private static String TAG = "EnterWalkInformationActivity";
     private static String ENTER_ROUTE_NAME_TOAST = "Please enter the route name";
@@ -28,6 +32,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
+                // If the user hasn't entered a route name
                 if (routeName.getText().toString().isEmpty()) {
                     Toast.makeText(getApplicationContext(), ENTER_ROUTE_NAME_TOAST, Toast.LENGTH_LONG).show();
                 } else {
@@ -46,19 +51,35 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
 
         Button cancelBtn = findViewById(R.id.enter_walk_info_cancel_button);
         cancelBtn.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 // Go to home screen
                 Toast.makeText(getApplicationContext(), "Save data and go to home screen", Toast.LENGTH_LONG).show();
-
+                launchHomeActivity();
             }
         });
     }
 
+    /**
+     * Takes the user to the Routes screen after they've entered information for the walk
+     */
     public void launchRoutesActivity() {
         Intent intent = new Intent(this, RoutesActivity.class);
+        // Clear the activity stack so only the Home screen will be left
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
+        finish();
+    }
+
+    /**
+     * Returns the user to the Home screen if they don't want to enter route information
+     */
+    public void launchHomeActivity() {
+        Intent intent = new Intent(this, HomeScreenActivity.class);
+        // Clear the activity stack so only the Home screen will be left
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 
 }

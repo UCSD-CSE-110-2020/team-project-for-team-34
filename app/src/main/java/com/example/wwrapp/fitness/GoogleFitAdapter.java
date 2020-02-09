@@ -99,9 +99,13 @@ public class GoogleFitAdapter implements FitnessService {
 
                                 SharedPreferences saveSteps = activity.getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME,MODE_PRIVATE);
                                 SharedPreferences.Editor editor = saveSteps.edit();
+
+                                SharedPreferences testSave =
+                                        activity.getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
+                                long savedSteps = testSave.getLong(HomeScreenActivity.TOTAL_STEPS_KEY, -1);
                                 // Testing only
-                                offset += 10;
-                               total += offset;
+                                savedSteps += offset;
+                                total += savedSteps;
                                 activity.setStepCount(total);
                                 editor.putLong(HomeScreenActivity.TOTAL_STEPS_KEY, total);
                                 editor.apply();
