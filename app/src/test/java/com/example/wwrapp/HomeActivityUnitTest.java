@@ -8,22 +8,27 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
-@Config(sdk = Config.OLDEST_SDK)
 public class HomeActivityUnitTest {
+
+    @BeforeClass
+    public static void disableAsyncTask() {
+        // Disable the asynchronous task in the activity to prevent a hanging test
+        HomeScreenActivity.setEnableFitnessRunner(false);
+    }
 
     @Rule
     public ActivityScenarioRule<HomeScreenActivity> scenarioRule =
             new ActivityScenarioRule<>(HomeScreenActivity.class);
 
-    private ActivityScenario<HomeScreenActivity> scenario;
+    private ActivityScenario<HomeScreenActivity> activityScenario;
 
     private TextView stepsTextView;
     private TextView milesTextView;
@@ -35,12 +40,12 @@ public class HomeActivityUnitTest {
 
     @Before
     public void setup() {
-        this.scenario = scenarioRule.getScenario();
+        this.activityScenario = scenarioRule.getScenario();
     }
 
     @After
     public void cleanup() {
-        scenario.close();
+        activityScenario.close();
     }
 
     private void init(HomeScreenActivity homeScreenActivity) {
@@ -54,7 +59,7 @@ public class HomeActivityUnitTest {
 
     @Test
     public void testSteps() {
-        scenario.onActivity(homeScreenActivity -> {
+        activityScenario.onActivity(homeScreenActivity -> {
             init(homeScreenActivity);
             long steps = 2435;
             homeScreenActivity.setStepCount(steps);
@@ -64,7 +69,7 @@ public class HomeActivityUnitTest {
 
     @Test
     public void testMiles() {
-        scenario.onActivity(homeScreenActivity -> {
+        activityScenario.onActivity(homeScreenActivity -> {
             init(homeScreenActivity);
             long steps = 2435;
             int feet = 5;
@@ -73,21 +78,22 @@ public class HomeActivityUnitTest {
             homeScreenActivity.setStepCount(steps);
             double acceptableError = 0.001;
             double expectedMiles = 1.0;
-            assertEquals(expectedMiles, Double.parseDouble(stepsTextView.getText().toString()), acceptableError);
+            assertEquals(expectedMiles, Double.parseDouble(milesTextView.getText().toString()), acceptableError);
         });
     }
 
     @Test
     public void testNoLastWalk() {
-        scenario.onActivity(homeScreenActivity -> {
+        activityScenario.onActivity(homeScreenActivity -> {
             init(homeScreenActivity);
             int expectedSteps = 0;
             double expectedMiles = 0.0;
             double acceptableError = 0.001;
-            String expectedTime = "No time";
+            String expectedTime = HomeScreenActivity.NO_LAST_WALK_TIME_TEXT;
             assertEquals(expectedSteps, Integer.parseInt(lastStepsTextView.getText().toString()));
             assertEquals(expectedMiles, Double.parseDouble(lastMilesTextView.getText().toString()), acceptableError);
             assertEquals(expectedTime, lastTimeTextView.getText().toString());
         });
     }
 }
+

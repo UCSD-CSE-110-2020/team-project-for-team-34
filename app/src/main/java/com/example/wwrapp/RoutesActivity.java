@@ -16,7 +16,6 @@ import com.example.wwrapp.database.Route;
 import com.example.wwrapp.database.RouteViewModel;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class RoutesActivity extends AppCompatActivity {
@@ -80,9 +79,7 @@ public class RoutesActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putInt(HomeScreenActivity.LAST_WALK_STEPS_KEY, steps);
                 editor.putFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, (float) miles);
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
-                String formattedDate = date.format(formatter);
-                editor.putString(HomeScreenActivity.LAST_WALK_TIME_KEY, formattedDate);
+                editor.putString(HomeScreenActivity.LAST_WALK_TIME_KEY, duration);
                 editor.apply();
                 mRouteViewModel.insert(route);
 

@@ -24,7 +24,13 @@ public class HomeScreenActivity extends AppCompatActivity {
     private static final String TAG = "HomeScreenActivity";
     private static final String fitnessServiceKey = "GOOGLE_FIT";
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
-    private static FitnessService fitnessService;
+
+    // True to enable the FitnessRunner, false otherwise
+    private static boolean sEnableFitnessRunner = true;
+
+    public static final String NO_LAST_WALK_TIME_TEXT = "No last walk time available";
+
+    private static FitnessService sFitnessService;
 
     // Numeric constants
     private static final int SLEEP_TIME = 1000;
@@ -62,11 +68,18 @@ public class HomeScreenActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//         Check for a saved height
+
+        // Check for a saved height
         if(!checkHasHeight()){
             Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
             startActivity(askHeight);
         }
+
+        // Get the user's height
+        SharedPreferences heightSharedPref =
+                getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
+        mFeet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
+        mInches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
 
         // Register the start walk button
         findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
@@ -105,12 +118,11 @@ public class HomeScreenActivity extends AppCompatActivity {
                 getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
         int lastSteps = sharedPreferences.getInt(HomeScreenActivity.LAST_WALK_STEPS_KEY, 0);
         float lastMiles = sharedPreferences.getFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, 0);
-        String lastTime = sharedPreferences.getString(HomeScreenActivity.LAST_WALK_TIME_KEY, "No time");
+        String lastTime = sharedPreferences.getString(HomeScreenActivity.LAST_WALK_TIME_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
 
         lastWalkSteps.setText(String.valueOf(lastSteps));
         lastWalkMiles.setText(String.valueOf(lastMiles));
         lastWalkTime.setText(lastTime);
-
 
         // Initialize the FitnessService implementation
         FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
@@ -119,12 +131,15 @@ public class HomeScreenActivity extends AppCompatActivity {
                 return new GoogleFitAdapter(homeScreenActivity);
             }
         });
-        fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
-        fitnessService.setup();
-        fitnessService.updateStepCount();
+        sFitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
+        sFitnessService.setup();
+        sFitnessService.updateStepCount();
+
         // Start the Home screen steps/miles updating in the background
         mFitnessRunner = new FitnessAsyncTask();
-        mFitnessRunner.execute();
+        if (sEnableFitnessRunner) {
+            mFitnessRunner.execute();
+        }
     }
 
     @Override
@@ -134,11 +149,11 @@ public class HomeScreenActivity extends AppCompatActivity {
 
 //       If authentication was required during google fit setup, this will be called after the user authenticates
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == fitnessService.getRequestCode()) {
+            if (requestCode == sFitnessService.getRequestCode()) {
                 Log.d(TAG, "requestCode is from GoogleFit");
                 // Update the steps/miles if returning from a walk
-                fitnessService.updateStepCount();
-                setMiles(mTotalSteps);
+                sFitnessService.updateStepCount();
+                setMiles(mTotalSteps, mFeet, mInches);
                 displayStepsAndMiles();
             }
         } else {
@@ -186,15 +201,12 @@ public class HomeScreenActivity extends AppCompatActivity {
 
 
     /**
-     * Sets the miles based on the given stepCount
+     * Sets the miles based on the given stepCount and height
      * @param stepCount the number of steps in the day
+     * @param feet the user's height in feet
+     * @param inches the user's height in inches
      */
-    public void setMiles(long stepCount){
-        // Get the user's height
-        SharedPreferences heightSharedPref =
-                getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-        int feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
-        int inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+    public void setMiles(long stepCount, int feet, int inches){
         // Calculate the user's total miles
         StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
         this.mTotalMiles = converter.getNumMiles(stepCount);
@@ -206,16 +218,9 @@ public class HomeScreenActivity extends AppCompatActivity {
      */
     public void setStepCount(long stepCount) {
         mTotalSteps = stepCount;
-
-        // Get the user's height
-        SharedPreferences heightSharedPref =
-                getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-        mFeet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
-        mInches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
-
-        // Calculate the user's total miles from their steps and height
-        StepsAndMilesConverter converter = new StepsAndMilesConverter(mFeet, mInches);
-        this.mTotalMiles = converter.getNumMiles(this.mTotalSteps);
+        // Set the miles based on the steps
+        setMiles(mTotalSteps, mFeet, mInches);
+        // Update the UI
         displayStepsAndMiles();
     }
 
@@ -224,8 +229,12 @@ public class HomeScreenActivity extends AppCompatActivity {
         mInches = inches;
     }
 
+    public static void setEnableFitnessRunner(boolean enableFitnessRunner) {
+        HomeScreenActivity.sEnableFitnessRunner = enableFitnessRunner;
+    }
+
     public static FitnessService getFitnessService() {
-        return fitnessService;
+        return sFitnessService;
     }
 
     /**
@@ -253,9 +262,9 @@ public class HomeScreenActivity extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(String... update) {
             // Ask the FitnessService to update the step count, if applicable
-            fitnessService.updateStepCount();
+            sFitnessService.updateStepCount();
             // Update the miles based on the newly set step count
-            setMiles(mTotalSteps);
+            setMiles(mTotalSteps, mFeet, mInches);
             // Update the Home screen
             displayStepsAndMiles();
         }
