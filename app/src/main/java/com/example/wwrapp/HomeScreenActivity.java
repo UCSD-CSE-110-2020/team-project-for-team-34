@@ -152,8 +152,7 @@ public class HomeScreenActivity extends AppCompatActivity {
         // Get the user's height
         SharedPreferences heightSharedPref =
                 getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-        int feet = 6;
-                //heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
+        int feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
         int inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
 
         // Calculate the user's total miles
