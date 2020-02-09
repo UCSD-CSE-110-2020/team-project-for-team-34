@@ -32,6 +32,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     private long mTotalSteps;
     private double mTotalMiles;
 
+    private FitnessAsyncTask runner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,23 +74,41 @@ public class HomeScreenActivity extends AppCompatActivity {
             }
         });
 
-        new AsyncTaskRunner().execute("1");
+        runner = new FitnessAsyncTask();
+        fitnessService.setup();
+        runner.execute("");
     }
 
-    private class AsyncTaskRunner extends AsyncTask<String, String, String> {
+
+
+    private class FitnessAsyncTask extends AsyncTask<String, String, String> {
         private String resp;
 
         @Override
         protected String doInBackground(String... params) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                resp = e.getMessage();
+            while(!isCancelled()) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    resp = e.getMessage();
+                }
+                fitnessService.updateStepCount();
+                publishProgress(params);
             }
-            fitnessService.updateStepCount();
-            fitnessService.setup();
             return resp;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... update) {
+            setTotalStepsAndMiles();
+            displayStepsAndMiles();
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            setTotalStepsAndMiles();
+            displayStepsAndMiles();
         }
     }
 
@@ -119,7 +139,7 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     public void displayStepsAndMiles() {
         this.mStepsView.setText(String.valueOf(this.mTotalSteps));
-        this.mMilesView.setText(String.valueOf(this.mTotalMiles));
+        this.mMilesView.setText(String.valueOf(Math.round(this.mTotalMiles * 10)/10.0));
     }
 
 
