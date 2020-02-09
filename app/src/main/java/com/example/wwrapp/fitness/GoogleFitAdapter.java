@@ -1,10 +1,11 @@
 package com.example.wwrapp.fitness;
 
-import androidx.annotation.NonNull;
-
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.example.wwrapp.HomeScreenActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.fitness.Fitness;
@@ -14,16 +15,17 @@ import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-//import com.google.android.material;
-
-import com.example.wwrapp.HomeScreenActivity;
 
 import static android.content.Context.MODE_PRIVATE;
+
+//import com.google.android.material;
 
 public class GoogleFitAdapter implements FitnessService {
     private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
     private final String TAG = "GoogleFitAdapter";
     private GoogleSignInAccount account;
+
+    private int offset = 10;
 
     private HomeScreenActivity activity;
 
@@ -97,10 +99,19 @@ public class GoogleFitAdapter implements FitnessService {
 
                                 SharedPreferences saveSteps = activity.getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME,MODE_PRIVATE);
                                 SharedPreferences.Editor editor = saveSteps.edit();
+
+                                SharedPreferences testSave =
+                                        activity.getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
+                                long savedSteps = testSave.getLong(HomeScreenActivity.TOTAL_STEPS_KEY, -1);
+                                // Testing only
+                                savedSteps += offset;
+                                total += savedSteps;
+                                activity.setStepCount(total);
                                 editor.putLong(HomeScreenActivity.TOTAL_STEPS_KEY, total);
                                 editor.apply();
 
                                 Log.d(TAG, "Total steps: " + total);
+                                System.out.println("Total steps: " + total);
                             }
                         })
                 .addOnFailureListener(
@@ -117,4 +128,5 @@ public class GoogleFitAdapter implements FitnessService {
     public int getRequestCode() {
         return GOOGLE_FIT_PERMISSIONS_REQUEST_CODE;
     }
-}
+
+   }

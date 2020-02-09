@@ -20,6 +20,6 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <include layout="@layout/content_height_page" />
+    <include layout="@layout/content_height" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
