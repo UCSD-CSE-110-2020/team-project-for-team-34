@@ -5,11 +5,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.ToggleButton;
+import android.content.ContextWrapper;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 
 import java.util.ArrayList;
 
@@ -21,13 +26,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<String> mRouteDate = new ArrayList<>();
     private ArrayList<String> mRouteMile = new ArrayList<>();
     private ArrayList<String> mRouteStep = new ArrayList<>();
+    private ArrayList<Boolean> mFavourite = new ArrayList<>();
     private Context mContext;
 
-    public RecyclerViewAdapter(ArrayList<String> RouteName, ArrayList<String> RouteDate, ArrayList<String> RouteMile, ArrayList<String> RouteStep, Context Context) {
+    public RecyclerViewAdapter(ArrayList<String> RouteName, ArrayList<String> RouteDate, ArrayList<String> RouteMile, ArrayList<String> RouteStep, ArrayList<Boolean> Favourite ,Context Context) {
         this.mRouteName = RouteName;
         this.mRouteDate = RouteDate;
         this.mRouteMile = RouteMile;
         this.mRouteStep = RouteStep;
+        this.mFavourite = Favourite;
         this.mContext = Context;
     }
 
@@ -47,6 +54,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.routeDate.setText(mRouteDate.get(position));
         holder.routeMile.setText(mRouteMile.get(position));
         holder.routeStep.setText(mRouteStep.get(position));
+        holder.favouriteBtn.setChecked(mFavourite.get(position));
+        holder.favouriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked)
+                    holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mContext,R.drawable.ic_star_on));
+                else
+                    holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mContext,R.drawable.ic_star_off));
+            }
+        });
 
         holder.parentLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,6 +84,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         TextView routeDate;
         TextView routeMile;
         TextView routeStep;
+        ToggleButton favouriteBtn;
         RelativeLayout parentLayout;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,6 +92,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             routeDate = itemView.findViewById(R.id.route_date);
             routeMile = itemView.findViewById(R.id.route_mile);
             routeStep = itemView.findViewById(R.id.route_step);
+            favouriteBtn = itemView.findViewById(R.id.favoriteBtn);
             parentLayout = itemView.findViewById(R.id.parent_layout);
         }
     }

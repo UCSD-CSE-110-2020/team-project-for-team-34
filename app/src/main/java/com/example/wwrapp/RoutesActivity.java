@@ -17,6 +17,7 @@ public class RoutesActivity extends AppCompatActivity {
     private ArrayList<String> mRouteDate = new ArrayList<>();
     private ArrayList<String> mRouteMile = new ArrayList<>();
     private ArrayList<String> mRouteStep = new ArrayList<>();
+    private ArrayList<Boolean> mFavourite = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,13 +31,18 @@ public class RoutesActivity extends AppCompatActivity {
     private void loadRoutes(){
         Log.d(TAG, "loadRoutes: loading routes");
         //read Route into the arraylist
+        mRouteName.add("Fake Route");
+        mRouteDate.add("2000/01/01");
+        mRouteStep.add("9999");
+        mRouteMile.add("999.99");
+        mFavourite.add(true);
         initRecyclerView();
     }
 
     private void initRecyclerView(){
         Log.d(TAG, "initRecyclerView: init recyclerview");
         RecyclerView recyclerView = findViewById(R.id.recyclerview_route);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(mRouteName,mRouteDate,mRouteMile,mRouteStep,this);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(mRouteName,mRouteDate,mRouteMile,mRouteStep,mFavourite,this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
