@@ -55,6 +55,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.routeMile.setText(mRouteMile.get(position));
         holder.routeStep.setText(mRouteStep.get(position));
         holder.favouriteBtn.setChecked(mFavourite.get(position));
+        if(mFavourite.get(position))
+            holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mContext,R.drawable.ic_star_on));
+        else
+            holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mContext,R.drawable.ic_star_off));
+
         holder.favouriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
