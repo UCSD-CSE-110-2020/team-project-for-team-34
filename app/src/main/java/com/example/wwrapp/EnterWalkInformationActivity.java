@@ -101,6 +101,9 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                         // data storing here ...
                     }
 
+                    // store notes here...
+                    EditText editText = findViewById(R.id.notes_edit);
+                    String notes = editText.getText().toString();
 
 
                     // Save data and go to routes screen
