@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +34,18 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
     private String mRouteName;
     private String mStartingPoint;
 
+    private RadioGroup group1;
+    private RadioGroup group2;
+    private RadioGroup group3;
+    private RadioGroup group4;
+    private RadioGroup group5;
+    private RadioButton loop;
+    private RadioButton flat;
+    private RadioButton streets;
+    private RadioButton even;
+    private RadioButton difficulty;
+    private boolean favorite;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +55,11 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         final EditText startingPoint = findViewById(R.id.starting_point_edit_text);
 
         Button doneBtn = findViewById(R.id.enter_walk_info_done_button);
+        group1 = findViewById(R.id.group1);
+        group2 = findViewById(R.id.group2);
+        group3 = findViewById(R.id.group3);
+        group4 = findViewById(R.id.group4);
+        group5 = findViewById(R.id.group5);
 
         doneBtn.setOnClickListener(new View.OnClickListener() {
 
@@ -50,6 +69,40 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 if (routeName.getText().toString().isEmpty()) {
                     Toast.makeText(getApplicationContext(), ENTER_ROUTE_NAME_TOAST, Toast.LENGTH_LONG).show();
                 } else {
+                    // extract info from radio group
+                    if(group1.getCheckedRadioButtonId() != -1){
+                        int id = group1.getCheckedRadioButtonId();
+                        loop = findViewById(id);
+
+                        // data storing here ...
+                    }
+                    if(group2.getCheckedRadioButtonId() != -1){
+                        int id = group2.getCheckedRadioButtonId();
+                        flat = findViewById(id);
+
+                        // data storing here ...
+                    }
+                    if(group1.getCheckedRadioButtonId() != -1){
+                        int id = group3.getCheckedRadioButtonId();
+                        streets = findViewById(id);
+
+                        // data storing here ...
+                    }
+                    if(group1.getCheckedRadioButtonId() != -1){
+                        int id = group4.getCheckedRadioButtonId();
+                        even = findViewById(id);
+
+                        // data storing here ...
+                    }
+                    if(group1.getCheckedRadioButtonId() != -1){
+                        int id = group5.getCheckedRadioButtonId();
+                        difficulty = findViewById(id);
+
+                        // data storing here ...
+                    }
+
+
+
                     // Save data and go to routes screen
                     mRouteName = routeName.getText().toString();
                     mStartingPoint = startingPoint.getText().toString();
@@ -68,7 +121,25 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 launchHomeActivity();
             }
         });
+
+
     }
+
+    /**
+     * This method is required for radio button
+     */
+    public void checkButton(View view){
+        // can do nothing or store data here instead...
+
+        // check for favorite radio button only, rest on top...
+        RadioButton favoriteButton = findViewById(R.id.favorite);
+        if(favoriteButton.isSelected()){
+            favorite = true;
+        } else {
+            favorite = false;
+        }
+    }
+
 
     /**
      * Takes the user to the Routes screen after they've entered information for the walk
