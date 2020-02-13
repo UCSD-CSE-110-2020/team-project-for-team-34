@@ -4,12 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
 import java.util.ArrayList;
 
-public class RoutesActivity extends AppCompatActivity {
+public class RoutesActivity extends AppCompatActivity implements RecyclerViewAdapter.OnRouteListener{
 
     private static final String TAG = "RoutesActivity";
 
@@ -42,8 +43,14 @@ public class RoutesActivity extends AppCompatActivity {
     private void initRecyclerView(){
         Log.d(TAG, "initRecyclerView: init recyclerview");
         RecyclerView recyclerView = findViewById(R.id.recyclerview_route);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(mRouteName,mRouteDate,mRouteMile,mRouteStep,mFavourite,this);
+        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this,mRouteName,mRouteDate,mRouteMile,mRouteStep,mFavourite,this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    @Override
+    public void onRouteClick(int position) {
+        Intent intent = new Intent(this, WalkActivity.class);
+        startActivity(intent);
     }
 }
