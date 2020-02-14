@@ -73,7 +73,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mContext,R.drawable.ic_star_off));
             }
         });
-        
+
     }
 
     @Override

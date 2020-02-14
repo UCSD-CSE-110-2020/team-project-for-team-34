@@ -5,6 +5,7 @@ import androidx.core.content.ContextCompat;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 import android.widget.ToggleButton;
@@ -17,6 +18,13 @@ public class RouteDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route_detail);
+
+        findViewById(R.id.close_route_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         readFromRoute();
     }
