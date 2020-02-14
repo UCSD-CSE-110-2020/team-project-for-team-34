@@ -1,7 +1,6 @@
 package com.example.wwrapp;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +9,6 @@ import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-import android.content.ContextWrapper;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -19,9 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>{
+public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.ViewHolder>{
 
-    private static final String TAG = "RecyclerViewAdapter";
+    private static final String TAG = "RouteListAdapter";
 
     private OnRouteListener mOnRouteListener;
 
@@ -32,7 +30,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<Boolean> mFavourite = new ArrayList<>();
     private Context mContext;
 
-    public RecyclerViewAdapter(OnRouteListener onRouteListener,ArrayList<String> RouteName, ArrayList<String> RouteDate, ArrayList<String> RouteMile, ArrayList<String> RouteStep, ArrayList<Boolean> Favourite ,Context Context) {
+    public RouteListAdapter(OnRouteListener onRouteListener, ArrayList<String> RouteName, ArrayList<String> RouteDate, ArrayList<String> RouteMile, ArrayList<String> RouteStep, ArrayList<Boolean> Favourite , Context Context) {
         this.mOnRouteListener = onRouteListener;
         this.mRouteName = RouteName;
         this.mRouteDate = RouteDate;

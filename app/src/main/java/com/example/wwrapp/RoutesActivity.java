@@ -10,7 +10,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-public class RoutesActivity extends AppCompatActivity implements RecyclerViewAdapter.OnRouteListener{
+public class RoutesActivity extends AppCompatActivity implements RouteListAdapter.OnRouteListener{
 
     private static final String TAG = "RoutesActivity";
 
@@ -43,7 +43,7 @@ public class RoutesActivity extends AppCompatActivity implements RecyclerViewAda
     private void initRecyclerView(){
         Log.d(TAG, "initRecyclerView: init recyclerview");
         RecyclerView recyclerView = findViewById(R.id.recyclerview_route);
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(this,mRouteName,mRouteDate,mRouteMile,mRouteStep,mFavourite,this);
+        RouteListAdapter adapter = new RouteListAdapter(this,mRouteName,mRouteDate,mRouteMile,mRouteStep,mFavourite,this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
