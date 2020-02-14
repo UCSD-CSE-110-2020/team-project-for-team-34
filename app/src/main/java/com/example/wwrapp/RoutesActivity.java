@@ -50,7 +50,7 @@ public class RoutesActivity extends AppCompatActivity implements RecyclerViewAda
 
     @Override
     public void onRouteClick(int position) {
-        Intent intent = new Intent(this, WalkActivity.class);
+        Intent intent = new Intent(this, RouteDetailActivity.class);
         startActivity(intent);
     }
 }
