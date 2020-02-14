@@ -54,7 +54,7 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.Rout
             double miles = currentRoute.getMiles();
             holder.routeMiles.setText(String.valueOf(miles));
 
-            int steps = currentRoute.getSteps();
+            long steps = currentRoute.getSteps();
             holder.routeSteps.setText(String.valueOf(steps));
         } else {
             holder.routeName.setText("Route name not ready yet");

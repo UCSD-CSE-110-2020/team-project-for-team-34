@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wwrapp.database.Route;
 import com.example.wwrapp.database.RouteViewModel;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class RoutesActivity extends AppCompatActivity {
@@ -50,40 +49,24 @@ public class RoutesActivity extends AppCompatActivity {
         // update the routes database.
         switch (callerID) {
             case EnterWalkInformationActivity.CALLER_ID:
-                String routeName = intent.getStringExtra(EnterWalkInformationActivity.ROUTE_NAME_KEY);
-                String startingPoint = intent.getStringExtra(EnterWalkInformationActivity.ROUTE_STARTING_POINT_KEY);
-                String duration = intent.getStringExtra(EnterWalkInformationActivity.ROUTE_DURATION_KEY);
-                LocalDateTime date = (LocalDateTime) (intent.getSerializableExtra(EnterWalkInformationActivity.ROUTE_DATE_KEY));
-                int steps = intent.getIntExtra(EnterWalkInformationActivity.ROUTE_STEPS_KEY, 0);
-                double miles = intent.getDoubleExtra(EnterWalkInformationActivity.ROUTE_MILES_KEY, 0.0);
+                Intent incomingIntent = getIntent();
+                Route route = (Route) (incomingIntent.getSerializableExtra(EnterWalkInformationActivity.ROUTE_KEY));
 
-                if (startingPoint == null) {
-                    startingPoint = "No starting point";
-                }
-
-                if (date == null) {
+                if (route.getDate() == null) {
                     Log.e(TAG, "LocalDateTime is null");
-                    date = LocalDateTime.now();
                 }
 
-                Log.d(TAG, "Route steps are: " + steps);
-                Log.d(TAG, "Route miles are: " + miles);
-                Log.d(TAG, "Route duration is: " + duration);
+                Log.d(TAG, route.toString());
 
-
-                Route route = new Route(routeName, startingPoint, date, duration, steps, miles);
-                Log.i(TAG, "Successfully created Route object");
                 // Save the newest walk
                 SharedPreferences sharedPreferences =
                         getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putInt(HomeScreenActivity.LAST_WALK_STEPS_KEY, steps);
-                editor.putFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, (float) miles);
-                editor.putString(HomeScreenActivity.LAST_WALK_TIME_KEY, duration);
+                editor.putLong(HomeScreenActivity.LAST_WALK_STEPS_KEY, route.getSteps());
+                editor.putFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, (float) route.getMiles());
+                editor.putString(HomeScreenActivity.LAST_WALK_TIME_KEY, route.getDuration());
                 editor.apply();
                 mRouteViewModel.insert(route);
-
-
                 break;
             case HomeScreenActivity.CALLER_ID:
                 break;

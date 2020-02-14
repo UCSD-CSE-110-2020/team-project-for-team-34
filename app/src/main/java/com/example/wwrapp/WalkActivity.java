@@ -11,6 +11,10 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.wwrapp.database.Walk;
+
+import java.time.LocalDateTime;
+
 public class WalkActivity extends AppCompatActivity {
 
     private static final String TAG = "WalkActivity";
@@ -37,11 +41,15 @@ public class WalkActivity extends AppCompatActivity {
     private int mMinutes;
     private int mSeconds;
 
+    private LocalDateTime mDateTime;
+
+    // Intent keys
     public static final String HOURS_KEY = "HOURS_KEY";
     public static final String MINUTES_KEY = "MINUTES_KEY";
     public static final String SECONDS_KEY = "SECONDS_KEY";
     public static final String STEPS_KEY = "STEPS_KEY";
     public static final String MILES_KEY = "MILES_KEY";
+    public static final String WALK_KEY = "WALK_KEY";
 
 
 
@@ -51,6 +59,7 @@ public class WalkActivity extends AppCompatActivity {
         setContentView(R.layout.activity_walk);
         Log.d(TAG, "onCreate called");
 
+        mDateTime = LocalDateTime.now();
         mStepsSharedPreference = getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
         mStartSteps = mStepsSharedPreference.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
 
@@ -93,13 +102,11 @@ public class WalkActivity extends AppCompatActivity {
      * Launches the activity to enter walk information
      */
     public void launchWalkInformationActivity() {
+        // Pass the Walk data onto the next Activity
         Intent intent = new Intent(this, EnterWalkInformationActivity.class);
-        intent.putExtra(HOURS_KEY, mHours);
-        intent.putExtra(MINUTES_KEY, mMinutes);
-        intent.putExtra(SECONDS_KEY, mSeconds);
-        intent.putExtra(STEPS_KEY, mStepsTaken);
-        intent.putExtra(MILES_KEY, mMiles);
-
+        String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
+        Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);
+        intent.putExtra(WALK_KEY, walk);
 
         Log.d(TAG, "mHours is" + mHours);
         Log.d(TAG, "mMinutes is " + mMinutes);
