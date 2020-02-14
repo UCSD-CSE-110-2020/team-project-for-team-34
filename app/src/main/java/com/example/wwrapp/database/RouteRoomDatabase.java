@@ -26,7 +26,7 @@ public abstract class RouteRoomDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             RouteRoomDatabase.class, "route_database").addCallback(sRoomDatabaseCallback)
-
+                            .fallbackToDestructiveMigration()
                             .build();
                 }
             }

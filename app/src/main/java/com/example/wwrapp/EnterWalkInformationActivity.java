@@ -12,54 +12,72 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.wwrapp.database.Route;
+import com.example.wwrapp.database.Walk;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+// TODO: Make sure that default values for radio buttons aren't selected (right now they are)
+// TODO: Allow the user to uncheck radio buttons if they change their mind.
 
 /**
  * Launched after the user ends a walk initiated from the Home screen; prompts user to enter
  * notes about the walk.
  */
 public class EnterWalkInformationActivity extends AppCompatActivity {
+    private static final String TAG = "EnterWalkInformationActivity";
+
+    // Keys for Intents
     public static final String CALLER_ID_KEY = "callerID";
-    public static final String ROUTE_MILES_KEY = "miles";
-    public static final String ROUTE_STEPS_KEY = "steps";
-    public static final String ROUTE_NAME_KEY = "routeName";
-    public static final String ROUTE_STARTING_POINT_KEY = "startingPoint";
-    public static final String ROUTE_DATE_KEY = "date";
-    public static final String ROUTE_DURATION_KEY = "duration";
+    public static final String ROUTE_KEY = "ROUTE_KEY";
     public static final String CALLER_ID = "EnterWalkInformation";
 
-    private static String TAG = "EnterWalkInformationActivity";
     private static String ENTER_ROUTE_NAME_TOAST = "Please enter the route name";
 
     private String mRouteName;
     private String mStartingPoint;
+    private List<String> mTags;
+    private boolean mRouteFavorite;
+    private String mNotes;
 
-    private RadioGroup group1;
-    private RadioGroup group2;
-    private RadioGroup group3;
-    private RadioGroup group4;
-    private RadioGroup group5;
-    private RadioButton loop;
-    private RadioButton flat;
-    private RadioButton streets;
-    private RadioButton even;
-    private RadioButton difficulty;
-    private boolean favorite;
+    private RadioGroup mRouteShapeRadioGroup;
+    private RadioGroup mRouteElevationRadioGroup;
+    private RadioGroup mRouteEnvironmentRadioGroup;
+    private RadioGroup mRouteSmoothnessRadioGroup;
+    private RadioGroup mRouteDifficultyRadioGroup;
+    private RadioButton mRouteShapeRadioBtn;
+    private RadioButton mRouteElevationRadioBtn;
+    private RadioButton mRouteEnvironmentRadioBtn;
+    private RadioButton mRouteSmoothnessRadioBtn;
+    private RadioButton mRouteDifficultyRadioBtn;
+    private RadioButton mRouteFavoriteRadioBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_walk_information);
 
+        // Create the list of tags
+        mTags = new ArrayList<>();
+
         final EditText routeName = findViewById(R.id.route_name_edit_text);
         final EditText startingPoint = findViewById(R.id.starting_point_edit_text);
 
         Button doneBtn = findViewById(R.id.enter_walk_info_done_button);
-        group1 = findViewById(R.id.group1);
-        group2 = findViewById(R.id.group2);
-        group3 = findViewById(R.id.group3);
-        group4 = findViewById(R.id.group4);
-        group5 = findViewById(R.id.group5);
+        mRouteShapeRadioGroup = findViewById(R.id.route_shape_radio_group);
+        mRouteElevationRadioGroup = findViewById(R.id.route_elevation_radio_group);
+        mRouteEnvironmentRadioGroup = findViewById(R.id.route_environment_radio_group);
+        mRouteSmoothnessRadioGroup = findViewById(R.id.route_smoothness_radio_group);
+        mRouteDifficultyRadioGroup = findViewById(R.id.route_difficulty_radio_group);
+
+        mRouteShapeRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+            }
+        });
 
         doneBtn.setOnClickListener(new View.OnClickListener() {
 
@@ -70,43 +88,53 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), ENTER_ROUTE_NAME_TOAST, Toast.LENGTH_LONG).show();
                 } else {
                     // extract info from radio group
-                    if(group1.getCheckedRadioButtonId() != -1){
-                        int id = group1.getCheckedRadioButtonId();
-                        loop = findViewById(id);
-
-                        // data storing here ...
+                    if (mRouteShapeRadioGroup.getCheckedRadioButtonId() != -1) {
+                        int id = mRouteShapeRadioGroup.getCheckedRadioButtonId();
+                        mRouteShapeRadioBtn = findViewById(id);
+                        String shapeTag = mRouteShapeRadioBtn.getText().toString();
+                        Log.d(TAG, "Shape is: " + shapeTag);
+                        // Save this tag
+                        mTags.add(shapeTag);
                     }
-                    if(group2.getCheckedRadioButtonId() != -1){
-                        int id = group2.getCheckedRadioButtonId();
-                        flat = findViewById(id);
-
-                        // data storing here ...
+                    if (mRouteElevationRadioGroup.getCheckedRadioButtonId() != -1) {
+                        int id = mRouteElevationRadioGroup.getCheckedRadioButtonId();
+                        mRouteElevationRadioBtn = findViewById(id);
+                        String elevationTag = mRouteElevationRadioBtn.getText().toString();
+                        Log.d(TAG, "Elevation is: " + elevationTag);
+                        mTags.add(elevationTag);
                     }
-                    if(group1.getCheckedRadioButtonId() != -1){
-                        int id = group3.getCheckedRadioButtonId();
-                        streets = findViewById(id);
-
-                        // data storing here ...
+                    if (mRouteEnvironmentRadioGroup.getCheckedRadioButtonId() != -1) {
+                        int id = mRouteEnvironmentRadioGroup.getCheckedRadioButtonId();
+                        mRouteEnvironmentRadioBtn = findViewById(id);
+                        String environmentTag = mRouteEnvironmentRadioBtn.getText().toString();
+                        Log.d(TAG, "Environment is: " + environmentTag);
+                        mTags.add(environmentTag);
                     }
-                    if(group1.getCheckedRadioButtonId() != -1){
-                        int id = group4.getCheckedRadioButtonId();
-                        even = findViewById(id);
-
-                        // data storing here ...
+                    if (mRouteSmoothnessRadioGroup.getCheckedRadioButtonId() != -1) {
+                        int id = mRouteSmoothnessRadioGroup.getCheckedRadioButtonId();
+                        mRouteSmoothnessRadioBtn = findViewById(id);
+                        String smoothnessTag = mRouteSmoothnessRadioBtn.getText().toString();
+                        Log.d(TAG, "Smoothness is: " + smoothnessTag);
+                        mTags.add(smoothnessTag);
                     }
-                    if(group1.getCheckedRadioButtonId() != -1){
-                        int id = group5.getCheckedRadioButtonId();
-                        difficulty = findViewById(id);
-
-                        // data storing here ...
+                    if (mRouteDifficultyRadioGroup.getCheckedRadioButtonId() != -1) {
+                        int id = mRouteDifficultyRadioGroup.getCheckedRadioButtonId();
+                        mRouteDifficultyRadioBtn = findViewById(id);
+                        String difficultyTags = mRouteDifficultyRadioBtn.getText().toString();
+                        Log.d(TAG, "Difficulty is: " + difficultyTags);
+                        mTags.add(difficultyTags);
                     }
 
-                    // store notes here...
+                    //  Get and save the notes
                     EditText editText = findViewById(R.id.notes_edit);
-                    String notes = editText.getText().toString();
+                    mNotes = editText.getText().toString();
+                    Log.d(TAG, "Notes are: " + mNotes);
 
 
-                    // Save data and go to routes screen
+                    // Get favorite/not favorite
+                    checkButton(v);
+                    Log.d(TAG, "Favorite is: " + mRouteFavorite);
+
                     mRouteName = routeName.getText().toString();
                     mStartingPoint = startingPoint.getText().toString();
                     Toast.makeText(getApplicationContext(), "Save data and go to routes screen", Toast.LENGTH_LONG).show();
@@ -131,15 +159,15 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
     /**
      * This method is required for radio button
      */
-    public void checkButton(View view){
+    public void checkButton(View view) {
         // can do nothing or store data here instead...
 
-        // check for favorite radio button only, rest on top...
-        RadioButton favoriteButton = findViewById(R.id.favorite);
-        if(favoriteButton.isSelected()){
-            favorite = true;
+        // check for mRouteFavorite radio button only, rest on top...
+        mRouteFavoriteRadioBtn = findViewById(R.id.favorite);
+        if (mRouteFavoriteRadioBtn.isSelected()) {
+            mRouteFavorite = true;
         } else {
-            favorite = false;
+            mRouteFavorite = false;
         }
     }
 
@@ -148,37 +176,28 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
      * Takes the user to the Routes screen after they've entered information for the walk
      */
     public void launchRoutesActivity() {
-        Intent intent = new Intent(this, RoutesActivity.class);
+        // Get the data from the Walk
+        Intent incomingIntent = getIntent();
+        Walk walk = (Walk) (incomingIntent.getSerializableExtra(WalkActivity.WALK_KEY));
+        long walkSteps = walk.getSteps();
+        double walkMiles = walk.getMiles();
+        LocalDateTime walkDate = walk.getDate();
+        String duration = walk.getDuration();
+        Log.d(TAG, "Steps are: " + walkSteps);
+        Log.d(TAG, "Miles are: " + walkMiles);
 
-        // Get the data to be saved for Routes
-        int hours = getIntent().getIntExtra(WalkActivity.HOURS_KEY, -1);
-        int minutes = getIntent().getIntExtra(WalkActivity.MINUTES_KEY, -1);
-        int seconds = getIntent().getIntExtra(WalkActivity.SECONDS_KEY, -1);
-        String duration = String.format("%d hours, %d minutes, %d seconds", hours, minutes, seconds);
+        // Bundle up data to pass to the Routes activity
+        Intent outgoingIntent = new Intent(this, RoutesActivity.class);
+        Route route = new Route(mRouteName, mStartingPoint, walkDate, duration, walkSteps,
+                walkMiles, mTags, mRouteFavorite, mNotes);
+        outgoingIntent.putExtra(ROUTE_KEY, route);
 
-        LocalDateTime localDateTime = LocalDateTime.now();
-        intent.putExtra(EnterWalkInformationActivity.ROUTE_DATE_KEY, localDateTime);
-
-        intent.putExtra(EnterWalkInformationActivity.ROUTE_DURATION_KEY, duration);
-        intent.putExtra(EnterWalkInformationActivity.ROUTE_NAME_KEY, mRouteName);
-        intent.putExtra(EnterWalkInformationActivity.ROUTE_STARTING_POINT_KEY, mStartingPoint);
-
-        int steps = (int) (getIntent().getLongExtra(WalkActivity.STEPS_KEY, 0));
-        double miles = getIntent().getDoubleExtra(WalkActivity.MILES_KEY, 0);
-
-        Log.d(TAG, "Steps are: " + steps);
-        Log.d(TAG, "Miles are: " + miles);
-
-
-        intent.putExtra(EnterWalkInformationActivity.ROUTE_STEPS_KEY, steps);
-        intent.putExtra(EnterWalkInformationActivity.ROUTE_MILES_KEY, miles);
-
-        intent.putExtra(EnterWalkInformationActivity.CALLER_ID_KEY, EnterWalkInformationActivity.CALLER_ID);
-
+        // Let the RoutesActivity know who launched it
+        outgoingIntent.putExtra(EnterWalkInformationActivity.CALLER_ID_KEY, EnterWalkInformationActivity.CALLER_ID);
 
         // Clear the activity stack so only the Home screen will be left
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
+        outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(outgoingIntent);
         finish();
     }
 

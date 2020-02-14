@@ -114,9 +114,15 @@ public class HomeScreenActivity extends AppCompatActivity {
         TextView lastWalkMiles = findViewById(R.id.lastWalkDistance);
         TextView lastWalkTime = findViewById(R.id.lastWalkTime);
 
+        // use this code to reset the last walk's stats
+        SharedPreferences spfs = getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = spfs.edit();
+        editor.clear();
+        editor.apply();
+
         SharedPreferences sharedPreferences =
                 getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
-        int lastSteps = sharedPreferences.getInt(HomeScreenActivity.LAST_WALK_STEPS_KEY, 0);
+        long lastSteps = sharedPreferences.getLong(HomeScreenActivity.LAST_WALK_STEPS_KEY, 0);
         float lastMiles = sharedPreferences.getFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, 0);
         String lastTime = sharedPreferences.getString(HomeScreenActivity.LAST_WALK_TIME_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
 

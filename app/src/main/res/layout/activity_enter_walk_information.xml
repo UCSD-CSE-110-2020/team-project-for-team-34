@@ -73,7 +73,7 @@
     </LinearLayout>
 
     <RadioGroup
-        android:id="@+id/group1"
+        android:id="@+id/route_shape_radio_group"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
@@ -98,7 +98,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="checkButton"
-            android:text="out"
+            android:text="out-and-back"
             app:layout_constraintEnd_toEndOf="parent"
 
             />
@@ -106,7 +106,7 @@
     </RadioGroup>
 
     <RadioGroup
-        android:id="@+id/group2"
+        android:id="@+id/route_elevation_radio_group"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
@@ -115,7 +115,7 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/group1">
+        app:layout_constraintTop_toBottomOf="@+id/route_shape_radio_group">
 
         <RadioButton
             android:id="@+id/flat"
@@ -138,7 +138,7 @@
     </RadioGroup>
 
     <RadioGroup
-        android:id="@+id/group3"
+        android:id="@+id/route_environment_radio_group"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
@@ -147,7 +147,7 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/group2">
+        app:layout_constraintTop_toBottomOf="@+id/route_elevation_radio_group">
 
         <RadioButton
             android:id="@+id/streets"
@@ -168,7 +168,7 @@
     </RadioGroup>
 
     <RadioGroup
-        android:id="@+id/group4"
+        android:id="@+id/route_smoothness_radio_group"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
@@ -177,7 +177,7 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/group3">
+        app:layout_constraintTop_toBottomOf="@+id/route_environment_radio_group">
 
         <RadioButton
             android:id="@+id/even"
@@ -198,7 +198,7 @@
     </RadioGroup>
 
     <RadioGroup
-        android:id="@+id/group5"
+        android:id="@+id/route_difficulty_radio_group"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
@@ -207,7 +207,7 @@
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/group4">
+        app:layout_constraintTop_toBottomOf="@+id/route_smoothness_radio_group">
 
         <RadioButton
             android:id="@+id/easy"
@@ -244,10 +244,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="1dp"
         android:text="Add to favorite"
+        android:onClick="checkButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/group5" />
+        app:layout_constraintTop_toBottomOf="@+id/route_difficulty_radio_group" />
 
     <LinearLayout
         android:id="@+id/note"
