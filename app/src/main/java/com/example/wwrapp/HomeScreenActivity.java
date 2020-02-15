@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.OnLifecycleEvent;
 
 import com.example.wwrapp.fitness.FitnessService;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
@@ -171,6 +170,7 @@ public class HomeScreenActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "In method onPause");
         if (!mFitnessRunner.isCancelled()) {
             mFitnessRunner.cancel(false);
         }
@@ -179,6 +179,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d(TAG, "In method onStop");
+
         if (!mFitnessRunner.isCancelled()) {
             mFitnessRunner.cancel(false);
         }
@@ -187,6 +189,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "In method onDestroy");
+
         if (!mFitnessRunner.isCancelled()) {
             mFitnessRunner.cancel(false);
         }
@@ -195,13 +199,15 @@ public class HomeScreenActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "In method onResume");
+
         TextView lastWalkSteps = findViewById(R.id.lastWalkSteps);
         TextView lastWalkMiles = findViewById(R.id.lastWalkDistance);
         TextView lastWalkTime = findViewById(R.id.lastWalkTime);
         SharedPreferences spfs = getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
-        long lastSteps = spfs.getLong(HomeScreenActivity.LAST_WALK_STEPS_KEY, -1);
+        long lastSteps = spfs.getLong(HomeScreenActivity.LAST_WALK_STEPS_KEY, 0);
         Log.d(TAG, "lastSteps is " + lastSteps);
-        float lastMiles = spfs.getFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, -1);
+        float lastMiles = spfs.getFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, 0);
         String lastTime = spfs.getString(HomeScreenActivity.LAST_WALK_TIME_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
         lastWalkSteps.setText(String.valueOf(lastSteps));
         lastWalkMiles.setText(String.valueOf(lastMiles));
