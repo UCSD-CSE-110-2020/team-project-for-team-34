@@ -27,7 +27,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/You_ve" />
+        app:layout_constraintTop_toTopOf="@+id/mock_You_ve" />
 
     <TextView
         android:id="@+id/mock_Steps_on"
@@ -38,7 +38,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/stepCount" />
+        app:layout_constraintTop_toTopOf="@+id/mock_stepCount" />
 
     <TextView
         android:id="@+id/mock_mileCount"
@@ -49,7 +49,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/Steps_on" />
+        app:layout_constraintTop_toTopOf="@+id/mock_Steps_on" />
 
     <TextView
         android:id="@+id/mock_hrs"
@@ -58,7 +58,7 @@
         android:layout_marginTop="392dp"
         android:text="0 hr"
         android:textSize="30dp"
-        app:layout_constraintEnd_toStartOf="@+id/mins"
+        app:layout_constraintEnd_toStartOf="@+id/mock_mins"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -84,7 +84,7 @@
         android:textSize="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/mins"
+        app:layout_constraintStart_toEndOf="@+id/mock_mins"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
@@ -103,43 +103,35 @@
         android:id="@+id/mock_addStepsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="154dp"
-        android:layout_marginTop="291dp"
-        android:layout_marginEnd="150dp"
-        android:layout_marginBottom="418dp"
+        android:layout_marginTop="56dp"
         android:text="Add 500 Steps"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/mock_mins"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/mock_mileCount"
+        app:layout_constraintVertical_bias="0.0" />
 
     <EditText
         android:id="@+id/mock_setTimeField"
         android:layout_width="142dp"
         android:layout_height="47dp"
-        android:layout_marginStart="99dp"
-        android:layout_marginTop="478dp"
-        android:layout_marginEnd="188dp"
-        android:layout_marginBottom="232dp"
+        android:layout_marginStart="140dp"
+        android:layout_marginTop="476dp"
         android:ems="10"
         android:inputType="number"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/mock_stopButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.031" />
 
     <Button
         android:id="@+id/mock_setTimeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="267dp"
-        android:layout_marginTop="478dp"
-        android:layout_marginEnd="74dp"
-        android:layout_marginBottom="231dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="44dp"
         android:text="set ms"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/mock_setTimeField"
+        app:layout_constraintTop_toBottomOf="@+id/mock_secs" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
