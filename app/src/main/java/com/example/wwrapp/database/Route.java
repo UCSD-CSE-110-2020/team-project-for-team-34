@@ -35,6 +35,7 @@ public class Route implements Serializable {
 
     /**
      * Constructor with additional information: tags, favorite, notes
+     *
      * @param routeName
      * @param startingPoint
      * @param date
@@ -139,6 +140,55 @@ public class Route implements Serializable {
     }
 
     @Override
+    public boolean equals(Object object) {
+
+        // The same object equals itself
+        if (object == this) {
+            return true;
+        }
+
+        // Check if the object passed in is actually a Route
+        if (!(object instanceof Route)) {
+            return false;
+        }
+
+        // Now we've verified that object is a Route type
+        Route other = (Route) object;
+
+        // Compare the two Routes
+        boolean routesAreEqual = false;
+
+        routesAreEqual = this.getRouteName().equals(other.getRouteName());
+
+        if (this.getStartingPoint() != null) {
+            routesAreEqual = this.getStartingPoint().equals(other.getStartingPoint());
+        }
+
+        if (this.getDate() != null) {
+            routesAreEqual = this.getDate().equals(other.getDate());
+        }
+
+        if (this.getDuration() != null) {
+            routesAreEqual = this.getDuration().equals(other.getDuration());
+        }
+
+        routesAreEqual = (Long.compare(this.getSteps(), other.getSteps()) == 0);
+        routesAreEqual = (Double.compare(this.getMiles(), other.getMiles()) == 0);
+
+        if (this.getTags() != null) {
+            routesAreEqual = this.getTags().equals(other.getTags());
+        }
+
+        routesAreEqual = this.isFavorite() == other.isFavorite();
+
+        if (this.getNotes() != null) {
+            routesAreEqual = this.getNotes().equals(other.getNotes());
+        }
+
+        return routesAreEqual;
+    }
+
+    @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Route:\n");
@@ -149,8 +199,12 @@ public class Route implements Serializable {
         stringBuilder.append("Route steps: ").append(this.getSteps()).append("\n");
         stringBuilder.append("Route miles: ").append(this.getMiles()).append("\n");
         stringBuilder.append("Route tags: ");
-        for (String tag : this.getTags()) {
-            stringBuilder.append(tag).append(",");
+        List<String> tags = this.getTags();
+        if (tags != null) {
+            for (String tag : tags) {
+                stringBuilder.append(tag).append(",");
+            }
+
         }
         stringBuilder.append("\n");
         stringBuilder.append("Route favorite? ").append(this.isFavorite).append("\n");

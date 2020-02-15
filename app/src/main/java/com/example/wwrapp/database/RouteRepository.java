@@ -30,4 +30,11 @@ public class RouteRepository {
             });
         }
 
+        void updateLastWalk(Route route) {
+            RouteRoomDatabase.databaseWriteExecutor.execute(() -> {
+                routeDao.updateLastWalkStats(route.getId(), route.getSteps(),
+                        route.getMiles(), route.getDate());
+            });
+        }
+
 }

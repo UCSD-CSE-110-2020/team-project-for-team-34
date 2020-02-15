@@ -22,4 +22,8 @@ public class RouteViewModel extends AndroidViewModel {
     public LiveData<List<Route>> getAllRoutes() { return allRoutes; }
 
     public void insert(Route route) { routeRepository.insert(route); }
+
+    public void updateLastWalk(Route route) {
+        routeRepository.updateLastWalk(route);
+    }
 }

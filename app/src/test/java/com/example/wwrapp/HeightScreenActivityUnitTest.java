@@ -42,7 +42,7 @@ public class HeightScreenActivityUnitTest {
     public void clearHeightSharedPreferences() {
         scenario.onActivity(heightScreenActivity -> {
             SharedPreferences sharedPreferences =
-                    heightScreenActivity.getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, Context.MODE_PRIVATE);
+                    heightScreenActivity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.clear().commit();
         });
@@ -74,12 +74,12 @@ public class HeightScreenActivityUnitTest {
 
             // Check that data is saved
             SharedPreferences sharedPreferences =
-                    heightScreenActivity.getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, Context.MODE_PRIVATE);
+                    heightScreenActivity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, Context.MODE_PRIVATE);
             int sharedPrefFeet =
-                    sharedPreferences.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, -1);
+                    sharedPreferences.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, -1);
             assertEquals(Integer.parseInt(expectedFeet), sharedPrefFeet);
             int sharedPrefInches =
-                    sharedPreferences.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, -1);
+                    sharedPreferences.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, -1);
             assertEquals(Integer.parseInt(expectedInches), sharedPrefInches);
 
             // Check that the activity has transitioned.
@@ -106,12 +106,12 @@ public class HeightScreenActivityUnitTest {
 
             // Check that no data is saved
             SharedPreferences sharedPreferences =
-                    heightScreenActivity.getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, Context.MODE_PRIVATE);
+                    heightScreenActivity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, Context.MODE_PRIVATE);
             int sharedPrefFeet =
-                    sharedPreferences.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, -1);
+                    sharedPreferences.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, -1);
             assertEquals(-1, sharedPrefFeet);
             int sharedPrefInches =
-                    sharedPreferences.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, -1);
+                    sharedPreferences.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, -1);
             assertEquals(-1, sharedPrefInches);
 
             // Check that the current activity is still running

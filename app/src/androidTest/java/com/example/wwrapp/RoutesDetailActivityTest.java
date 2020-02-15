@@ -5,11 +5,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.test.espresso.DataInteraction;
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.espresso.contrib.RecyclerViewActions;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -55,10 +57,11 @@ public class RoutesDetailActivityTest {
                         isDisplayed()));
         appCompatButton2.perform(click());
 
-        ViewInteraction relativeLayout = onView(
+        onView(withId(R.id.recycler_view_route)).perform(RecyclerViewActions.actionOnItemAtPosition(0,click()));
+        /*ViewInteraction relativeLayout = onView(
                 allOf(withId(R.id.parent_layout),
                         isDisplayed()));
-        relativeLayout.perform(click());
+        relativeLayout.perform(click());*/
 
         ViewInteraction toggleButton = onView(
                 allOf(withId(R.id.favoriteBtnDetail),
@@ -132,7 +135,7 @@ public class RoutesDetailActivityTest {
         textView12.check(matches(isDisplayed()));
 
         ViewInteraction button2 = onView(
-                allOf(withId(R.id.startBtn),
+                allOf(withId(R.id.start_existing_walk_btn),
                         isDisplayed()));
         button2.check(matches(isDisplayed()));
 
@@ -142,7 +145,7 @@ public class RoutesDetailActivityTest {
         button3.perform(click());
 
         ViewInteraction relativeLayout2 = onView(
-                allOf(withId(R.id.parent_layout),
+                allOf(withId(R.id.recycler_view_route),
                         isDisplayed()));
         relativeLayout2.check(matches(isDisplayed()));
     }

@@ -1,5 +1,8 @@
 package com.example.wwrapp;
 
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,26 +13,21 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.wwrapp.database.Route;
-import com.example.wwrapp.database.Walk;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Make sure that default values for radio buttons aren't selected (right now they are)
-// TODO: Allow the user to uncheck radio buttons if they change their mind.
+public class NewRouteActivity extends AppCompatActivity {
+    private static final String TAG = "NewRouteActivity";
 
-/**
- * Launched after the user ends a walk initiated from the Home screen; prompts user to enter
- * notes about the walk.
- */
-public class EnterWalkInformationActivity extends AppCompatActivity {
-    private static final String TAG = "EnterWalkInformationActivity";
+
 
     private static String ENTER_ROUTE_NAME_TOAST = "Please enter the route name";
+
+    public static final String CALLER_ID_KEY = "callerID";
+    public static final String CALLER_ID = "NewRouteInformation";
+    public static final String ROUTE_KEY = "ROUTE_KEY";
 
     private String mRouteName;
     private String mStartingPoint;
@@ -52,30 +50,31 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_enter_walk_information);
+        setContentView(R.layout.activity_new_route);
 
         // Create the list of tags
         mTags = new ArrayList<>();
 
-        final EditText routeName = findViewById(R.id.route_name_edit_text);
-        final EditText startingPoint = findViewById(R.id.starting_point_edit_text);
+        final EditText routeName = findViewById(R.id.new_route_name_edit_text);
+        final EditText startingPoint = findViewById(R.id.new_route_starting_point_edit_text);
 
-        Button doneBtn = findViewById(R.id.enter_walk_info_done_button);
-        mRouteShapeRadioGroup = findViewById(R.id.route_shape_radio_group);
-        mRouteElevationRadioGroup = findViewById(R.id.route_elevation_radio_group);
-        mRouteEnvironmentRadioGroup = findViewById(R.id.route_environment_radio_group);
-        mRouteSmoothnessRadioGroup = findViewById(R.id.route_smoothness_radio_group);
-        mRouteDifficultyRadioGroup = findViewById(R.id.route_difficulty_radio_group);
+        mRouteShapeRadioGroup = findViewById(R.id.new_route_shape_radio_group);
+        mRouteElevationRadioGroup = findViewById(R.id.new_route_elevation_radio_group);
+        mRouteEnvironmentRadioGroup = findViewById(R.id.new_route_environment_radio_group);
+        mRouteSmoothnessRadioGroup = findViewById(R.id.new_route_smoothness_radio_group);
+        mRouteDifficultyRadioGroup = findViewById(R.id.new_route_difficulty_radio_group);
 
-        mRouteShapeRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+
+        Button cancelButton = findViewById(R.id.enter_new_route_info_cancel_button);
+        cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-
+            public void onClick(View v) {
+                finish();
             }
         });
 
-        doneBtn.setOnClickListener(new View.OnClickListener() {
-
+        Button doneButton = findViewById(R.id.enter_new_route_info_done_button);
+        doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // If the user hasn't entered a route name
@@ -121,7 +120,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                     }
 
                     //  Get and save the notes
-                    EditText editText = findViewById(R.id.notes_edit);
+                    EditText editText = findViewById(R.id.notes_edit_new);
                     mNotes = editText.getText().toString();
                     Log.d(TAG, "Notes are: " + mNotes);
 
@@ -133,21 +132,12 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                     mRouteName = routeName.getText().toString();
                     mStartingPoint = startingPoint.getText().toString();
                     Toast.makeText(getApplicationContext(), "Save data and go to routes screen", Toast.LENGTH_LONG).show();
-                    launchRoutesActivity();
+
+                    returnRouteActivity();
                 }
+
             }
         });
-
-        Button cancelBtn = findViewById(R.id.enter_walk_info_cancel_button);
-        cancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Go to home screen
-                Toast.makeText(getApplicationContext(), "Save data and go to home screen", Toast.LENGTH_LONG).show();
-                launchHomeActivity();
-            }
-        });
-
 
     }
 
@@ -158,7 +148,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         // can do nothing or store data here instead...
 
         // check for mRouteFavorite radio button only, rest on top...
-        mRouteFavoriteRadioBtn = findViewById(R.id.favorite);
+        mRouteFavoriteRadioBtn = findViewById(R.id.favorite_new);
         if (mRouteFavoriteRadioBtn.isSelected()) {
             mRouteFavorite = true;
         } else {
@@ -166,46 +156,20 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         }
     }
 
+    public void returnRouteActivity() {
 
-    /**
-     * Takes the user to the Routes screen after they've entered information for the walk
-     */
-    public void launchRoutesActivity() {
-        // Get the data from the Walk
-        Intent incomingIntent = getIntent();
-        Walk walk = (Walk) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
-        long walkSteps = walk.getSteps();
-        double walkMiles = walk.getMiles();
-        LocalDateTime walkDate = walk.getDate();
-        String duration = walk.getDuration();
-        Log.d(TAG, "Steps are: " + walkSteps);
-        Log.d(TAG, "Miles are: " + walkMiles);
-
-        // Bundle up data to pass to the Routes activity
         Intent outgoingIntent = new Intent(this, RoutesActivity.class);
-        Route route = new Route(mRouteName, mStartingPoint, walkDate, duration, walkSteps,
-                walkMiles, mTags, mRouteFavorite, mNotes);
-        outgoingIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+        Route route = new Route(mRouteName, mStartingPoint, null, null, 0,
+                0, mTags, mRouteFavorite, mNotes);
+        outgoingIntent.putExtra(ROUTE_KEY, route);
 
-        // Let the RoutesActivity know who launched it
-        outgoingIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
-                WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
+        outgoingIntent.putExtra(NewRouteActivity.CALLER_ID_KEY, NewRouteActivity.CALLER_ID);
 
-        // Clear the activity stack so only the Home screen will be left
         outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(outgoingIntent);
+
         finish();
     }
-
-    /**
-     * Returns the user to the Home screen if they don't want to enter route information
-     */
-    public void launchHomeActivity() {
-        Intent intent = new Intent(this, HomeScreenActivity.class);
-        // Clear the activity stack so only the Home screen will be left
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(intent);
-        finish();
-    }
-
 }
+
+

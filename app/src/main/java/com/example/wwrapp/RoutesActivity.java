@@ -1,9 +1,12 @@
 package com.example.wwrapp;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,10 +20,10 @@ import com.example.wwrapp.database.RouteViewModel;
 
 import java.util.List;
 
-public class RoutesActivity extends AppCompatActivity implements RouteListAdapter.OnRouteListener{
+public class RoutesActivity extends AppCompatActivity implements RouteListAdapter.OnRouteListener {
 
     private static final String TAG = "RoutesActivity";
-    public static final String ROUTE_KEY = "RouteKey";
+    private static final int START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE = 1;
     private RouteViewModel mRouteViewModel;
     RouteListAdapter adapter;
     private static boolean sIsTest = false;
@@ -44,14 +47,15 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
             }
         });
         Intent intent = getIntent();
-        String callerID = intent.getStringExtra(EnterWalkInformationActivity.CALLER_ID_KEY);
-        Log.i(TAG, "callerID is: " + callerID);
+        String callerId = intent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
+        Log.i(TAG, "callerID is: " + callerId);
+
         // If the Routes activity was launched by the EnterWalkInformation activity, then
         // update the routes database.
-        switch (callerID) {
-            case EnterWalkInformationActivity.CALLER_ID:
+        switch (callerId) {
+            case WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID:
                 Intent incomingIntent = getIntent();
-                Route route = (Route) (incomingIntent.getSerializableExtra(EnterWalkInformationActivity.ROUTE_KEY));
+                Route route = (Route) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
                 if (route.getDate() == null) {
                     Log.e(TAG, "LocalDateTime is null");
@@ -61,18 +65,36 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
 
                 // Save the newest walk
                 SharedPreferences sharedPreferences =
-                        getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
+                        getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putLong(HomeScreenActivity.LAST_WALK_STEPS_KEY, route.getSteps());
-                editor.putFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, (float) route.getMiles());
-                editor.putString(HomeScreenActivity.LAST_WALK_TIME_KEY, route.getDuration());
+                editor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, route.getSteps());
+                editor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, (float) route.getMiles());
+                editor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, route.getDuration());
                 editor.apply();
                 mRouteViewModel.insert(route);
                 break;
-            case HomeScreenActivity.CALLER_ID:
+            case WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID:
+                break;
+            case NewRouteActivity.CALLER_ID:
+                Intent incomingNewIntent = getIntent();
+                Route newRoute = (Route) (incomingNewIntent.getSerializableExtra(NewRouteActivity.ROUTE_KEY));
+
+                if(newRoute.getDate() == null) {
+                    Log.e(TAG, "LocalDateTime is null");
+                }
+                    Log.d(TAG, newRoute.toString());
+
+                    mRouteViewModel.insert(newRoute);
                 break;
         }
-
+        Button addNewRoute = (Button) findViewById(R.id.addNewRouteButton);
+        addNewRoute.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent toAddNewRoute = new Intent(RoutesActivity.this, NewRouteActivity.class);
+                startActivity(toAddNewRoute);
+            }
+        });
     }
 
 
@@ -88,8 +110,46 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
     @Override
     public void onRouteClick(int position,List<Route> routes) {
         Intent intent = new Intent(this, RouteDetailActivity.class);
-        intent.putExtra(ROUTE_KEY,routes.get(position));
+        intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY,routes.get(position));
         startActivity(intent);
+    }
+
+    /**
+     * Starts the RouteDetailActivity
+     *
+     * @param route: the Route to start the detail activity for
+     */
+    private void startRouteDetailActivity(Route route) {
+        Intent intent = new Intent(RoutesActivity.this, RouteDetailActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+        startActivityForResult(intent, START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "In method onActivityResult");
+
+        // Check that this is the RouteDetailActivity calling back
+        if (requestCode == START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE) {
+
+            // If the RouteDetailActivity finished normally
+            if (resultCode == Activity.RESULT_OK) {
+                // Get the potentially updated Route object
+                Route route = (Route) (data.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
+
+                // If the route object is null, then no updates should be made
+                if (route == null) {
+                    Log.d(TAG, "Route object returned in onActivityResult is null");
+                } else {
+                    // otherwise, update the appropriate route object
+                    Log.d(TAG, route.toString());
+                    mRouteViewModel.updateLastWalk(route);
+                }
+            } else {
+                Log.d(TAG, "Result of RouteDetailActivity is (not OK): " + resultCode);
+            }
+        }
     }
 
     public void generateFakeRoute(){
