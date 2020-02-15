@@ -7,7 +7,7 @@
     tools:context=".MockWalkActivity">
 
     <TextView
-        android:id="@+id/You_ve"
+        android:id="@+id/mock_You_ve"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="105dp"
@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/stepCount"
+        android:id="@+id/mock_stepCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
@@ -30,7 +30,7 @@
         app:layout_constraintTop_toTopOf="@+id/You_ve" />
 
     <TextView
-        android:id="@+id/Steps_on"
+        android:id="@+id/mock_Steps_on"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
@@ -41,7 +41,7 @@
         app:layout_constraintTop_toTopOf="@+id/stepCount" />
 
     <TextView
-        android:id="@+id/mileCount"
+        android:id="@+id/mock_mileCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
@@ -52,7 +52,7 @@
         app:layout_constraintTop_toTopOf="@+id/Steps_on" />
 
     <TextView
-        android:id="@+id/hrs"
+        android:id="@+id/mock_hrs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="392dp"
@@ -64,7 +64,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/mins"
+        android:id="@+id/mock_mins"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="392dp"
@@ -76,7 +76,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/secs"
+        android:id="@+id/mock_secs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="392dp"
@@ -88,7 +88,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/stopButton"
+        android:id="@+id/mock_stopButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="529dp"
@@ -100,7 +100,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/addStepsButton"
+        android:id="@+id/mock_addStepsButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="154dp"
@@ -114,7 +114,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/setTimeField"
+        android:id="@+id/mock_setTimeField"
         android:layout_width="142dp"
         android:layout_height="47dp"
         android:layout_marginStart="99dp"
@@ -129,7 +129,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/setTimeButton"
+        android:id="@+id/mock_setTimeButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="267dp"

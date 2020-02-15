@@ -56,19 +56,19 @@ public class MockWalkActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_walk);
+        setContentView(R.layout.activity_mock_walk);
         Log.d(TAG, "onCreate called");
 
         mDateTime = LocalDateTime.now();
         mStepsSharedPreference = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
 
-        mHoursTextView = findViewById(R.id.hrs);
-        mMinutesTextView = findViewById(R.id.mins);
-        mSecondsTextView = findViewById(R.id.secs);
-        mStepsView = findViewById(R.id.stepCount);
-        mMilesView = findViewById(R.id.mileCount);
-        mStopBtn = findViewById(R.id.stopButton);
-        mAddStepsBtn = findViewById(R.id.addStepsButton);
+        mHoursTextView = findViewById(R.id.mock_hrs);
+        mMinutesTextView = findViewById(R.id.mock_mins);
+        mSecondsTextView = findViewById(R.id.mock_secs);
+        mStepsView = findViewById(R.id.mock_stepCount);
+        mMilesView = findViewById(R.id.mock_mileCount);
+        mStopBtn = findViewById(R.id.mock_stopButton);
+        mAddStepsBtn = findViewById(R.id.mock_addStepsButton);
         mWalkTimer = new TimerTask();
         mStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
