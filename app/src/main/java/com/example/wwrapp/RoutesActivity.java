@@ -23,6 +23,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
     public static final String ROUTE_KEY = "RouteKey";
     private RouteViewModel mRouteViewModel;
     RouteListAdapter adapter;
+    private static boolean sIsTest = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,12 +31,11 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
         setContentView(R.layout.activity_routes);
         Log.d(TAG, "onCreate: started");
 
-        Route testRoute = new Route("route","staring",null,"",10,10,null,true,"");
-
         initRecyclerView();
 
         mRouteViewModel = new ViewModelProvider(this).get(RouteViewModel.class);
-        mRouteViewModel.insert(testRoute);
+        if(sIsTest)
+            generateFakeRoute();
         mRouteViewModel.getAllRoutes().observe(this, new Observer<List<Route>>() {
             @Override
             public void onChanged(@Nullable final List<Route> routes) {
@@ -90,5 +90,14 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
         Intent intent = new Intent(this, RouteDetailActivity.class);
         intent.putExtra(ROUTE_KEY,routes.get(position));
         startActivity(intent);
+    }
+
+    public void generateFakeRoute(){
+        Route testRoute = new Route("route","staring",null,"",10,10,null,true,"");
+        mRouteViewModel.insert(testRoute);
+    }
+
+    public static void setIsTest(boolean isTest) {
+        RoutesActivity.sIsTest = isTest;
     }
 }
