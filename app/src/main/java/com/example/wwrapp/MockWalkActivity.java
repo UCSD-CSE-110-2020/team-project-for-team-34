@@ -197,9 +197,9 @@ public class MockWalkActivity extends AppCompatActivity {
             HomeScreenActivity.getFitnessService().updateStepCount();
             mStepsView.setText(Long.toString(mSteps));
             SharedPreferences heightSharedPref =
-                    getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-            feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
-            inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
+            feet = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
+            inches = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
             Log.d(TAG, "Feet: " + feet);
             Log.d(TAG, "Inches: " + inches);
             // Calculate the user's total miles

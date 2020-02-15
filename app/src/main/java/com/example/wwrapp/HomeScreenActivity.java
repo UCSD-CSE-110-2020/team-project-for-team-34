@@ -204,11 +204,10 @@ public class HomeScreenActivity extends AppCompatActivity {
         TextView lastWalkSteps = findViewById(R.id.lastWalkSteps);
         TextView lastWalkMiles = findViewById(R.id.lastWalkDistance);
         TextView lastWalkTime = findViewById(R.id.lastWalkTime);
-        SharedPreferences spfs = getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
-        long lastSteps = spfs.getLong(HomeScreenActivity.LAST_WALK_STEPS_KEY, 0);
-        Log.d(TAG, "lastSteps is " + lastSteps);
-        float lastMiles = spfs.getFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, 0);
-        String lastTime = spfs.getString(HomeScreenActivity.LAST_WALK_TIME_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
+        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+        long lastSteps = spfs.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
+        float lastMiles = spfs.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
+        String lastTime = spfs.getString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
         lastWalkSteps.setText(String.valueOf(lastSteps));
         lastWalkMiles.setText(String.valueOf(lastMiles));
         lastWalkTime.setText(lastTime);
