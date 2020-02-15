@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -71,8 +73,26 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
                 break;
             case HomeScreenActivity.CALLER_ID:
                 break;
-        }
+            case NewRouteActivity.CALLER_ID:
+                Intent incomingNewIntent = getIntent();
+                Route newRoute = (Route) (incomingNewIntent.getSerializableExtra(NewRouteActivity.ROUTE_KEY));
 
+                if(newRoute.getDate() == null) {
+                    Log.e(TAG, "LocalDateTime is null");
+                }
+                    Log.d(TAG, newRoute.toString());
+
+                    mRouteViewModel.insert(newRoute);
+                break;
+        }
+        Button addNewRoute = (Button) findViewById(R.id.addNewRouteButton);
+        addNewRoute.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent toAddNewRoute = new Intent(RoutesActivity.this, NewRouteActivity.class);
+                startActivity(toAddNewRoute);
+            }
+        });
     }
 
 
