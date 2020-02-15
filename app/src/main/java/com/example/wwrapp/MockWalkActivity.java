@@ -78,6 +78,17 @@ public class MockWalkActivity extends AppCompatActivity {
                 long currStpes = oldSteps + mSteps;
                 SharedPreferences.Editor editor = mStepsSharedPreference.edit();
                 editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, currStpes);
+                editor.apply();
+                SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+                SharedPreferences.Editor spfsEditor = spfs.edit();
+                long lastSteps = spfs.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
+                long currLastSteps = lastSteps + mSteps;
+                spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, currLastSteps);
+                float lastMiles = spfs.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
+                float currLastMiles = lastMiles + ((float)mMiles);
+                spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
+                spfsEditor.apply();
+//              String lastTime = mockTime();
                 launchWalkInformationActivity();
                 finish();
             }
@@ -107,6 +118,10 @@ public class MockWalkActivity extends AppCompatActivity {
             mWalkTimer.cancel(false);
         }
     }
+
+//    private String mockTime() {
+//
+//    }
 
     /**
      * Launches the activity to enter walk information
@@ -181,7 +196,12 @@ public class MockWalkActivity extends AppCompatActivity {
         private void updateSteps() {
             HomeScreenActivity.getFitnessService().updateStepCount();
             mStepsView.setText(Long.toString(mSteps));
-
+            SharedPreferences heightSharedPref =
+                    getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
+            feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
+            inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+            Log.d(TAG, "Feet: " + feet);
+            Log.d(TAG, "Inches: " + inches);
             // Calculate the user's total miles
             StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
             mMiles = converter.getNumMiles(mSteps);
@@ -190,6 +210,4 @@ public class MockWalkActivity extends AppCompatActivity {
             mMilesView.setText("That's " + mMiles + " miles so far");
         }
     }
-
-
 }

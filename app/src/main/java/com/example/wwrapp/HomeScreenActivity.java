@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.OnLifecycleEvent;
 
 import com.example.wwrapp.fitness.FitnessService;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
@@ -189,6 +190,22 @@ public class HomeScreenActivity extends AppCompatActivity {
         if (!mFitnessRunner.isCancelled()) {
             mFitnessRunner.cancel(false);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        TextView lastWalkSteps = findViewById(R.id.lastWalkSteps);
+        TextView lastWalkMiles = findViewById(R.id.lastWalkDistance);
+        TextView lastWalkTime = findViewById(R.id.lastWalkTime);
+        SharedPreferences spfs = getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
+        long lastSteps = spfs.getLong(HomeScreenActivity.LAST_WALK_STEPS_KEY, -1);
+        Log.d(TAG, "lastSteps is " + lastSteps);
+        float lastMiles = spfs.getFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, -1);
+        String lastTime = spfs.getString(HomeScreenActivity.LAST_WALK_TIME_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
+        lastWalkSteps.setText(String.valueOf(lastSteps));
+        lastWalkMiles.setText(String.valueOf(lastMiles));
+        lastWalkTime.setText(lastTime);
     }
 
 
