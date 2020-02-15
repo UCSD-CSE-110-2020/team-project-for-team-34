@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     // Commenting out this line to resolve travisCI license build error
     // buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.example.wwrapp"
         minSdkVersion 26
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -24,7 +24,6 @@ android {
         unitTests {
             includeAndroidResources = true
             all {
-
                 testLogging {
                     events "passed", "skipped", "failed"
                     exceptionFormat "full"
@@ -63,7 +62,6 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'
-
 
     implementation "androidx.recyclerview:recyclerview:1.1.0"
 

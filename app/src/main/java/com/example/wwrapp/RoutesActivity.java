@@ -17,22 +17,25 @@ import com.example.wwrapp.database.RouteViewModel;
 
 import java.util.List;
 
-public class RoutesActivity extends AppCompatActivity {
+public class RoutesActivity extends AppCompatActivity implements RouteListAdapter.OnRouteListener{
 
     private static final String TAG = "RoutesActivity";
+    public static final String ROUTE_KEY = "RouteKey";
     private RouteViewModel mRouteViewModel;
+    RouteListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_routes);
         Log.d(TAG, "onCreate: started");
-        RecyclerView recyclerView = findViewById(R.id.recycler_view_route);
-        final RouteListAdapter adapter = new RouteListAdapter(this);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        Route testRoute = new Route("route","staring",null,"",10,10,null,true,"");
+
+        initRecyclerView();
 
         mRouteViewModel = new ViewModelProvider(this).get(RouteViewModel.class);
+        mRouteViewModel.insert(testRoute);
         mRouteViewModel.getAllRoutes().observe(this, new Observer<List<Route>>() {
             @Override
             public void onChanged(@Nullable final List<Route> routes) {
@@ -40,8 +43,6 @@ public class RoutesActivity extends AppCompatActivity {
                 adapter.setRoutes(routes);
             }
         });
-
-
         Intent intent = getIntent();
         String callerID = intent.getStringExtra(EnterWalkInformationActivity.CALLER_ID_KEY);
         Log.i(TAG, "callerID is: " + callerID);
@@ -75,4 +76,19 @@ public class RoutesActivity extends AppCompatActivity {
     }
 
 
+
+    private void initRecyclerView(){
+        Log.d(TAG, "initRecyclerView: init recyclerview");
+        RecyclerView recyclerView = findViewById(R.id.recycler_view_route);
+        adapter = new RouteListAdapter(this,this);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    @Override
+    public void onRouteClick(int position,List<Route> routes) {
+        Intent intent = new Intent(this, RouteDetailActivity.class);
+        intent.putExtra(ROUTE_KEY,routes.get(position));
+        startActivity(intent);
+    }
 }
