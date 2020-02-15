@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(AndroidJUnit4.class)
 public class HomeActivityUnitTest {
 
-    @BeforeClass
+    /*@BeforeClass
     public static void disableAsyncTask() {
         // Disable the asynchronous task in the activity to prevent a hanging test
         HomeScreenActivity.setEnableFitnessRunner(false);
@@ -94,6 +94,6 @@ public class HomeActivityUnitTest {
             assertEquals(expectedMiles, Double.parseDouble(lastMilesTextView.getText().toString()), acceptableError);
             assertEquals(expectedTime, lastTimeTextView.getText().toString());
         });
-    }
+    }*/
 }
 

@@ -13,7 +13,7 @@ public class StepsAndMilesConverterUnitTest {
     private double acceptableError = 0.001;
 
 
-    /*@Before
+    @Before
     public void setup() {
         int heightFeet = 5;
         int heightInches = 3;
@@ -66,5 +66,5 @@ public class StepsAndMilesConverterUnitTest {
         float testMiles = (float)(Math.round(tester.getNumMiles(testSteps) * 10)/ 10.0);
         assertEquals(expectedMiles, testMiles, acceptableError);
 
-    }*/
+    }
 }
