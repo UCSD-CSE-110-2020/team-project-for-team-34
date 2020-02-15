@@ -11,6 +11,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".RouteDetailActivity"
             android:theme="@style/AppTheme.NoActionBar" ></activity>
+        <activity android:name=".MockWalkActivity"></activity>
         <activity android:name=".EnterWalkInformationActivity" />
         <activity
             android:name=".HomeScreenActivity"
