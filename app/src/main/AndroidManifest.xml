@@ -27,6 +27,7 @@
         <activity
             android:name=".HeightScreenActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".NewRouteActivity"/>
     </application>
 
 </manifest>
