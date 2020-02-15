@@ -97,6 +97,20 @@ public class HomeScreenActivity extends AppCompatActivity {
             }
         });
 
+        // Register the mock screen button
+        findViewById(R.id.mockButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Cancel the updating of the home screen before starting the Routes screen
+                if (!mFitnessRunner.isCancelled()) {
+                    mFitnessRunner.cancel(false);
+                }
+                Intent route = new Intent(HomeScreenActivity.this, MockWalkActivity.class);
+                route.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+                startActivity(route);
+            }
+        });
+
         // Update the last walk display, if applicable
         TextView lastWalkSteps = findViewById(R.id.lastWalkSteps);
         TextView lastWalkMiles = findViewById(R.id.lastWalkDistance);
@@ -158,6 +172,7 @@ public class HomeScreenActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "In method onPause");
         if (!mFitnessRunner.isCancelled()) {
             mFitnessRunner.cancel(false);
         }
@@ -166,6 +181,8 @@ public class HomeScreenActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        Log.d(TAG, "In method onStop");
+
         if (!mFitnessRunner.isCancelled()) {
             mFitnessRunner.cancel(false);
         }
@@ -174,9 +191,28 @@ public class HomeScreenActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "In method onDestroy");
+
         if (!mFitnessRunner.isCancelled()) {
             mFitnessRunner.cancel(false);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "In method onResume");
+
+        TextView lastWalkSteps = findViewById(R.id.lastWalkSteps);
+        TextView lastWalkMiles = findViewById(R.id.lastWalkDistance);
+        TextView lastWalkTime = findViewById(R.id.lastWalkTime);
+        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+        long lastSteps = spfs.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
+        float lastMiles = spfs.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
+        String lastTime = spfs.getString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
+        lastWalkSteps.setText(String.valueOf(lastSteps));
+        lastWalkMiles.setText(String.valueOf(lastMiles));
+        lastWalkTime.setText(lastTime);
     }
 
 
