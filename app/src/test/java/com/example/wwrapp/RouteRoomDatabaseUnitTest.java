@@ -102,16 +102,31 @@ public class RouteRoomDatabaseUnitTest {
 
         // Create 2 Route objects to check that the query updates only 1 of them
         String routeName1 = "Test Route Name 1";
-        String durationToUpdate = "0 hours, 5 minutes, 20 seconds";
-        Route routeToUpdate = new Route(routeName1, null, null,
-                durationToUpdate, stepsToUpdate, milesToUpdate, null, false, null);
+        int yearToUpdate = 2020;
+        int monthToUpdate = 3;
+        int dayOfMonthToUpdate = 20;
+        int hourToUpdate = 14;
+        int minutesToUpdate = 30;
+        int secondsToUpdate = 50;
+        LocalDateTime dateTimeToUpdate = LocalDateTime.of(yearToUpdate, monthToUpdate,
+                dayOfMonthToUpdate, hourToUpdate, minutesToUpdate, secondsToUpdate);
+        Route routeToUpdate = new Route(routeName1, null, dateTimeToUpdate,
+                null, stepsToUpdate, milesToUpdate, null, false, null);
 
         String routeName2 = "Test Route Name 2";
-        String durationToStayTheSame = "0 hours, 2 minutes, 10 seconds";
+        int yearToStayTheSame = 2020;
+        int monthToStayTheSame = 2;
+        int dayOfMonthToStayTheSame = 10;
+        int hourToStayTheSame = 12;
+        int minutesToStayTheSame = 35;
+        int secondsToStayTheSame = 40;
+        LocalDateTime dateTimeToStayTheSame = LocalDateTime.of(yearToStayTheSame,
+                monthToStayTheSame, dayOfMonthToStayTheSame, hourToStayTheSame,
+                minutesToStayTheSame, secondsToStayTheSame);
         long stepsToStayTheSame = 2435;
         double milesToStayTheSame = stepsAndMilesConverter.getNumMiles(stepsToStayTheSame);
-        Route routeToStayTheSame = new Route(routeName2, null, null,
-                durationToStayTheSame, stepsToStayTheSame, milesToStayTheSame, null, false, null);
+        Route routeToStayTheSame = new Route(routeName2, null, dateTimeToStayTheSame,
+                null, stepsToStayTheSame, milesToStayTheSame, null, false, null);
 
         // Insert the routes
         routeDao.insert(routeToUpdate);
@@ -120,11 +135,18 @@ public class RouteRoomDatabaseUnitTest {
         // Update 1 of the routes
         long newSteps = 5000;
         double newMiles = stepsAndMilesConverter.getNumMiles(newSteps);
-        String newDuration = "1 hour, 2 minutes, 3 seconds";
+        int newYear = 2020;
+        int newMonth = 3;
+        int newDay = 25;
+        int newHour = 16;
+        int newMinutes = 35;
+        int newSeconds = 40;
+        LocalDateTime newDateTime = LocalDateTime.of(newYear, newMonth, newDay, newHour,
+                newMinutes, newSeconds);
 
         // First, get the ID of the route to update
         Route queriedRouteToUpdate = routeDao.findRouteByName(routeToUpdate.getRouteName());
-        routeDao.updateLastWalkStats(queriedRouteToUpdate.getId(), newSteps, newMiles, newDuration);
+        routeDao.updateLastWalkStats(queriedRouteToUpdate.getId(), newSteps, newMiles, newDateTime);
         // Re-query the route to get the updates
         queriedRouteToUpdate = routeDao.findRouteById(queriedRouteToUpdate.getId());
 
@@ -133,7 +155,7 @@ public class RouteRoomDatabaseUnitTest {
         // Check that the the target route was updated correctly
         assertEquals(newSteps, queriedRouteToUpdate.getSteps());
         assertEquals(newMiles, queriedRouteToUpdate.getMiles(), ACCEPTABLE_ERROR);
-        assertEquals(newDuration, queriedRouteToUpdate.getDuration());
+        assertEquals(newDateTime, queriedRouteToUpdate.getDate());
 
         // Ensure that no other fields were updated - simple test, not exhaustive
         assertEquals(routeName1, queriedRouteToUpdate.getRouteName());

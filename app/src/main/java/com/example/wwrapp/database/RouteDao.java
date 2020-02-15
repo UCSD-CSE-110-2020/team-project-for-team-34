@@ -5,10 +5,13 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.TypeConverters;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Dao
+@TypeConverters({ListConverter.class, LocalDateTimeConverter.class})
 public interface RouteDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -27,6 +30,6 @@ public interface RouteDao {
     Route findRouteById(int routeId);
 
     @Query("UPDATE route_table SET steps = :updateSteps, miles = :updateMiles, " +
-            "duration = :updateDuration WHERE id = :routeId")
-    void updateLastWalkStats(int routeId, long updateSteps, double updateMiles, String updateDuration);
+            "date = :updateDateTime WHERE id = :routeId")
+    void updateLastWalkStats(int routeId, long updateSteps, double updateMiles, LocalDateTime updateDateTime);
 }
