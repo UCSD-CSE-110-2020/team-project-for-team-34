@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.database.Walk;
 
+import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
 
 public class WalkActivity extends AppCompatActivity {
@@ -69,7 +70,7 @@ public class WalkActivity extends AppCompatActivity {
         mStepsView = findViewById(R.id.stepCount);
         mMilesView = findViewById(R.id.mileCount);
         mStopBtn = findViewById(R.id.stopButton);
-        mWalkTimer = new TimerTask();
+        mWalkTimer = new TimerTask(this);
         mStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,16 +119,24 @@ public class WalkActivity extends AppCompatActivity {
         finish();
     }
 
-    private class TimerTask extends AsyncTask<String,String, String> {
+    private static class TimerTask extends AsyncTask<String,String, String> {
         private long time;
         private int feet;
         private int inches;
 
+        private WeakReference<WalkActivity> walkActivityWeakReference;
+
+        public TimerTask(WalkActivity context) {
+            walkActivityWeakReference = new WeakReference<>(context);
+        }
+
         @Override
         public void onPreExecute() {
             Log.d(TAG, "onPreExecute called");
-            SharedPreferences heightSharedPref =
-                    getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
+            // Get a reference to the activity
+            WalkActivity walkActivity = walkActivityWeakReference.get();
+            SharedPreferences heightSharedPref = walkActivity.getSharedPreferences
+                    (HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
             feet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
             inches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
             Log.d(TAG, "Feet: " + feet);
@@ -159,27 +168,30 @@ public class WalkActivity extends AppCompatActivity {
 
         private void updateTime() {
             Log.d(TAG, "updateTime called");
-            mHours = (int) (time / NUM_SECONDS_PER_HOUR);
-            mMinutes = (int) ((time / NUM_SECONDS_PER_MINUTE) % NUM_SECONDS_PER_MINUTE);
-            mSeconds = (int) (time % NUM_SECONDS_PER_MINUTE);
+            WalkActivity walkActivity = walkActivityWeakReference.get();
+            walkActivity.mHours = (int) (time / NUM_SECONDS_PER_HOUR);
+            walkActivity.mMinutes = (int) ((time / NUM_SECONDS_PER_MINUTE) % NUM_SECONDS_PER_MINUTE);
+            walkActivity.mSeconds = (int) (time % NUM_SECONDS_PER_MINUTE);
             Log.d(TAG, "time is " + time);
-            mHoursTextView.setText(mHours + " hr");
-            mMinutesTextView.setText(mMinutes + " min");
-            mSecondsTextView.setText(mSeconds + " sec");
+            walkActivity.mHoursTextView.setText(walkActivity.mHours + " hr");
+            walkActivity.mMinutesTextView.setText(walkActivity.mMinutes + " min");
+            walkActivity.mSecondsTextView.setText(walkActivity.mSeconds + " sec");
         }
 
         private void updateSteps() {
+            WalkActivity walkActivity = walkActivityWeakReference.get();
+
             HomeScreenActivity.getFitnessService().updateStepCount();
-            mCurrSteps = mStepsSharedPreference.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
-            mStepsTaken = mCurrSteps - mStartSteps;
-            mStepsView.setText(Long.toString(mStepsTaken));
+            walkActivity.mCurrSteps = walkActivity.mStepsSharedPreference.getLong(HomeScreenActivity.TOTAL_STEPS_KEY,0);
+            walkActivity.mStepsTaken = walkActivity.mCurrSteps - walkActivity.mStartSteps;
+            walkActivity.mStepsView.setText(Long.toString(walkActivity.mStepsTaken));
 
             // Calculate the user's total miles
             StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
-            mMiles = converter.getNumMiles(mStepsTaken);
+            walkActivity.mMiles = converter.getNumMiles(walkActivity.mStepsTaken);
             //https://www.quora.com/How-can-I-round-a-number-to-1-decimal-digit-in-Java
-            mMiles = Math.round(mMiles * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
-            mMilesView.setText("That's " + mMiles + " miles so far");
+            walkActivity.mMiles = Math.round(walkActivity.mMiles * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
+            walkActivity.mMilesView.setText("That's " + walkActivity.mMiles + " miles so far");
         }
     }
 
