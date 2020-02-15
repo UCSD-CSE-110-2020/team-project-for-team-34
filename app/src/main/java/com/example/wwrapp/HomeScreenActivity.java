@@ -95,6 +95,20 @@ public class HomeScreenActivity extends AppCompatActivity {
             }
         });
 
+        // Register the mock screen button
+        findViewById(R.id.mockButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Cancel the updating of the home screen before starting the Routes screen
+                if (!mFitnessRunner.isCancelled()) {
+                    mFitnessRunner.cancel(false);
+                }
+                Intent route = new Intent(HomeScreenActivity.this, MockWalkActivity.class);
+                route.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+                startActivity(route);
+            }
+        });
+
         // Update the last walk display, if applicable
         TextView lastWalkSteps = findViewById(R.id.lastWalkSteps);
         TextView lastWalkMiles = findViewById(R.id.lastWalkDistance);

@@ -165,5 +165,14 @@
         app:layout_constraintTop_toBottomOf="@+id/startNewWalkButton"
         app:layout_constraintVertical_bias="0.693" />
 
+    <Button
+        android:id="@+id/mockButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="69dp"
+        android:text="mock"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="306dp" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
