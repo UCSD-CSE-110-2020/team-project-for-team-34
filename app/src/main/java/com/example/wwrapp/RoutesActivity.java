@@ -26,6 +26,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
     private static final int START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE = 1;
     private RouteViewModel mRouteViewModel;
     RouteListAdapter adapter;
+    private static boolean sIsTest = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,12 +34,11 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
         setContentView(R.layout.activity_routes);
         Log.d(TAG, "onCreate: started");
 
-        Route testRoute = new Route("route", "staring", null, "", 10, 10, null, true, "");
-
         initRecyclerView();
 
         mRouteViewModel = new ViewModelProvider(this).get(RouteViewModel.class);
-        mRouteViewModel.insert(testRoute);
+        if(sIsTest)
+            generateFakeRoute();
         mRouteViewModel.getAllRoutes().observe(this, new Observer<List<Route>>() {
             @Override
             public void onChanged(@Nullable final List<Route> routes) {
@@ -98,19 +98,20 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
     }
 
 
-    private void initRecyclerView() {
+
+    private void initRecyclerView(){
         Log.d(TAG, "initRecyclerView: init recyclerview");
         RecyclerView recyclerView = findViewById(R.id.recycler_view_route);
-        adapter = new RouteListAdapter(this, this);
+        adapter = new RouteListAdapter(this,this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
-    public void onRouteClick(int position, List<Route> routes) {
-        // Get the clicked Route
-        Route route = routes.get(position);
-        startRouteDetailActivity(route);
+    public void onRouteClick(int position,List<Route> routes) {
+        Intent intent = new Intent(this, RouteDetailActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY,routes.get(position));
+        startActivity(intent);
     }
 
     /**
@@ -149,5 +150,14 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
                 Log.d(TAG, "Result of RouteDetailActivity is (not OK): " + resultCode);
             }
         }
+    }
+
+    public void generateFakeRoute(){
+        Route testRoute = new Route("route","staring",null,"",10,10,null,true,"");
+        mRouteViewModel.insert(testRoute);
+    }
+
+    public static void setIsTest(boolean isTest) {
+        RoutesActivity.sIsTest = isTest;
     }
 }

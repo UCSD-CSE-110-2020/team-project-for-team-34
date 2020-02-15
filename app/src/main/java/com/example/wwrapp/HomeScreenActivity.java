@@ -27,6 +27,7 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     // True to enable the FitnessRunner, false otherwise
     private static boolean sEnableFitnessRunner = true;
+    private static boolean sIgnoreHeight = false;
 
     public static final String NO_LAST_WALK_TIME_TEXT = "No last walk time available";
 
@@ -59,10 +60,11 @@ public class HomeScreenActivity extends AppCompatActivity {
 
 
         // Check for a saved height
+        if(!sIgnoreHeight){
         if(!checkHasHeight()){
             Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
             startActivity(askHeight);
-        }
+        }}
 
         // Get the user's height
         SharedPreferences heightSharedPref =
@@ -259,6 +261,10 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     public static void setEnableFitnessRunner(boolean enableFitnessRunner) {
         HomeScreenActivity.sEnableFitnessRunner = enableFitnessRunner;
+    }
+
+    public static void setIgnoreHeight(boolean ignoreHeight) {
+        HomeScreenActivity.sIgnoreHeight = ignoreHeight;
     }
 
     public static FitnessService getFitnessService() {
