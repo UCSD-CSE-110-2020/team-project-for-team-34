@@ -29,11 +29,6 @@ import java.util.List;
 public class EnterWalkInformationActivity extends AppCompatActivity {
     private static final String TAG = "EnterWalkInformationActivity";
 
-    // Keys for Intents
-    public static final String CALLER_ID_KEY = "callerID";
-    public static final String ROUTE_KEY = "ROUTE_KEY";
-    public static final String CALLER_ID = "EnterWalkInformation";
-
     private static String ENTER_ROUTE_NAME_TOAST = "Please enter the route name";
 
     private String mRouteName;
@@ -178,7 +173,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
     public void launchRoutesActivity() {
         // Get the data from the Walk
         Intent incomingIntent = getIntent();
-        Walk walk = (Walk) (incomingIntent.getSerializableExtra(WalkActivity.WALK_KEY));
+        Walk walk = (Walk) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
         long walkSteps = walk.getSteps();
         double walkMiles = walk.getMiles();
         LocalDateTime walkDate = walk.getDate();
@@ -190,10 +185,11 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         Intent outgoingIntent = new Intent(this, RoutesActivity.class);
         Route route = new Route(mRouteName, mStartingPoint, walkDate, duration, walkSteps,
                 walkMiles, mTags, mRouteFavorite, mNotes);
-        outgoingIntent.putExtra(ROUTE_KEY, route);
+        outgoingIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
 
         // Let the RoutesActivity know who launched it
-        outgoingIntent.putExtra(EnterWalkInformationActivity.CALLER_ID_KEY, EnterWalkInformationActivity.CALLER_ID);
+        outgoingIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
+                WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
 
         // Clear the activity stack so only the Home screen will be left
         outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

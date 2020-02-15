@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.wwrapp.HomeScreenActivity;
+import com.example.wwrapp.WWRConstants;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.fitness.Fitness;
@@ -97,17 +98,17 @@ public class GoogleFitAdapter implements FitnessService {
                                                 ? 0
                                                 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
 
-                                SharedPreferences saveSteps = activity.getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME,MODE_PRIVATE);
+                                SharedPreferences saveSteps = activity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME,MODE_PRIVATE);
                                 SharedPreferences.Editor editor = saveSteps.edit();
 
                                 SharedPreferences testSave =
-                                        activity.getSharedPreferences(HomeScreenActivity.STEPS_SHARED_PREF_NAME, MODE_PRIVATE);
-                                long savedSteps = testSave.getLong(HomeScreenActivity.TOTAL_STEPS_KEY, -1);
+                                        activity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
+                                long savedSteps = testSave.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, -1);
                                 // Testing only
                                 savedSteps += offset;
 //                                total += savedSteps;
                                 activity.setStepCount(total);
-                                editor.putLong(HomeScreenActivity.TOTAL_STEPS_KEY, total);
+                                editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, total);
                                 editor.apply();
 
                                 Log.d(TAG, "Total steps: " + total);
