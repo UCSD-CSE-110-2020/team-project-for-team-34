@@ -11,7 +11,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 /**
- * Prompts the user for their height and saves the measurements.
+ * Prompts the user for their height and saves the measurements. This activity is launched by
+ * the Home screen if the user has never entered their height before.
  */
 public class HeightScreenActivity extends AppCompatActivity {
 
@@ -34,7 +35,7 @@ public class HeightScreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_height_page);
+        setContentView(R.layout.activity_height);
         mDoneBtn = (Button) findViewById(R.id.height_button);
 
         mFeetSpinner = (Spinner) findViewById(R.id.spinner_feet);

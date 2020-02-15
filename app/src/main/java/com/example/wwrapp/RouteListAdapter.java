@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -14,89 +13,122 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.wwrapp.database.Route;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
-public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.ViewHolder>{
+public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.RouteViewHolder> {
 
     private static final String TAG = "RouteListAdapter";
 
     private OnRouteListener mOnRouteListener;
 
-    private ArrayList<String> mRouteName = new ArrayList<>();
-    private ArrayList<String> mRouteDate = new ArrayList<>();
-    private ArrayList<String> mRouteMile = new ArrayList<>();
-    private ArrayList<String> mRouteStep = new ArrayList<>();
-    private ArrayList<Boolean> mFavourite = new ArrayList<>();
-    private Context mContext;
+    private List<Route> mRoutes;
+    private LayoutInflater mInflater;
 
-    public RouteListAdapter(OnRouteListener onRouteListener, ArrayList<String> RouteName, ArrayList<String> RouteDate, ArrayList<String> RouteMile, ArrayList<String> RouteStep, ArrayList<Boolean> Favourite , Context Context) {
-        this.mOnRouteListener = onRouteListener;
-        this.mRouteName = RouteName;
-        this.mRouteDate = RouteDate;
-        this.mRouteMile = RouteMile;
-        this.mRouteStep = RouteStep;
-        this.mFavourite = Favourite;
-        this.mContext = Context;
+    public RouteListAdapter(OnRouteListener onRouteListener, Context context) {
+        mOnRouteListener = onRouteListener;
+        mInflater = LayoutInflater.from(context);
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_listitem,parent,false);
-        ViewHolder holder = new ViewHolder(view, mOnRouteListener);
-        return holder;
+    public RouteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View itemView = mInflater.inflate(R.layout.layout_listitem, parent, false);
+        return new RouteViewHolder(itemView, mOnRouteListener);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Log.d(TAG,"onBindViewHolder: called");
+    public void onBindViewHolder(@NonNull RouteViewHolder holder, int position) {
+        Log.d(TAG, "onBindViewHolder: called");
 
-        holder.routeName.setText(mRouteName.get(position));
-        holder.routeDate.setText(mRouteDate.get(position));
-        holder.routeMile.setText(mRouteMile.get(position));
-        holder.routeStep.setText(mRouteStep.get(position));
-        holder.favouriteBtn.setChecked(mFavourite.get(position));
-        if(mFavourite.get(position))
-            holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mContext,R.drawable.ic_star_on));
-        else
-            holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mContext,R.drawable.ic_star_off));
+        if (mRoutes != null) {
+            Route currentRoute = mRoutes.get(position);
+            holder.routeName.setText(currentRoute.getRouteName());
 
-        holder.favouriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked)
-                    holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mContext,R.drawable.ic_star_on));
-                else
-                    holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mContext,R.drawable.ic_star_off));
+            // Format the date
+            LocalDateTime routeDate = currentRoute.getDate();
+            if (routeDate == null) {
+                Log.e(TAG, "Date is null");
+                routeDate = LocalDateTime.now();
             }
-        });
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+            String formattedDate = routeDate.format(formatter);
+            holder.routeDate.setText(formattedDate);
+
+            double miles = currentRoute.getMiles();
+            holder.routeMiles.setText(String.valueOf(miles));
+
+            long steps = currentRoute.getSteps();
+            holder.routeSteps.setText(String.valueOf(steps));
+
+            String startingPoing = currentRoute.getStartingPoint();
+            if (startingPoing != null)
+                holder.routeStaringPoint.setText(startingPoing);
+
+            Boolean isFavorite = currentRoute.isFavorite();
+            if (isFavorite) {
+                holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
+                holder.favouriteBtn.setChecked(true);
+            } else {
+                holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
+            }
+            holder.favouriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
+                    }
+                    else
+                        holder.favouriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
+                }
+            });
+        } else {
+            holder.routeName.setText("Route name not ready yet");
+            holder.routeDate.setText("Route date not ready yet");
+            holder.routeMiles.setText("Route miles not ready yet");
+            holder.routeSteps.setText("Route steps not ready yet");
+        }
 
     }
 
     @Override
     public int getItemCount() {
-        return mRouteName.size();
+        if (mRoutes != null) {
+            return mRoutes.size();
+        } else {
+            return 0;
+        }
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    void setRoutes(List<Route> routes) {
+        mRoutes = routes;
+        notifyDataSetChanged();
+    }
+
+    class RouteViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         OnRouteListener onRouteListener;
 
         TextView routeName;
+        TextView routeStaringPoint;
         TextView routeDate;
-        TextView routeMile;
-        TextView routeStep;
+        TextView routeMiles;
+        TextView routeSteps;
         ToggleButton favouriteBtn;
-        RelativeLayout parentLayout;
-        public ViewHolder(@NonNull View itemView, OnRouteListener onRouteListener) {
+
+        //RelativeLayout parentLayout;
+        public RouteViewHolder(@NonNull View itemView, OnRouteListener onRouteListener) {
             super(itemView);
             routeName = itemView.findViewById(R.id.route_name);
+            routeStaringPoint = itemView.findViewById(R.id.starting_point);
             routeDate = itemView.findViewById(R.id.route_date);
-            routeMile = itemView.findViewById(R.id.route_mile);
-            routeStep = itemView.findViewById(R.id.route_step);
+            routeMiles = itemView.findViewById(R.id.route_mile);
+            routeSteps = itemView.findViewById(R.id.route_step);
             favouriteBtn = itemView.findViewById(R.id.favoriteBtn);
-            parentLayout = itemView.findViewById(R.id.parent_layout);
+            //parentLayout = itemView.findViewById(R.id.parent_layout);
             this.onRouteListener = onRouteListener;
 
             itemView.setOnClickListener(this);
@@ -104,11 +136,11 @@ public class RouteListAdapter extends RecyclerView.Adapter<RouteListAdapter.View
 
         @Override
         public void onClick(View v) {
-            onRouteListener.onRouteClick(getAdapterPosition());
+            onRouteListener.onRouteClick(getAdapterPosition(),mRoutes);
         }
     }
 
-    public interface OnRouteListener{
-        void onRouteClick(int position);
+    public interface OnRouteListener {
+        void onRouteClick(int position,List<Route> routes);
     }
 }
