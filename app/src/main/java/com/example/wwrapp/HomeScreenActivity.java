@@ -36,17 +36,6 @@ public class HomeScreenActivity extends AppCompatActivity {
     private static final int SLEEP_TIME = 1000;
     private static final double TENTHS_PLACE_ROUNDING_FACTOR = 10.0;
 
-    // SharedPreferences
-    public static final String STEPS_SHARED_PREF_NAME = "user_steps";
-    public static final String TOTAL_STEPS_KEY = "totalSteps";
-
-    public static final String LAST_WALK_SHARED_PREFS_NAME = "last_walk";
-    public static final String LAST_WALK_STEPS_KEY = "lastWalkSteps";
-    public static final String LAST_WALK_MILES_KEY = "lastWalkMiles";
-    public static final String LAST_WALK_TIME_KEY = "lastWalkTime";
-
-    public static final String CALLER_ID = "Home";
-
     private TextView mStepsView;
     private TextView mMilesView;
 
@@ -77,9 +66,9 @@ public class HomeScreenActivity extends AppCompatActivity {
 
         // Get the user's height
         SharedPreferences heightSharedPref =
-                getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-        mFeet = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_FEET_KEY, 0);
-        mInches = heightSharedPref.getInt(HeightScreenActivity.HEIGHT_INCHES_KEY, 0);
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
+        mFeet = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
+        mInches = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, 0);
 
         // Register the start walk button
         findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
@@ -90,8 +79,7 @@ public class HomeScreenActivity extends AppCompatActivity {
                     Log.w(TAG, "Fitness runner to be canceled");
                     mFitnessRunner.cancel(false);
                 }
-                Intent walk = new Intent(HomeScreenActivity.this,WalkActivity.class);
-                startActivity(walk);
+                startWalkActivity();
             }
         });
 
@@ -103,9 +91,7 @@ public class HomeScreenActivity extends AppCompatActivity {
                 if (!mFitnessRunner.isCancelled()) {
                     mFitnessRunner.cancel(false);
                 }
-                Intent route = new Intent(HomeScreenActivity.this,RoutesActivity.class);
-                route.putExtra(EnterWalkInformationActivity.CALLER_ID_KEY, HomeScreenActivity.CALLER_ID);
-                startActivity(route);
+                startRoutesActivity();
             }
         });
 
@@ -115,16 +101,16 @@ public class HomeScreenActivity extends AppCompatActivity {
         TextView lastWalkTime = findViewById(R.id.lastWalkTime);
 
         // use this code to reset the last walk's stats
-        SharedPreferences spfs = getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = spfs.edit();
         editor.clear();
         editor.apply();
 
         SharedPreferences sharedPreferences =
-                getSharedPreferences(HomeScreenActivity.LAST_WALK_SHARED_PREFS_NAME, MODE_PRIVATE);
-        long lastSteps = sharedPreferences.getLong(HomeScreenActivity.LAST_WALK_STEPS_KEY, 0);
-        float lastMiles = sharedPreferences.getFloat(HomeScreenActivity.LAST_WALK_MILES_KEY, 0);
-        String lastTime = sharedPreferences.getString(HomeScreenActivity.LAST_WALK_TIME_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+        long lastSteps = sharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
+        float lastMiles = sharedPreferences.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
+        String lastTime = sharedPreferences.getString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
 
         lastWalkSteps.setText(String.valueOf(lastSteps));
         lastWalkMiles.setText(String.valueOf(lastMiles));
@@ -194,8 +180,8 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     private boolean checkHasHeight(){
         SharedPreferences saveHeight =
-                getSharedPreferences(HeightScreenActivity.HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
-        int testVal = saveHeight.getInt(HeightScreenActivity.HEIGHT_FEET_KEY,-1);
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
+        int testVal = saveHeight.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY,-1);
         // If testVal == -1, then there was no height
         return testVal != - 1;
     }
@@ -241,6 +227,26 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     public static FitnessService getFitnessService() {
         return sFitnessService;
+    }
+
+    /**
+     * Starts the WalkActivity
+     */
+    private void startWalkActivity() {
+        Intent intent = new Intent(HomeScreenActivity.this, WalkActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
+                WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+        startActivity(intent);
+    }
+
+    /**
+     * Starts the RoutesActivity
+     */
+    private void startRoutesActivity() {
+        Intent intent = new Intent(HomeScreenActivity.this, RoutesActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
+                WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+        startActivity(intent);
     }
 
     /**

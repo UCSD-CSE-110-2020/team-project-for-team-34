@@ -27,10 +27,6 @@ public class HeightScreenActivity extends AppCompatActivity {
     public static String VALID_HEIGHT_TOAST_TEXT = "Height saved!";
     public static String INVALID_HEIGHT_TOAST_TEXT = "Please enter a valid height";
 
-    // SharedPreferences
-    public static final String HEIGHT_SHARED_PREF_NAME = "user_height";
-    public static final String HEIGHT_FEET_KEY = "heightFeet";
-    public static final String HEIGHT_INCHES_KEY = "heightInches";
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -64,10 +60,10 @@ public class HeightScreenActivity extends AppCompatActivity {
                             ,Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    SharedPreferences saveHeight = getSharedPreferences(HEIGHT_SHARED_PREF_NAME, MODE_PRIVATE);
+                    SharedPreferences saveHeight = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
                     SharedPreferences.Editor editor = saveHeight.edit();
-                    editor.putInt(HEIGHT_INCHES_KEY, Integer.parseInt(inches));
-                    editor.putInt(HEIGHT_FEET_KEY, Integer.parseInt(feet));
+                    editor.putInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, Integer.parseInt(inches));
+                    editor.putInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, Integer.parseInt(feet));
                     editor.apply();
                     Toast.makeText(HeightScreenActivity.this,
                             VALID_HEIGHT_TOAST_TEXT, Toast.LENGTH_SHORT).show();

@@ -199,8 +199,12 @@ public class Route implements Serializable {
         stringBuilder.append("Route steps: ").append(this.getSteps()).append("\n");
         stringBuilder.append("Route miles: ").append(this.getMiles()).append("\n");
         stringBuilder.append("Route tags: ");
-        for (String tag : this.getTags()) {
-            stringBuilder.append(tag).append(",");
+        List<String> tags = this.getTags();
+        if (tags != null) {
+            for (String tag : tags) {
+                stringBuilder.append(tag).append(",");
+            }
+
         }
         stringBuilder.append("\n");
         stringBuilder.append("Route favorite? ").append(this.isFavorite).append("\n");
