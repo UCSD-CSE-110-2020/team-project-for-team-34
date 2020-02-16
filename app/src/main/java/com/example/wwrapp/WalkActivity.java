@@ -1,10 +1,14 @@
 package com.example.wwrapp;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -13,22 +17,17 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.database.Walk;
+import com.example.wwrapp.fitness.IFitnessObserver;
+import com.example.wwrapp.fitness.IFitnessService;
+import com.example.wwrapp.fitness.IFitnessSubject;
+import com.example.wwrapp.fitness.MockFitnessService;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
 
-public class WalkActivity extends AppCompatActivity {
+public class WalkActivity extends AppCompatActivity implements IFitnessObserver {
 
     private static final String TAG = "WalkActivity";
-
-    private TextView mHoursTextView, mMinutesTextView, mSecondsTextView, mStepsView, mMilesView;
-    private Button mStopBtn;
-    private TimerTask mWalkTimer;
-
-    private long mStartSteps, mCurrSteps, mStepsTaken;
-    private double mMiles;
-
-    private SharedPreferences mStepsSharedPreference;
 
     // Numeric constants
     private static final int SLEEP_TIME = 1000;
@@ -43,7 +42,34 @@ public class WalkActivity extends AppCompatActivity {
     private int mMinutes;
     private int mSeconds;
 
+    private TextView mHoursTextView, mMinutesTextView, mSecondsTextView, mStepsView, mMilesView;
+    private Button mStopBtn;
+    private TimerTask mWalkTimer;
+
+    private long mStartSteps, mCurrSteps, mStepsTaken;
+    private double mMiles;
+
+
     private LocalDateTime mDateTime;
+    private SharedPreferences mStepsSharedPreference;
+    private IFitnessService fitnessService;
+    private boolean mIsBound;
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MockFitnessService.LocalBinder localService = (MockFitnessService.LocalBinder) service;
+            fitnessService = localService.getService();
+            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
+            fitnessSubject.registerObserver(WalkActivity.this);
+            mIsBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mIsBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +79,7 @@ public class WalkActivity extends AppCompatActivity {
 
         mDateTime = LocalDateTime.now();
         mStepsSharedPreference = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
-        mStartSteps = mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY,0);
+        mStartSteps = mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
 
         mHoursTextView = findViewById(R.id.hrs);
         mMinutesTextView = findViewById(R.id.mins);
@@ -61,15 +87,20 @@ public class WalkActivity extends AppCompatActivity {
         mStepsView = findViewById(R.id.stepCount);
         mMilesView = findViewById(R.id.mileCount);
         mStopBtn = findViewById(R.id.stopButton);
-        mWalkTimer = new TimerTask(this);
 
+        // Start the service
+        Intent intent = new Intent(WalkActivity.this, MockFitnessService.class);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        startService(intent);
+
+        mWalkTimer = new TimerTask(this);
         // Register the "stop walk" button
 
         mStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mWalkTimer.cancel(false);
-                HomeScreenActivity.getFitnessService().updateStepCount();
+                // HomeScreenActivity.getFitnessService().updateStepCount();
                 handleWalkStopped();
             }
         });
@@ -79,14 +110,26 @@ public class WalkActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "In method onPause");
         if (!mWalkTimer.isCancelled()) {
             mWalkTimer.cancel(false);
         }
+
+        // Unbind from the fitness service
+        if (mIsBound) {
+            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
+            fitnessSubject.removeObserver(WalkActivity.this);
+            unbindService(serviceConnection);
+            mIsBound = false;
+        }
+
+        Log.d(TAG, "In method onPause");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "In method onDestroy");
         if (!mWalkTimer.isCancelled()) {
             mWalkTimer.cancel(false);
         }
@@ -147,7 +190,44 @@ public class WalkActivity extends AppCompatActivity {
         finish();
     }
 
-    private static class TimerTask extends AsyncTask<String,String, String> {
+    @Override
+    public void update(long steps) {
+        Log.d(TAG, "In method update");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mCurrSteps = steps;
+                updateSteps();
+            }
+        });
+
+    }
+
+    public void updateSteps() {
+
+        mStepsTaken = mCurrSteps - mStartSteps;
+
+        Log.d(TAG, "Start steps is: " + mStartSteps);
+        Log.d(TAG, "Current steps is: " + mCurrSteps);
+        Log.d(TAG, "Steps taken is: " + mStepsTaken);
+
+        mStepsView.setText(Long.toString(mStepsTaken));
+
+        // Calculate the user's total miles
+        SharedPreferences heightSharedPref = getSharedPreferences
+                (WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
+        int feet = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
+        int inches = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, 0);
+        StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
+        mMiles = converter.getNumMiles(mStepsTaken);
+        //https://www.quora.com/How-can-I-round-a-number-to-1-decimal-digit-in-Java
+        mMiles = Math.round(mMiles * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
+        mMilesView.setText("That's " + mMiles + " miles so far");
+
+
+    }
+
+    private static class TimerTask extends AsyncTask<String, String, String> {
         private long time;
         private int feet;
         private int inches;
@@ -172,7 +252,7 @@ public class WalkActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String doInBackground(String ... params) {
+        protected String doInBackground(String... params) {
             Log.d(TAG, "doInBackground called");
             while (!isCancelled()) {
                 try {
@@ -188,10 +268,11 @@ public class WalkActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onProgressUpdate(String ... text) {
+        public void onProgressUpdate(String... text) {
             Log.d(TAG, "onProgressUpdate called");
             updateTime();
-            updateSteps();
+            // Call updateSteps in the update() via FitnessObserver
+            // updateSteps();
         }
 
         private void updateTime() {
@@ -204,22 +285,6 @@ public class WalkActivity extends AppCompatActivity {
             walkActivity.mHoursTextView.setText(walkActivity.mHours + " hr");
             walkActivity.mMinutesTextView.setText(walkActivity.mMinutes + " min");
             walkActivity.mSecondsTextView.setText(walkActivity.mSeconds + " sec");
-        }
-
-        private void updateSteps() {
-            WalkActivity walkActivity = walkActivityWeakReference.get();
-
-            HomeScreenActivity.getFitnessService().updateStepCount();
-            walkActivity.mCurrSteps = walkActivity.mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY,0);
-            walkActivity.mStepsTaken = walkActivity.mCurrSteps - walkActivity.mStartSteps;
-            walkActivity.mStepsView.setText(Long.toString(walkActivity.mStepsTaken));
-
-            // Calculate the user's total miles
-            StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
-            walkActivity.mMiles = converter.getNumMiles(walkActivity.mStepsTaken);
-            //https://www.quora.com/How-can-I-round-a-number-to-1-decimal-digit-in-Java
-            walkActivity.mMiles = Math.round(walkActivity.mMiles * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
-            walkActivity.mMilesView.setText("That's " + walkActivity.mMiles + " miles so far");
         }
     }
 
