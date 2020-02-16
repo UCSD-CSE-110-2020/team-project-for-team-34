@@ -25,9 +25,8 @@ public class NewRouteActivity extends AppCompatActivity {
 
     private static String ENTER_ROUTE_NAME_TOAST = "Please enter the route name";
 
-    public static final String CALLER_ID_KEY = "callerID";
     public static final String CALLER_ID = "NewRouteInformation";
-    public static final String ROUTE_KEY = "ROUTE_KEY";
+
 
     private String mRouteName;
     private String mStartingPoint;
@@ -161,9 +160,9 @@ public class NewRouteActivity extends AppCompatActivity {
         Intent outgoingIntent = new Intent(this, RoutesActivity.class);
         Route route = new Route(mRouteName, mStartingPoint, null, null, 0,
                 0, mTags, mRouteFavorite, mNotes);
-        outgoingIntent.putExtra(ROUTE_KEY, route);
+        outgoingIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
 
-        outgoingIntent.putExtra(NewRouteActivity.CALLER_ID_KEY, NewRouteActivity.CALLER_ID);
+        outgoingIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, NewRouteActivity.CALLER_ID);
 
         outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(outgoingIntent);

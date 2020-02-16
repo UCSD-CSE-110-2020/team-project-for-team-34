@@ -31,6 +31,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
 
     private static String ENTER_ROUTE_NAME_TOAST = "Please enter the route name";
 
+
     private String mRouteName;
     private String mStartingPoint;
     private List<String> mTags;
