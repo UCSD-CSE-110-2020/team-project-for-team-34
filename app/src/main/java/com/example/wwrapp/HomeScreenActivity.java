@@ -69,7 +69,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            MockFitnessService.LocalBinder localService = (MockFitnessService.LocalBinder)service;
+            MockFitnessService.LocalBinder localService = (MockFitnessService.LocalBinder) service;
+            Log.d(TAG, "Assigned fitness service in onServiceConnected");
             fitnessService = localService.getService();
             IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
             fitnessSubject.registerObserver(HomeScreenActivity.this);
@@ -219,8 +220,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "In method onResume");
-
-
         initSavedData();
         updateUi();
     }
@@ -245,10 +244,26 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         SharedPreferences stepsSharedPref = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
         mDailyTotalSteps = stepsSharedPref.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
 
-        // Override Mock Fitness service's steps
-        // if using mock
-        MockFitnessService mockFitnessService = (MockFitnessService) fitnessService;
-        mockFitnessService.setDailyStepCount(mDailyTotalSteps);
+//        // Override Mock Fitness service's steps
+//        // if using mock
+//        Intent receivedIntent = getIntent();
+//        String fitnessServiceVersion = receivedIntent.getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_VERSION_KEY);
+//        if (WWRConstants.MOCK_FITNESS_SERVICE_VERSION.equals(fitnessServiceVersion)) {
+//            MockFitnessService mockFitnessService = (MockFitnessService) fitnessService;
+//
+//            while (mockFitnessService != null) {
+//                try {
+//                    Log.d(TAG, "in while loop");
+//                    mockFitnessService = (MockFitnessService) fitnessService;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            mockFitnessService.setDailyStepCount(mDailyTotalSteps);
+//        } else {
+//            Log.d(TAG, "Running version " + fitnessServiceVersion);
+//        }
+
 
         StepsAndMilesConverter stepsAndMilesConverter = new StepsAndMilesConverter(mFeet, mInches);
         mDailyTotalMiles = stepsAndMilesConverter.getNumMiles(mDailyTotalSteps);
@@ -317,7 +332,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         mFeet = feet;
         mInches = inches;
     }
-
 
 
     public static void setEnableFitnessRunner(boolean enableFitnessRunner) {
