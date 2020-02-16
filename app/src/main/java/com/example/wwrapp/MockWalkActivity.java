@@ -150,6 +150,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         float currLastMiles = lastMiles + ((float)mMiles);
         spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
         spfsEditor.apply();
+        mSteps = 0;
     }
 
     @Override
