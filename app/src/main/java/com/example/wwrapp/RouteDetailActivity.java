@@ -34,6 +34,8 @@ public class RouteDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_route_detail);
 
         // Register the "X"/close screen button
+        Log.d(TAG, "Generate Buttons");
+
         findViewById(R.id.close_route_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,6 +54,8 @@ public class RouteDetailActivity extends AppCompatActivity {
             }
         });
 
+
+        Log.d(TAG, "Load route");
         Route route = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
         TextView routeNameText = findViewById(R.id.route_detail_name);
@@ -87,22 +91,27 @@ public class RouteDetailActivity extends AppCompatActivity {
                 TextView tagText;
                 switch (i) {
                     case 1:
+                        Log.d(TAG, "Add Tag");
                         tagText = findViewById(R.id.tag1);
                         tagText.setText(tag);
                         break;
                     case 2:
+                        Log.d(TAG, "Add Tag");
                         tagText = findViewById(R.id.tag2);
                         tagText.setText(tag);
                         break;
                     case 3:
+                        Log.d(TAG, "Add Tag");
                         tagText = findViewById(R.id.tag3);
                         tagText.setText(tag);
                         break;
                     case 4:
+                        Log.d(TAG, "Add Tag");
                         tagText = findViewById(R.id.tag4);
                         tagText.setText(tag);
                         break;
                     case 5:
+                        Log.d(TAG, "Add Tag");
                         tagText = findViewById(R.id.tag5);
                         tagText.setText(tag);
                         break;
@@ -114,6 +123,7 @@ public class RouteDetailActivity extends AppCompatActivity {
         }
         Context current = this;
         boolean isFavorite = route.isFavorite();
+        Log.d(TAG, "Set Favorite");
         favoriteBtn = findViewById(R.id.favoriteBtnDetail);
         if (isFavorite) {
             favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(current, R.drawable.ic_star_on));
