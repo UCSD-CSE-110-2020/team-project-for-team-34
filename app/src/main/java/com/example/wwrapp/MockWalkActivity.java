@@ -158,6 +158,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
             @Override
             public void run() {
                 mSteps = steps;
+                saveData();
                 updateViews();
             }
         });
