@@ -190,6 +190,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             unbindService(serviceConnection);
             mIsBound = false;
         }
+        saveData();
         Log.d(TAG, "In method onPause");
     }
 

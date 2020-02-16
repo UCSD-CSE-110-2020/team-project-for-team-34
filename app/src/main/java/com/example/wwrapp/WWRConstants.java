@@ -49,5 +49,7 @@ public final class WWRConstants {
     public static final String SHARED_PREFERENCES_LAST_WALK_MILES_KEY = "com.example.wwrapp.SHARED_PREFERENCES_LAST_WALK_MILES_NAME";
     public static final String SHARED_PREFERENCES_LAST_WALK_DATE_KEY = "com.example.wwrapp.SHARED_PREFERENCES_LAST_WALK_DATE_NAME";
 
-
+    // Mock Walk was called
+    public static final boolean MOCK_VERSION = true;
+    public static final boolean PRODUCTION_VERSION = false;
 }

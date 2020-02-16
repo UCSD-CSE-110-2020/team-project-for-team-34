@@ -122,7 +122,6 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
             unbindService(serviceConnection);
             mIsBound = false;
         }
-
         Log.d(TAG, "In method onPause");
     }
 
