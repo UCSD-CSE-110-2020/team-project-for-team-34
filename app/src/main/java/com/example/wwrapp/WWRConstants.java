@@ -54,6 +54,11 @@ public final class WWRConstants {
 
 
     // Mock Walk was called
-    public static final boolean MOCK_VERSION = true;
+    public static final String EXTRA_FITNESS_SERVICE_VERSION_KEY = "com.example.wwrapp.EXTRA_FITNESS_SERVICE_VERSION_KEY";
+    public static String GOOGLE_FIT_VERSION = "com.example.wwrapp.GOOGLE_FIT_VERSION";
+    public static String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
+    public static String FITNESS_SERVICE_VERSION = GOOGLE_FIT_VERSION;
+
+
     public static final boolean PRODUCTION_VERSION = false;
 }

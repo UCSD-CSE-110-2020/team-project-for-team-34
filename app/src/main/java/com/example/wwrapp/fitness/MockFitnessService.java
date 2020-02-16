@@ -77,6 +77,10 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
 //                        Log.d(TAG, "Waiting ...");
 //                        Log.d(TAG, "Step count before update: " + MockFitnessService.this.sDailyStepCount);
                         wait(TIMEOUT);
+                        SharedPreferences sharedPreferencesRead =
+                                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
+                        long totalDailySteps = sharedPreferencesRead.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
+                        MockFitnessService.this.setDailyStepCount(totalDailySteps);
                         MockFitnessService.this.updateStepCount();
                         // Save the daily steps
                         Context context = MockFitnessApplication.getAppContext();
