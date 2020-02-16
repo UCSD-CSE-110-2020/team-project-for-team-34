@@ -77,7 +77,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
                 break;
             case NewRouteActivity.CALLER_ID:
                 Intent incomingNewIntent = getIntent();
-                Route newRoute = (Route) (incomingNewIntent.getSerializableExtra(NewRouteActivity.ROUTE_KEY));
+                Route newRoute = (Route) (incomingNewIntent.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
                 if (newRoute.getDate() == null) {
                     Log.e(TAG, "LocalDateTime is null");

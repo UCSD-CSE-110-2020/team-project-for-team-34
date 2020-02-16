@@ -21,6 +21,9 @@ public class WalkActivity extends AppCompatActivity {
 
     private static final String TAG = "WalkActivity";
 
+    // adding a boolean for testing
+    public static boolean ignoreTimer = false;
+
     private TextView mHoursTextView, mMinutesTextView, mSecondsTextView, mStepsView, mMilesView;
     private Button mStopBtn;
     private TimerTask mWalkTimer;
@@ -49,6 +52,12 @@ public class WalkActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
+
+        if(ignoreTimer){
+            handleWalkStopped();
+        }
+
+
         Log.d(TAG, "onCreate called");
 
         mDateTime = LocalDateTime.now();
