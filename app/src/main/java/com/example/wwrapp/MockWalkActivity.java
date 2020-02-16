@@ -90,27 +90,9 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         mStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG,"Stop button pressed");
                 //Stop Timer
                 mWalkTimer.cancel(false);
-                long oldSteps = mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY,0);
-                long currStpes = oldSteps + mSteps;
-                SharedPreferences.Editor editor = mStepsSharedPreference.edit();
-                editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, currStpes);
-                editor.apply();
-                SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-                SharedPreferences.Editor spfsEditor = spfs.edit();
-                long lastSteps = spfs.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
-                long currLastSteps = lastSteps + mSteps;
-                spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, currLastSteps);
-                float lastMiles = spfs.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
-                float currLastMiles = lastMiles + ((float)mMiles);
-                spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
-                if(mMockTime == -1) {
-                    spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_KEY, NO_MOCK_TIME);
-                } else {
-                    spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_KEY, mMockTime);
-                }
-                spfsEditor.apply();
                 saveData();
                 launchHomeScreenActivity();
                 finish();
@@ -119,6 +101,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         mSetMsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "set MS time button pressed");
                 mMockTime = Long.parseLong(mTimeField.getText().toString());
                 if( mMockTime < 0 ) {
                     Toast.makeText(MockWalkActivity.this,
@@ -132,6 +115,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         mAddStepsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "Add 500 Steps button clicked");
                 mSteps += 500;
                 saveData();
                 updateViews();
@@ -143,6 +127,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "onPause called");
         if (!mWalkTimer.isCancelled()) {
             mWalkTimer.cancel(false);
         }
@@ -151,6 +136,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onPause called");
         if (!mWalkTimer.isCancelled()) {
             mWalkTimer.cancel(false);
         }
@@ -160,6 +146,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
      * Launches the activity to enter walk information
      */
     public void launchHomeScreenActivity() {
+        Log.d(TAG,"launchHomeScreenActivity called");
         // Pass the Walk data onto the next Activity
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
         Walk walk = new Walk(mSteps, mMiles, mDateTime, duration);
@@ -175,6 +162,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
     }
 
     public void saveData() {
+        Log.d(TAG,"savedData called");
         //Update total steps
         long oldSteps = mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY,0);
         long currStpes = oldSteps + mSteps;
@@ -191,13 +179,20 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         float lastMiles = spfs.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
         float currLastMiles = lastMiles + ((float)mMiles);
         spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
-        spfsEditor.apply();
         mTotalSteps += mSteps;
         mSteps = 0;
+        if(mMockTime == -1) {
+            spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_KEY, NO_MOCK_TIME);
+        } else {
+            spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_KEY, mMockTime);
+        }
+        spfsEditor.apply();
+        Log.d(TAG,"Data Saved to Shared Preferences");
     }
 
     @Override
     public void update(long steps) {
+        Log.d(TAG, "IFintess Implimentation: update called");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -209,6 +204,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
     }
 
     private void updateViews() {
+        Log.d(TAG, "updateViews called");
         mStepsView.setText(Long.toString(mTotalSteps));
         Log.d(TAG, "Feet: " + feet);
         Log.d(TAG, "Inches: " + inches);
@@ -233,7 +229,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
 
         @Override
         public void onPreExecute() {
-            Log.d(TAG, "onPreExecute called");
+            Log.d(TAG, "TimerTask: onPreExecute called");
             MockWalkActivity mockWalkActivity = mockWalkActivityWeakReference.get();
             SharedPreferences heightSharedPref =
                     mockWalkActivity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
@@ -245,7 +241,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
 
         @Override
         protected String doInBackground(String ... params) {
-            Log.d(TAG, "doInBackground called");
+            Log.d(TAG, "TimerTask: doInBackground called");
             while (!isCancelled()) {
                 try {
                     Thread.sleep(SLEEP_TIME);
@@ -261,14 +257,14 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
 
         @Override
         public void onProgressUpdate(String ... text) {
-            Log.d(TAG, "onProgressUpdate called");
+            Log.d(TAG, "TimerTask: onProgressUpdate called");
             updateTime();
             // implemented from IFitnessObserver
             // updateSteps();
         }
 
         private void updateTime() {
-            Log.d(TAG, "updateTime called");
+            Log.d(TAG, "TimerTask: updateTime called");
             MockWalkActivity mockWalkActivity = mockWalkActivityWeakReference.get();
             mockWalkActivity.mHours = (int) (time / NUM_SECONDS_PER_HOUR);
             mockWalkActivity.mMinutes = (int) ((time / NUM_SECONDS_PER_MINUTE) % NUM_SECONDS_PER_MINUTE);
