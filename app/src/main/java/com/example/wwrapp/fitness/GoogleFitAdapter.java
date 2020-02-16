@@ -21,7 +21,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 //import com.google.android.material;
 
-public class GoogleFitAdapter implements FitnessService {
+public class GoogleFitAdapter implements IFitnessService {
     private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
     private final String TAG = "GoogleFitAdapter";
     private GoogleSignInAccount account;

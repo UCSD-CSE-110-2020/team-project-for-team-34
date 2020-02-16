@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wwrapp.database.Route;
 import com.example.wwrapp.database.RouteViewModel;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class RoutesActivity extends AppCompatActivity implements RouteListAdapter.OnRouteListener {
@@ -69,7 +70,11 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, route.getSteps());
                 editor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, (float) route.getMiles());
-                editor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, route.getDuration());
+
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN);
+                String formattedDate = route.getDate().format(dateTimeFormatter);
+
+                editor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, formattedDate);
                 editor.apply();
                 mRouteViewModel.insert(route);
                 break;
