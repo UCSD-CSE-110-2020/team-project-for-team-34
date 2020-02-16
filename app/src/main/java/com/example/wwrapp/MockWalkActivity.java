@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.wwrapp.database.Walk;
 import com.example.wwrapp.fitness.IFitnessObserver;
 
+import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
 
 public class MockWalkActivity extends AppCompatActivity implements IFitnessObserver {
@@ -75,7 +76,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         mMilesView = findViewById(R.id.mock_mileCount);
         mStopBtn = findViewById(R.id.mock_stopButton);
         mAddStepsBtn = findViewById(R.id.mock_addStepsButton);
-        mWalkTimer = new TimerTask();
+        mWalkTimer = new TimerTask(this);
         mStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -178,14 +179,23 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         mMilesView.setText("That's " + mMiles + " miles so far");
     }
 
-    private class TimerTask extends AsyncTask<String,String, String> {
+    private static class TimerTask extends AsyncTask<String,String, String> {
         private long time;
+        private int feet;
+        private int inches;
+
+        private WeakReference<MockWalkActivity> mockWalkActivityWeakReference;
+
+        public TimerTask(MockWalkActivity context) {
+            mockWalkActivityWeakReference = new WeakReference<>(context);
+        }
 
         @Override
         public void onPreExecute() {
             Log.d(TAG, "onPreExecute called");
+            MockWalkActivity mockWalkActivity = mockWalkActivityWeakReference.get();
             SharedPreferences heightSharedPref =
-                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
+                    mockWalkActivity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
             feet = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
             inches = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, 0);
             Log.d(TAG, "Feet: " + feet);
@@ -218,13 +228,14 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
 
         private void updateTime() {
             Log.d(TAG, "updateTime called");
-            mHours = (int) (time / NUM_SECONDS_PER_HOUR);
-            mMinutes = (int) ((time / NUM_SECONDS_PER_MINUTE) % NUM_SECONDS_PER_MINUTE);
-            mSeconds = (int) (time % NUM_SECONDS_PER_MINUTE);
+            MockWalkActivity mockWalkActivity = mockWalkActivityWeakReference.get();
+            mockWalkActivity.mHours = (int) (time / NUM_SECONDS_PER_HOUR);
+            mockWalkActivity.mMinutes = (int) ((time / NUM_SECONDS_PER_MINUTE) % NUM_SECONDS_PER_MINUTE);
+            mockWalkActivity.mSeconds = (int) (time % NUM_SECONDS_PER_MINUTE);
             Log.d(TAG, "time is " + time);
-            mHoursTextView.setText(mHours + " hr");
-            mMinutesTextView.setText(mMinutes + " min");
-            mSecondsTextView.setText(mSeconds + " sec");
+            mockWalkActivity.mHoursTextView.setText(mockWalkActivity.mHours + " hr");
+            mockWalkActivity.mMinutesTextView.setText(mockWalkActivity.mMinutes + " min");
+            mockWalkActivity.mSecondsTextView.setText(mockWalkActivity.mSeconds + " sec");
         }
     }
 }
