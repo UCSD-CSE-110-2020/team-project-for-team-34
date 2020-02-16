@@ -81,25 +81,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
             public void onClick(View v) {
                 //Stop Timer
                 mWalkTimer.cancel(false);
-
-                //Update total steps
-                long oldSteps = mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY,0);
-                long currStpes = oldSteps + mSteps;
-                SharedPreferences.Editor editor = mStepsSharedPreference.edit();
-                editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, currStpes);
-                editor.apply();
-
-                //Update most recent walk
-                SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-                SharedPreferences.Editor spfsEditor = spfs.edit();
-                long lastSteps = spfs.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
-                long currLastSteps = lastSteps + mSteps;
-                spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, currLastSteps);
-                float lastMiles = spfs.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
-                float currLastMiles = lastMiles + ((float)mMiles);
-                spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
-                spfsEditor.apply();
-
+                saveData();
                 launchHomeScreenActivity();
                 finish();
             }
@@ -109,6 +91,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
             @Override
             public void onClick(View v) {
                 mSteps += 500;
+                saveData();
                 updateViews();
             }
         });
@@ -149,12 +132,34 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         finish();
     }
 
+    public void saveData() {
+        //Update total steps
+        long oldSteps = mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY,0);
+        long currStpes = oldSteps + mSteps;
+        SharedPreferences.Editor editor = mStepsSharedPreference.edit();
+        editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, currStpes);
+        editor.apply();
+
+        //Update most recent walk
+        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor spfsEditor = spfs.edit();
+        long lastSteps = spfs.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
+        long currLastSteps = lastSteps + mSteps;
+        spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, currLastSteps);
+        float lastMiles = spfs.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
+        float currLastMiles = lastMiles + ((float)mMiles);
+        spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
+        spfsEditor.apply();
+        mSteps = 0;
+    }
+
     @Override
     public void update(long steps) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mSteps = steps;
+                saveData();
                 updateViews();
             }
         });
