@@ -2,10 +2,10 @@ package com.example.wwrapp.fitness;
 
 import android.util.Log;
 
+import com.example.wwrapp.HomeScreenActivity;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.example.wwrapp.HomeScreenActivity;
 
 public class FitnessServiceFactory {
 
@@ -17,12 +17,12 @@ public class FitnessServiceFactory {
         blueprints.put(key, bluePrint);
     }
 
-    public static FitnessService create(String key, HomeScreenActivity homeScreenActivity) {
-        Log.i(TAG, String.format("creating FitnessService with key %s", key));
+    public static IFitnessService create(String key, HomeScreenActivity homeScreenActivity) {
+        Log.i(TAG, String.format("creating IFitnessService with key %s", key));
         return blueprints.get(key).create(homeScreenActivity);
     }
 
     public interface BluePrint {
-        FitnessService create(HomeScreenActivity homeScreenActivity);
+        IFitnessService create(HomeScreenActivity homeScreenActivity);
     }
 }

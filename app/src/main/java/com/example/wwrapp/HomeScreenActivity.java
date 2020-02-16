@@ -1,10 +1,14 @@
 package com.example.wwrapp;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -12,16 +16,18 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.example.wwrapp.fitness.FitnessService;
-import com.example.wwrapp.fitness.FitnessServiceFactory;
-import com.example.wwrapp.fitness.GoogleFitAdapter;
+import com.example.wwrapp.fitness.IFitnessObserver;
+import com.example.wwrapp.fitness.IFitnessService;
+import com.example.wwrapp.fitness.IFitnessSubject;
+import com.example.wwrapp.fitness.MockFitnessService;
 
 
 /**
  * Home screen for the app
  */
-public class HomeScreenActivity extends AppCompatActivity {
+public class HomeScreenActivity extends AppCompatActivity implements IFitnessObserver {
     private static final String TAG = "HomeScreenActivity";
+
     private static final String fitnessServiceKey = "GOOGLE_FIT";
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
 
@@ -31,7 +37,9 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     public static final String NO_LAST_WALK_TIME_TEXT = "No last walk time available";
 
-    private static FitnessService sFitnessService;
+    private static IFitnessService sFitnessService;
+    private IFitnessService fitnessService;
+    private boolean mIsBound;
 
     // Numeric constants
     private static final int SLEEP_TIME = 1000;
@@ -46,12 +54,11 @@ public class HomeScreenActivity extends AppCompatActivity {
     // User's height
     private int mFeet, mInches;
 
-    private FitnessAsyncTask mFitnessRunner;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
+        Log.d(TAG, "In method onCreate");
 
         mStepsView = findViewById(R.id.homeSteps);
         mMilesView = findViewById(R.id.homeMiles);
@@ -60,11 +67,12 @@ public class HomeScreenActivity extends AppCompatActivity {
 
 
         // Check for a saved height
-        if(!sIgnoreHeight){
-        if(!checkHasHeight()){
-            Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
-            startActivity(askHeight);
-        }}
+        if (!sIgnoreHeight) {
+            if (!checkHasHeight()) {
+                Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
+                startActivity(askHeight);
+            }
+        }
 
         // Get the user's height
         SharedPreferences heightSharedPref =
@@ -77,10 +85,6 @@ public class HomeScreenActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Cancel the updating of the home screen before starting the Walk
-                if (!mFitnessRunner.isCancelled()) {
-                    Log.w(TAG, "Fitness runner to be canceled");
-                    mFitnessRunner.cancel(false);
-                }
                 startWalkActivity();
             }
         });
@@ -90,9 +94,6 @@ public class HomeScreenActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Cancel the updating of the home screen before starting the Routes screen
-                if (!mFitnessRunner.isCancelled()) {
-                    mFitnessRunner.cancel(false);
-                }
                 startRoutesActivity();
             }
         });
@@ -101,10 +102,6 @@ public class HomeScreenActivity extends AppCompatActivity {
         findViewById(R.id.mockButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Cancel the updating of the home screen before starting the Routes screen
-                if (!mFitnessRunner.isCancelled()) {
-                    mFitnessRunner.cancel(false);
-                }
                 Intent route = new Intent(HomeScreenActivity.this, MockWalkActivity.class);
                 route.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
                 startActivity(route);
@@ -117,10 +114,10 @@ public class HomeScreenActivity extends AppCompatActivity {
         TextView lastWalkTime = findViewById(R.id.lastWalkTime);
 
         // use this code to reset the last walk's stats
-        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor editor = spfs.edit();
-        editor.clear();
-        editor.apply();
+//        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+//        SharedPreferences.Editor editor = spfs.edit();
+//        editor.clear();
+//        editor.apply();
 
         SharedPreferences sharedPreferences =
                 getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
@@ -132,23 +129,43 @@ public class HomeScreenActivity extends AppCompatActivity {
         lastWalkMiles.setText(String.valueOf(lastMiles));
         lastWalkTime.setText(lastTime);
 
-        // Initialize the FitnessService implementation
-        FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
-            @Override
-            public FitnessService create(HomeScreenActivity homeScreenActivity) {
-                return new GoogleFitAdapter(homeScreenActivity);
-            }
-        });
-        sFitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
-        sFitnessService.setup();
-        sFitnessService.updateStepCount();
-
-        // Start the Home screen steps/miles updating in the background
-        mFitnessRunner = new FitnessAsyncTask();
-        if (sEnableFitnessRunner) {
-            mFitnessRunner.execute();
-        }
+//        // Initialize the IFitnessService implementation
+//        FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
+//            @Override
+//            public IFitnessService create(HomeScreenActivity homeScreenActivity) {
+//                return new GoogleFitAdapter(homeScreenActivity);
+//            }
+//        });
+//        sFitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
+//        sFitnessService.setup();
+//        sFitnessService.updateStepCount();
+//
+//        // Start the Home screen steps/miles updating in the background
+//        mFitnessRunner = new FitnessAsyncTask();
+//        if (sEnableFitnessRunner) {
+//            mFitnessRunner.execute();
+//        }
+        Log.d(TAG, "Right before creating Mock Fitness object");
+        // fitnessService = MockFitnessApplication.getFitnessService();
     }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MockFitnessService.LocalService localService = (MockFitnessService.LocalService )service;
+            fitnessService = localService.getService();
+            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
+            fitnessSubject.registerObserver(HomeScreenActivity.this);
+            mIsBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mIsBound = false;
+        }
+    };
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -170,22 +187,30 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        Intent intent = new Intent(HomeScreenActivity.this, MockFitnessService.class);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        startService(intent);
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "In method onPause");
-        if (!mFitnessRunner.isCancelled()) {
-            mFitnessRunner.cancel(false);
+        // Unbind from the fitness service
+        if (mIsBound) {
+            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
+            fitnessSubject.removeObserver(HomeScreenActivity.this);
+            unbindService(serviceConnection);
+            mIsBound = false;
         }
+        Log.d(TAG, "In method onPause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "In method onStop");
-
-        if (!mFitnessRunner.isCancelled()) {
-            mFitnessRunner.cancel(false);
-        }
     }
 
     @Override
@@ -193,9 +218,13 @@ public class HomeScreenActivity extends AppCompatActivity {
         super.onDestroy();
         Log.d(TAG, "In method onDestroy");
 
-        if (!mFitnessRunner.isCancelled()) {
-            mFitnessRunner.cancel(false);
+        if (mIsBound) {
+            unbindService(serviceConnection);
+            mIsBound = false;
         }
+
+        Intent intent = new Intent(HomeScreenActivity.this, MockFitnessService.class);
+        stopService(intent);
     }
 
     @Override
@@ -216,27 +245,28 @@ public class HomeScreenActivity extends AppCompatActivity {
     }
 
 
-    private boolean checkHasHeight(){
+    private boolean checkHasHeight() {
         SharedPreferences saveHeight =
                 getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
-        int testVal = saveHeight.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY,-1);
+        int testVal = saveHeight.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, -1);
         // If testVal == -1, then there was no height
-        return testVal != - 1;
+        return testVal != -1;
     }
 
     public void displayStepsAndMiles() {
         this.mStepsView.setText(String.valueOf(this.mTotalSteps));
-        this.mMilesView.setText(String.valueOf(Math.round(this.mTotalMiles * TENTHS_PLACE_ROUNDING_FACTOR)/ TENTHS_PLACE_ROUNDING_FACTOR));
+        this.mMilesView.setText(String.valueOf(Math.round(this.mTotalMiles * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR));
     }
 
 
     /**
      * Sets the miles based on the given stepCount and height
+     *
      * @param stepCount the number of steps in the day
-     * @param feet the user's height in feet
-     * @param inches the user's height in inches
+     * @param feet      the user's height in feet
+     * @param inches    the user's height in inches
      */
-    public void setMiles(long stepCount, int feet, int inches){
+    public void setMiles(long stepCount, int feet, int inches) {
         // Calculate the user's total miles
         StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
         this.mTotalMiles = converter.getNumMiles(stepCount);
@@ -244,6 +274,7 @@ public class HomeScreenActivity extends AppCompatActivity {
 
     /**
      * Updates the total step count for the day
+     *
      * @param stepCount the new step count
      */
     public void setStepCount(long stepCount) {
@@ -267,7 +298,7 @@ public class HomeScreenActivity extends AppCompatActivity {
         HomeScreenActivity.sIgnoreHeight = ignoreHeight;
     }
 
-    public static FitnessService getFitnessService() {
+    public static IFitnessService getFitnessService() {
         return sFitnessService;
     }
 
@@ -291,6 +322,21 @@ public class HomeScreenActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    @Override
+    public void update(long steps) {
+        Log.d(TAG, "In method update");
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mTotalSteps = steps;
+                // Update the miles based on the newly set step count
+                setMiles(mTotalSteps, mFeet, mInches);
+                // Update the Home screen
+                displayStepsAndMiles();
+            }
+        });
+    }
+
     /**
      * Updates the steps/miles display on the Home screen
      */
@@ -299,7 +345,7 @@ public class HomeScreenActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... params) {
-            while(!isCancelled()) {
+            while (!isCancelled()) {
                 try {
                     Thread.sleep(SLEEP_TIME);
                 } catch (InterruptedException e) {
@@ -315,7 +361,7 @@ public class HomeScreenActivity extends AppCompatActivity {
 
         @Override
         protected void onProgressUpdate(String... update) {
-            // Ask the FitnessService to update the step count, if applicable
+            // Ask the IFitnessService to update the step count, if applicable
             sFitnessService.updateStepCount();
             // Update the miles based on the newly set step count
             setMiles(mTotalSteps, mFeet, mInches);

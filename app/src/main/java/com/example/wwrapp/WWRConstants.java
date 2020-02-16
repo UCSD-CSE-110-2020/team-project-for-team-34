@@ -1,5 +1,8 @@
 package com.example.wwrapp;
 
+/**
+ * Contains constants for use throughout the project
+ */
 public final class WWRConstants {
 
     /**
