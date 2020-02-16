@@ -24,7 +24,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
     private Button mStopBtn, mAddStepsBtn;
     private TimerTask mWalkTimer;
 
-    private long mSteps = 0;
+    private long mSteps = 0, mTotalSteps = 0;
     private double mMiles;
 
     private SharedPreferences mStepsSharedPreference;
@@ -150,6 +150,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         float currLastMiles = lastMiles + ((float)mMiles);
         spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
         spfsEditor.apply();
+        mTotalSteps += mSteps;
         mSteps = 0;
     }
 
@@ -166,12 +167,12 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
     }
 
     private void updateViews() {
-        mStepsView.setText(Long.toString(mSteps));
+        mStepsView.setText(Long.toString(mTotalSteps));
         Log.d(TAG, "Feet: " + feet);
         Log.d(TAG, "Inches: " + inches);
         // Calculate the user's total miles
         StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
-        mMiles = converter.getNumMiles(mSteps);
+        mMiles = converter.getNumMiles(mTotalSteps);
         //https://www.quora.com/How-can-I-round-a-number-to-1-decimal-digit-in-Java
         mMiles = Math.round(mMiles * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
         mMilesView.setText("That's " + mMiles + " miles so far");
