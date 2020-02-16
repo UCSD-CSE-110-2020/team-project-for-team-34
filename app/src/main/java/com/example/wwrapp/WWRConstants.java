@@ -24,10 +24,13 @@ public final class WWRConstants {
             "com.example.wwrapp.EXTRA_ENTER_WALK_INFORMATION";
     public static final String EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID =
             "com.example.wwrapp.EXTRA_ROUTE_DETAIL_ACTIVITY";
+    public static final String EXTRA_ROUTE_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_ROUTE_ACTIVITY";
 
     // Keys
     public static final String EXTRA_WALK_OBJECT_KEY = "com.example.wwrapp.EXTRA_WALK_KEY";
     public static final String EXTRA_ROUTE_OBJECT_KEY = "com.example.wwrapp.EXTRA_ROUTE_OBJECT_KEY";
+    public static final String EXTRA_MANUALLY_CREATED_ROUTE_KEY =
+            "com.example.wwrapp.EXTRA_MANUALLY_CREATED_ROUTE_KEY";
     public static final String EXTRA_DAILY_STEPS_KEY = "com.example.wwrapp.EXTRA_DAILY_STEPS_KEY";
 
     // SharedPreferences constants

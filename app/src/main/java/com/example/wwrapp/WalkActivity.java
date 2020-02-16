@@ -30,7 +30,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     private static final String TAG = "WalkActivity";
 
     // adding a boolean for testing
-    public static boolean ignoreTimer = false;
+    private static boolean ignoreTimer = false;
 
     private TextView mHoursTextView, mMinutesTextView, mSecondsTextView, mStepsView, mMilesView;
     private Button mStopBtn;
@@ -155,6 +155,8 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
         Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);
         intent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
+        intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_WALK_ACTIVITY_CALLER_ID);
+
 
 //        Log.d(TAG, "mHours is" + mHours);
 //        Log.d(TAG, "mMinutes is " + mMinutes);
@@ -177,7 +179,6 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);
         Log.d(TAG, "Walk object returned to RouteDetail is\n" + walk.toString());
         returnIntent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
-
         // Pass this Intent back
         setResult(Activity.RESULT_OK, returnIntent);
     }
@@ -298,6 +299,10 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
             walkActivity.mMinutesTextView.setText(walkActivity.mMinutes + " min");
             walkActivity.mSecondsTextView.setText(walkActivity.mSeconds + " sec");
         }
+    }
+
+    public static void setIgnoreTimer(boolean ignoreTimer){
+        WalkActivity.ignoreTimer = ignoreTimer;
     }
 
 
