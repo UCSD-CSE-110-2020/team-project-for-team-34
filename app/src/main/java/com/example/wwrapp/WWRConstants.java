@@ -53,4 +53,7 @@ public final class WWRConstants {
     public static final String DATE_FORMATTER_PATTERN = "MM-dd-yyyy: HH:mm";
 
 
+    // Mock Walk was called
+    public static final boolean MOCK_VERSION = true;
+    public static final boolean PRODUCTION_VERSION = false;
 }
