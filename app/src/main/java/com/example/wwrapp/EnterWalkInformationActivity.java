@@ -144,8 +144,13 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Go to home screen
-                Toast.makeText(getApplicationContext(), "Save data and go to home screen", Toast.LENGTH_LONG).show();
-                launchHomeActivity();
+                Intent intent = getIntent();
+                String callerID = intent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
+                if(callerID.equals(WWRConstants.EXTRA_ROUTE_ACTIVITY_CALLER_ID)){
+                    finish();
+                } else {
+                    launchHomeActivity();
+                }
             }
         });
 
@@ -173,29 +178,48 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
      */
     public void launchRoutesActivity() {
         // Get the data from the Walk
-        Intent incomingIntent = getIntent();
-        Walk walk = (Walk) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
-        long walkSteps = walk.getSteps();
-        double walkMiles = walk.getMiles();
-        LocalDateTime walkDate = walk.getDate();
-        String duration = walk.getDuration();
-        Log.d(TAG, "Steps are: " + walkSteps);
-        Log.d(TAG, "Miles are: " + walkMiles);
+        Intent intent = getIntent();
+        String callerID = intent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
+        if(callerID.equals(WWRConstants.EXTRA_ROUTE_ACTIVITY_CALLER_ID)){
+            Intent outgoingIntent = new Intent(this, RoutesActivity.class);
+            Route route = new Route(mRouteName, mStartingPoint, null, null, 0,
+                    0, mTags, mRouteFavorite, mNotes);
+            outgoingIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
 
-        // Bundle up data to pass to the Routes activity
-        Intent outgoingIntent = new Intent(this, RoutesActivity.class);
-        Route route = new Route(mRouteName, mStartingPoint, walkDate, duration, walkSteps,
-                walkMiles, mTags, mRouteFavorite, mNotes);
-        outgoingIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+            outgoingIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
+            outgoingIntent.putExtra(WWRConstants.EXTRA_MANUALLY_CREATED_ROUTE_KEY, true);
 
-        // Let the RoutesActivity know who launched it
-        outgoingIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
-                WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
 
-        // Clear the activity stack so only the Home screen will be left
-        outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(outgoingIntent);
-        finish();
+            outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(outgoingIntent);
+
+            finish();
+        } else {
+            Intent incomingIntent = getIntent();
+            Walk walk = (Walk) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
+            long walkSteps = walk.getSteps();
+            double walkMiles = walk.getMiles();
+            LocalDateTime walkDate = walk.getDate();
+            String duration = walk.getDuration();
+            Log.d(TAG, "Steps are: " + walkSteps);
+            Log.d(TAG, "Miles are: " + walkMiles);
+
+            // Bundle up data to pass to the Routes activity
+            Intent outgoingIntent = new Intent(this, RoutesActivity.class);
+            Route route = new Route(mRouteName, mStartingPoint, walkDate, duration, walkSteps,
+                    walkMiles, mTags, mRouteFavorite, mNotes);
+            outgoingIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+
+            // Let the RoutesActivity know who launched it
+            outgoingIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
+                    WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
+
+            // Clear the activity stack so only the Home screen will be left
+            outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(outgoingIntent);
+            finish();
+        }
+
     }
 
     /**

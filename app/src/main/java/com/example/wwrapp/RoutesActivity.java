@@ -63,35 +63,31 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
 
                 Log.d(TAG, route.toString());
 
-                // Save the newest walk
-                SharedPreferences sharedPreferences =
-                        getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, route.getSteps());
-                editor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, (float) route.getMiles());
-                editor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, route.getDuration());
-                editor.apply();
+                boolean manuallyCreatedRoute = incomingIntent.getBooleanExtra
+                        (WWRConstants.EXTRA_MANUALLY_CREATED_ROUTE_KEY, false);
+                if (!manuallyCreatedRoute) {
+                    // Save the newest walk
+                    SharedPreferences sharedPreferences =
+                            getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, route.getSteps());
+                    editor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, (float) route.getMiles());
+                    editor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, route.getDuration());
+                    editor.apply();
+                }
+
+
                 mRouteViewModel.insert(route);
                 break;
             case WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID:
-                break;
-            case NewRouteActivity.CALLER_ID:
-                Intent incomingNewIntent = getIntent();
-                Route newRoute = (Route) (incomingNewIntent.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
-
-                if(newRoute.getDate() == null) {
-                    Log.e(TAG, "LocalDateTime is null");
-                }
-                    Log.d(TAG, newRoute.toString());
-
-                    mRouteViewModel.insert(newRoute);
                 break;
         }
         Button addNewRoute = (Button) findViewById(R.id.addNewRouteButton);
         addNewRoute.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent toAddNewRoute = new Intent(RoutesActivity.this, NewRouteActivity.class);
+                Intent toAddNewRoute = new Intent(RoutesActivity.this, EnterWalkInformationActivity.class);
+                toAddNewRoute.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_ROUTE_ACTIVITY_CALLER_ID);
                 startActivity(toAddNewRoute);
             }
         });
