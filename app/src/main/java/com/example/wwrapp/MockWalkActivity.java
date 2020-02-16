@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -18,13 +20,16 @@ import java.time.LocalDateTime;
 public class MockWalkActivity extends AppCompatActivity {
 
     private static final String TAG = "MockWalkActivity";
+    public static String INVALID_TIME_TOAST = "Please enter a valid time";
+    public static long NO_MOCK_TIME = -1;
 
     private TextView mHoursTextView, mMinutesTextView, mSecondsTextView, mStepsView, mMilesView;
-    private Button mStopBtn, mAddStepsBtn;
+    private Button mStopBtn, mAddStepsBtn, mSetMsBtn;
     private TimerTask mWalkTimer;
+    private EditText mTimeField;
 
     private long mSteps = 0;
-    private double mMiles;
+    private double mMiles = -1;
 
     private SharedPreferences mStepsSharedPreference;
 
@@ -42,6 +47,7 @@ public class MockWalkActivity extends AppCompatActivity {
     private int mSeconds;
 
     private LocalDateTime mDateTime;
+    private long mMockTime;
 
     // Intent keys
     public static final String HOURS_KEY = "HOURS_KEY";
@@ -69,6 +75,9 @@ public class MockWalkActivity extends AppCompatActivity {
         mMilesView = findViewById(R.id.mock_mileCount);
         mStopBtn = findViewById(R.id.mock_stopButton);
         mAddStepsBtn = findViewById(R.id.mock_addStepsButton);
+        mTimeField = findViewById(R.id.mock_setTimeField);
+        mSetMsBtn = findViewById(R.id.mock_setTimeButton);
+        mTimeField = findViewById(R.id.mock_setTimeField);
         mWalkTimer = new TimerTask();
         mStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,10 +96,26 @@ public class MockWalkActivity extends AppCompatActivity {
                 float lastMiles = spfs.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
                 float currLastMiles = lastMiles + ((float)mMiles);
                 spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
+                if(mMockTime == -1) {
+                    spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_KEY, NO_MOCK_TIME);
+                } else {
+                    spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_KEY, mMockTime);
+                }
                 spfsEditor.apply();
-//              String lastTime = mockTime();
                 launchWalkInformationActivity();
                 finish();
+            }
+        });
+        mSetMsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mMockTime = Long.parseLong(mTimeField.getText().toString());
+                if( mMockTime < 0 ) {
+                    Toast.makeText(MockWalkActivity.this,
+                            INVALID_TIME_TOAST
+                            , Toast.LENGTH_LONG).show();
+                    mMockTime = -1;
+                }
             }
         });
 
