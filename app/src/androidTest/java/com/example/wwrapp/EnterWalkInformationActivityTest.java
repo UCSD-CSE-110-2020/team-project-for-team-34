@@ -43,10 +43,13 @@ public class EnterWalkInformationActivityTest {
     @BeforeClass
     public static void initialize(){
         HomeScreenActivity.setIgnoreHeight(true);
-        WalkActivity.ignoreTimer = true;
+        WalkActivity.setIgnoreTimer(true);
         HomeScreenActivity.setEnableFitnessRunner(false);
     }
 
+    // tests the enterWalkInformationActivity
+    // after starting and stopping a new walk, enter the basic information of the
+    // route, and click done, see if the route is recorded correctly
     @Test
     public void enterWalkInformationActivityTest() {
 
@@ -54,11 +57,6 @@ public class EnterWalkInformationActivityTest {
                 allOf(withId(R.id.startNewWalkButton), withText("Start new walk/run"),
                         isDisplayed()));
         appCompatButton2.perform(click());
-
-//        ViewInteraction appCompatButton3 = onView(
-//                allOf(withId(R.id.stopButton), withText("Stop"),
-//                        isDisplayed()));
-//        appCompatButton3.perform(click());
 
         ViewInteraction appCompatEditText = onView(
                 allOf(withId(R.id.route_name_edit_text),
