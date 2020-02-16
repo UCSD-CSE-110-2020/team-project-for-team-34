@@ -48,6 +48,8 @@ public final class WWRConstants {
     public static final String SHARED_PREFERENCES_LAST_WALK_STEPS_KEY = "com.example.wwrapp.SHARED_PREFERENCES_LAST_WALK_STEPS_NAME";
     public static final String SHARED_PREFERENCES_LAST_WALK_MILES_KEY = "com.example.wwrapp.SHARED_PREFERENCES_LAST_WALK_MILES_NAME";
     public static final String SHARED_PREFERENCES_LAST_WALK_DATE_KEY = "com.example.wwrapp.SHARED_PREFERENCES_LAST_WALK_DATE_NAME";
+    public static final String SHARED_PREFERENCES_SYSTEM_TIME_KEY = "com.example.wwrapp.SHARED_PREFERENCES_SYSTEM_TIME_NAME";
+
 
     // Date format
     public static final String DATE_FORMATTER_PATTERN = "MM-dd-yyyy: HH:mm";
