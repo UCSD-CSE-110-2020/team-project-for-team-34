@@ -37,7 +37,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
         initRecyclerView();
 
         mRouteViewModel = new ViewModelProvider(this).get(RouteViewModel.class);
-        if(sIsTest)
+        if (sIsTest)
             generateFakeRoute();
         mRouteViewModel.getAllRoutes().observe(this, new Observer<List<Route>>() {
             @Override
@@ -79,12 +79,12 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
                 Intent incomingNewIntent = getIntent();
                 Route newRoute = (Route) (incomingNewIntent.getSerializableExtra(NewRouteActivity.ROUTE_KEY));
 
-                if(newRoute.getDate() == null) {
+                if (newRoute.getDate() == null) {
                     Log.e(TAG, "LocalDateTime is null");
                 }
-                    Log.d(TAG, newRoute.toString());
+                Log.d(TAG, newRoute.toString());
 
-                    mRouteViewModel.insert(newRoute);
+                mRouteViewModel.insert(newRoute);
                 break;
         }
         Button addNewRoute = (Button) findViewById(R.id.addNewRouteButton);
@@ -98,19 +98,18 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
     }
 
 
-
-    private void initRecyclerView(){
+    private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
         RecyclerView recyclerView = findViewById(R.id.recycler_view_route);
-        adapter = new RouteListAdapter(this,this);
+        adapter = new RouteListAdapter(this, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
-    public void onRouteClick(int position,List<Route> routes) {
+    public void onRouteClick(int position, List<Route> routes) {
         Intent intent = new Intent(this, RouteDetailActivity.class);
-        intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY,routes.get(position));
+        intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, routes.get(position));
         startActivity(intent);
     }
 
@@ -152,8 +151,8 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
         }
     }
 
-    public void generateFakeRoute(){
-        Route testRoute = new Route("route","staring",null,"",10,10,null,true,"");
+    public void generateFakeRoute() {
+        Route testRoute = new Route("route", "staring", null, "", 10, 10, null, true, "");
         mRouteViewModel.insert(testRoute);
     }
 
