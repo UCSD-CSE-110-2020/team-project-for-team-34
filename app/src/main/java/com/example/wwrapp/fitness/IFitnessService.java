@@ -1,6 +1,9 @@
 package com.example.wwrapp.fitness;
 
-public interface FitnessService {
+/**
+ * Defines operations that a walking fitness service must provide
+ */
+public interface IFitnessService {
     int getRequestCode();
     void setup();
     void updateStepCount();

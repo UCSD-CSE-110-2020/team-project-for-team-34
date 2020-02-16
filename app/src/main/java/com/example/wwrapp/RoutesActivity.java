@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wwrapp.database.Route;
 import com.example.wwrapp.database.RouteViewModel;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class RoutesActivity extends AppCompatActivity implements RouteListAdapter.OnRouteListener {
@@ -37,7 +38,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
         initRecyclerView();
 
         mRouteViewModel = new ViewModelProvider(this).get(RouteViewModel.class);
-        if(sIsTest)
+        if (sIsTest)
             generateFakeRoute();
         mRouteViewModel.getAllRoutes().observe(this, new Observer<List<Route>>() {
             @Override
@@ -63,6 +64,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
 
                 Log.d(TAG, route.toString());
 
+
                 boolean manuallyCreatedRoute = incomingIntent.getBooleanExtra
                         (WWRConstants.EXTRA_MANUALLY_CREATED_ROUTE_KEY, false);
                 if (!manuallyCreatedRoute) {
@@ -77,6 +79,18 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
                 }
 
 
+                // Save the newest walk
+                SharedPreferences sharedPreferences =
+                        getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, route.getSteps());
+                editor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, (float) route.getMiles());
+
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN);
+                String formattedDate = route.getDate().format(dateTimeFormatter);
+
+                editor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, formattedDate);
+                editor.apply();
                 mRouteViewModel.insert(route);
                 break;
             case WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID:
@@ -94,19 +108,18 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
     }
 
 
-
-    private void initRecyclerView(){
+    private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
         RecyclerView recyclerView = findViewById(R.id.recycler_view_route);
-        adapter = new RouteListAdapter(this,this);
+        adapter = new RouteListAdapter(this, this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 
     @Override
-    public void onRouteClick(int position,List<Route> routes) {
+    public void onRouteClick(int position, List<Route> routes) {
         Intent intent = new Intent(this, RouteDetailActivity.class);
-        intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY,routes.get(position));
+        intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, routes.get(position));
         startActivity(intent);
     }
 
@@ -148,8 +161,8 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
         }
     }
 
-    public void generateFakeRoute(){
-        Route testRoute = new Route("route","staring",null,"",10,10,null,true,"");
+    public void generateFakeRoute() {
+        Route testRoute = new Route("route", "staring", null, "", 10, 10, null, true, "");
         mRouteViewModel.insert(testRoute);
     }
 
