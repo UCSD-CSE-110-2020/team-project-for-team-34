@@ -54,16 +54,10 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     private int mMinutes;
     private int mSeconds;
 
-    private TextView mHoursTextView, mMinutesTextView, mSecondsTextView, mStepsView, mMilesView;
-    private Button mStopBtn;
-    private TimerTask mWalkTimer;
 
-    private long mStartSteps, mCurrSteps, mStepsTaken;
-    private double mMiles;
 
 
     private LocalDateTime mDateTime;
-    private SharedPreferences mStepsSharedPreference;
     private IFitnessService fitnessService;
     private boolean mIsBound;
 
