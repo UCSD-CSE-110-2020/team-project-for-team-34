@@ -1,5 +1,8 @@
 package com.example.wwrapp;
 
+/**
+ * Contains constants for use throughout the project
+ */
 public final class WWRConstants {
 
     /**
@@ -25,6 +28,7 @@ public final class WWRConstants {
     // Keys
     public static final String EXTRA_WALK_OBJECT_KEY = "com.example.wwrapp.EXTRA_WALK_KEY";
     public static final String EXTRA_ROUTE_OBJECT_KEY = "com.example.wwrapp.EXTRA_ROUTE_OBJECT_KEY";
+    public static final String EXTRA_DAILY_STEPS_KEY = "com.example.wwrapp.EXTRA_DAILY_STEPS_KEY";
 
     // SharedPreferences constants
 
@@ -47,5 +51,16 @@ public final class WWRConstants {
     public static final String SHARED_PREFERENCES_SYSTEM_TIME_KEY = "com.example.wwrapp.SHARED_PREFERENCES_SYSTEM_TIME_NAME";
 
 
+    // Date format
+    public static final String DATE_FORMATTER_PATTERN = "MM-dd-yyyy: HH:mm";
 
+
+    // Mock Walk was called
+    public static final String EXTRA_FITNESS_SERVICE_VERSION_KEY = "com.example.wwrapp.EXTRA_FITNESS_SERVICE_VERSION_KEY";
+    public static String GOOGLE_FIT_VERSION = "com.example.wwrapp.GOOGLE_FIT_VERSION";
+    public static String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
+    public static String FITNESS_SERVICE_VERSION = GOOGLE_FIT_VERSION;
+
+
+    public static final boolean PRODUCTION_VERSION = false;
 }

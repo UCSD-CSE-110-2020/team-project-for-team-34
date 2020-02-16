@@ -14,10 +14,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.database.Walk;
+import com.example.wwrapp.fitness.IFitnessObserver;
 
+import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
 
-public class MockWalkActivity extends AppCompatActivity {
+public class MockWalkActivity extends AppCompatActivity implements IFitnessObserver {
 
     private static final String TAG = "MockWalkActivity";
     public static String INVALID_TIME_TOAST = "Please enter a valid time";
@@ -28,8 +30,9 @@ public class MockWalkActivity extends AppCompatActivity {
     private TimerTask mWalkTimer;
     private EditText mTimeField;
 
-    private long mSteps = 0;
-    private double mMiles = -1;
+
+    private long mSteps = 0, mTotalSteps = 0;
+    private double mMiles;
 
     private SharedPreferences mStepsSharedPreference;
 
@@ -45,6 +48,8 @@ public class MockWalkActivity extends AppCompatActivity {
     private int mHours;
     private int mMinutes;
     private int mSeconds;
+    private int feet;
+    private int inches;
 
     private LocalDateTime mDateTime;
     private long mMockTime;
@@ -67,7 +72,10 @@ public class MockWalkActivity extends AppCompatActivity {
 
         mDateTime = LocalDateTime.now();
         mStepsSharedPreference = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
-
+        SharedPreferences heightSharedPref =
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
+        feet = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
+        inches = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
         mHoursTextView = findViewById(R.id.mock_hrs);
         mMinutesTextView = findViewById(R.id.mock_mins);
         mSecondsTextView = findViewById(R.id.mock_secs);
@@ -78,10 +86,11 @@ public class MockWalkActivity extends AppCompatActivity {
         mTimeField = findViewById(R.id.mock_setTimeField);
         mSetMsBtn = findViewById(R.id.mock_setTimeButton);
         mTimeField = findViewById(R.id.mock_setTimeField);
-        mWalkTimer = new TimerTask();
+        mWalkTimer = new TimerTask(this);
         mStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //Stop Timer
                 mWalkTimer.cancel(false);
                 long oldSteps = mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY,0);
                 long currStpes = oldSteps + mSteps;
@@ -102,7 +111,8 @@ public class MockWalkActivity extends AppCompatActivity {
                     spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_KEY, mMockTime);
                 }
                 spfsEditor.apply();
-                launchWalkInformationActivity();
+                saveData();
+                launchHomeScreenActivity();
                 finish();
             }
         });
@@ -123,6 +133,8 @@ public class MockWalkActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mSteps += 500;
+                saveData();
+                updateViews();
             }
         });
         mWalkTimer.execute();
@@ -144,40 +156,87 @@ public class MockWalkActivity extends AppCompatActivity {
         }
     }
 
-//    private String mockTime() {
-//
-//    }
-
     /**
      * Launches the activity to enter walk information
      */
-    public void launchWalkInformationActivity() {
+    public void launchHomeScreenActivity() {
         // Pass the Walk data onto the next Activity
-        Intent intent = new Intent(this, EnterWalkInformationActivity.class);
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
         Walk walk = new Walk(mSteps, mMiles, mDateTime, duration);
-        intent.putExtra(WALK_KEY, walk);
-
+        Intent intent = new Intent(this, HomeScreenActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_FITNESS_SERVICE_VERSION_KEY, WWRConstants.MOCK_FITNESS_SERVICE_VERSION);
         Log.d(TAG, "mHours is" + mHours);
         Log.d(TAG, "mMinutes is " + mMinutes);
         Log.d(TAG, "mSeconds is " + mSeconds);
         Log.d(TAG, "mSteps is " + mSteps);
         Log.d(TAG, "mMiles is " + mMiles);
-
         startActivity(intent);
         finish();
     }
 
-    private class TimerTask extends AsyncTask<String,String, String> {
+    public void saveData() {
+        //Update total steps
+        long oldSteps = mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY,0);
+        long currStpes = oldSteps + mSteps;
+        SharedPreferences.Editor editor = mStepsSharedPreference.edit();
+        editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, currStpes);
+        editor.apply();
+
+        //Update most recent walk
+        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor spfsEditor = spfs.edit();
+        long lastSteps = spfs.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
+        long currLastSteps = lastSteps + mSteps;
+        spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, currLastSteps);
+        float lastMiles = spfs.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
+        float currLastMiles = lastMiles + ((float)mMiles);
+        spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
+        spfsEditor.apply();
+        mTotalSteps += mSteps;
+        mSteps = 0;
+    }
+
+    @Override
+    public void update(long steps) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mSteps = steps;
+                saveData();
+                updateViews();
+            }
+        });
+    }
+
+    private void updateViews() {
+        mStepsView.setText(Long.toString(mTotalSteps));
+        Log.d(TAG, "Feet: " + feet);
+        Log.d(TAG, "Inches: " + inches);
+        // Calculate the user's total miles
+        StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
+        mMiles = converter.getNumMiles(mTotalSteps);
+        //https://www.quora.com/How-can-I-round-a-number-to-1-decimal-digit-in-Java
+        mMiles = Math.round(mMiles * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
+        mMilesView.setText("That's " + mMiles + " miles so far");
+    }
+
+    private static class TimerTask extends AsyncTask<String,String, String> {
         private long time;
         private int feet;
         private int inches;
 
+        private WeakReference<MockWalkActivity> mockWalkActivityWeakReference;
+
+        public TimerTask(MockWalkActivity context) {
+            mockWalkActivityWeakReference = new WeakReference<>(context);
+        }
+
         @Override
         public void onPreExecute() {
             Log.d(TAG, "onPreExecute called");
+            MockWalkActivity mockWalkActivity = mockWalkActivityWeakReference.get();
             SharedPreferences heightSharedPref =
-                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
+                    mockWalkActivity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
             feet = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
             inches = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, 0);
             Log.d(TAG, "Feet: " + feet);
@@ -204,35 +263,20 @@ public class MockWalkActivity extends AppCompatActivity {
         public void onProgressUpdate(String ... text) {
             Log.d(TAG, "onProgressUpdate called");
             updateTime();
-            updateSteps();
+            // implemented from IFitnessObserver
+            // updateSteps();
         }
 
         private void updateTime() {
             Log.d(TAG, "updateTime called");
-            mHours = (int) (time / NUM_SECONDS_PER_HOUR);
-            mMinutes = (int) ((time / NUM_SECONDS_PER_MINUTE) % NUM_SECONDS_PER_MINUTE);
-            mSeconds = (int) (time % NUM_SECONDS_PER_MINUTE);
+            MockWalkActivity mockWalkActivity = mockWalkActivityWeakReference.get();
+            mockWalkActivity.mHours = (int) (time / NUM_SECONDS_PER_HOUR);
+            mockWalkActivity.mMinutes = (int) ((time / NUM_SECONDS_PER_MINUTE) % NUM_SECONDS_PER_MINUTE);
+            mockWalkActivity.mSeconds = (int) (time % NUM_SECONDS_PER_MINUTE);
             Log.d(TAG, "time is " + time);
-            mHoursTextView.setText(mHours + " hr");
-            mMinutesTextView.setText(mMinutes + " min");
-            mSecondsTextView.setText(mSeconds + " sec");
-        }
-
-        private void updateSteps() {
-            HomeScreenActivity.getFitnessService().updateStepCount();
-            mStepsView.setText(Long.toString(mSteps));
-            SharedPreferences heightSharedPref =
-                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
-            feet = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
-            inches = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
-            Log.d(TAG, "Feet: " + feet);
-            Log.d(TAG, "Inches: " + inches);
-            // Calculate the user's total miles
-            StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
-            mMiles = converter.getNumMiles(mSteps);
-            //https://www.quora.com/How-can-I-round-a-number-to-1-decimal-digit-in-Java
-            mMiles = Math.round(mMiles * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
-            mMilesView.setText("That's " + mMiles + " miles so far");
+            mockWalkActivity.mHoursTextView.setText(mockWalkActivity.mHours + " hr");
+            mockWalkActivity.mMinutesTextView.setText(mockWalkActivity.mMinutes + " min");
+            mockWalkActivity.mSecondsTextView.setText(mockWalkActivity.mSeconds + " sec");
         }
     }
 }
