@@ -98,8 +98,9 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
                 stopSelf(startId);
             }
         }
-
     }
+
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -118,7 +119,7 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "In method onStartCommand");
         // Launch the step counting
-        Log.d(TAG, "Number of fitness observers is: " + sFitnessObservers.size());
+        // Log.d(TAG, "Number of fitness observers is: " + sFitnessObservers.size());
 
         // Update the saved id of the thread about to run so that it can be stopped later
 
@@ -192,5 +193,15 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
 
     public void setCurrentDateTime(LocalDateTime currentDateTime) {
         sCurrentDateTime = currentDateTime;
+    }
+
+    /**
+     * Returns true if afterDateTime is one full day ahead of beforeDateTime, false otherwise
+     * @param beforeDateTime
+     * @param afterDateTime
+     * @return
+     */
+    public static boolean compareDays(LocalDateTime beforeDateTime, LocalDateTime afterDateTime) {
+return false;
     }
 }

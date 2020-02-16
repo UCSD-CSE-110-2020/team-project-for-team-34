@@ -145,11 +145,12 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);
         intent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
 
-        Log.d(TAG, "mHours is" + mHours);
-        Log.d(TAG, "mMinutes is " + mMinutes);
-        Log.d(TAG, "mSeconds is " + mSeconds);
-        Log.d(TAG, "mStepsTaken is " + mStepsTaken);
-        Log.d(TAG, "mMiles is " + mMiles);
+//        Log.d(TAG, "mHours is" + mHours);
+//        Log.d(TAG, "mMinutes is " + mMinutes);
+//        Log.d(TAG, "mSeconds is " + mSeconds);
+//        Log.d(TAG, "mStepsTaken is " + mStepsTaken);
+//        Log.d(TAG, "mMiles is " + mMiles);
+        Log.d(TAG, walk.toString());
 
         startActivity(intent);
     }
@@ -207,9 +208,9 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
         mStepsTaken = mCurrSteps - mStartSteps;
 
-        Log.d(TAG, "Start steps is: " + mStartSteps);
-        Log.d(TAG, "Current steps is: " + mCurrSteps);
-        Log.d(TAG, "Steps taken is: " + mStepsTaken);
+//        Log.d(TAG, "Start steps is: " + mStartSteps);
+//        Log.d(TAG, "Current steps is: " + mCurrSteps);
+//        Log.d(TAG, "Steps taken is: " + mStepsTaken);
 
         mStepsView.setText(Long.toString(mStepsTaken));
 

@@ -190,6 +190,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             unbindService(serviceConnection);
             mIsBound = false;
         }
+        saveData();
         Log.d(TAG, "In method onPause");
     }
 
@@ -218,6 +219,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "In method onResume");
+
+
         initSavedData();
         updateUi();
     }
@@ -241,6 +244,12 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         // Get the user's steps
         SharedPreferences stepsSharedPref = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
         mDailyTotalSteps = stepsSharedPref.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
+
+        // Override Mock Fitness service's steps
+        // if using mock
+        MockFitnessService mockFitnessService = (MockFitnessService) fitnessService;
+        mockFitnessService.setDailyStepCount(mDailyTotalSteps);
+
         StepsAndMilesConverter stepsAndMilesConverter = new StepsAndMilesConverter(mFeet, mInches);
         mDailyTotalMiles = stepsAndMilesConverter.getNumMiles(mDailyTotalSteps);
 
@@ -249,7 +258,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
         mLastWalkSteps = sharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
         mLastWalkMiles = sharedPreferences.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
-        String lastTime = sharedPreferences.getString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
+        mLastWalkTime = sharedPreferences.getString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
     }
 
     public void saveData() {
@@ -277,7 +286,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         mLastWalkMilesTextView.setText(String.valueOf(mLastWalkMiles));
         mLastWalkTimeTextView.setText(String.valueOf(mLastWalkTime));
     }
-
 
     /**
      * Sets the miles based on the given stepCount and height
