@@ -152,12 +152,14 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 String callerID = intent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
                 switch (callerID) {
                     case WWRConstants.EXTRA_ROUTES_ACTIVITY_CALLER_ID:
+                        setResult(RESULT_CANCELED);
                         finish();
                         break;
                     case WWRConstants.EXTRA_WALK_ACTIVITY_CALLER_ID:
                         finish();
                         break;
                 }
+                finish();
             }
         });
     }
@@ -187,13 +189,14 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 break;
             case WWRConstants.EXTRA_ROUTES_ACTIVITY_CALLER_ID:
                 returnToRoutesActivity();
-                finish();
                 break;
         }
-
+        Log.d(TAG, "End of method handleDoneButtonClick");
+        finish();
     }
 
     private void returnToRoutesActivity() {
+        Log.d(TAG, "In method returnToRoutesActivity");
         Intent returnIntent = new Intent();
         // Create a new route, but without any walk stats
         Route route = new Route(mRouteName, mStartingPoint, null, null, 0,
@@ -204,9 +207,10 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         returnIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
                 WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
 
-        // returnIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        returnIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         // Pass this Intent back
         setResult(Activity.RESULT_OK, returnIntent);
+        finish();
     }
 
 
@@ -245,9 +249,9 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                         WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
 
                 // Clear the activity stack so only the Home screen will be left
-//                outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(outgoingIntent);
-//                finish();
+                finish();
                 break;
             default:
                 Log.d(TAG, "Caller is unhandled: " + callerID);

@@ -29,7 +29,6 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
     private RouteViewModel mRouteViewModel;
     private Button mAddNewRouteButton;
 
-    RouteListAdapter adapter;
     private static boolean sIsTest = true;
 
 
@@ -123,13 +122,13 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
         });
     }
 
-    private void initRecyclerView() {
-        Log.d(TAG, "initRecyclerView: init recyclerview");
-        RecyclerView recyclerView = findViewById(R.id.recycler_view_route);
-        adapter = new RouteListAdapter(this, this);
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-    }
+//    private void initRecyclerView() {
+//        Log.d(TAG, "initRecyclerView: init recyclerview");
+//        RecyclerView recyclerView = findViewById(R.id.recycler_view_route);
+//        adapter = new RouteListAdapter(this, this);
+//        recyclerView.setAdapter(adapter);
+//        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+//    }
 
     @Override
     public void onRouteClick(int position, List<Route> routes) {
@@ -149,6 +148,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
     }
 
     private void startAddNewRouteActivity() {
+        Log.d(TAG, "Starting Add new route activity");
         Intent intent = new Intent(RoutesActivity.this, EnterWalkInformationActivity.class);
         intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_ROUTES_ACTIVITY_CALLER_ID);
         startActivityForResult(intent, START_ADD_NEW_ROUTE_ACTIVITY_REQUEST_CODE);
@@ -158,9 +158,12 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "In method onActivityResult");
+        Log.d(TAG, "Request code is: " + requestCode);
+        Log.d(TAG, "Result code is: " + resultCode);
 
         // Check that this is the RouteDetailActivity calling back
         if (requestCode == START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE) {
+            Log.d(TAG, "Returned from walk existing route");
 
             // If the RouteDetailActivity finished normally
             if (resultCode == Activity.RESULT_OK) {
@@ -174,10 +177,10 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
                     Log.d(TAG, route.toString());
                     mRouteViewModel.updateLastWalk(route);
                 }
-
             } else if (requestCode == START_ADD_NEW_ROUTE_ACTIVITY_REQUEST_CODE) {
                 if (resultCode == Activity.RESULT_OK) {
                     // Add the new route
+                    Log.d(TAG, "Returned from add new route");
                     Route route = (Route) (data.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
                     Log.d(TAG, route.toString());
                     mRouteViewModel.insert(route);
