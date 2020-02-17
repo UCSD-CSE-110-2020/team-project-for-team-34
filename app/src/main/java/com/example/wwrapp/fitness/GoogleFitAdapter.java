@@ -121,12 +121,13 @@ public class GoogleFitAdapter implements IFitnessService, IFitnessSubject {
                                 SharedPreferences saveSteps = activity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
                                 SharedPreferences.Editor editor = saveSteps.edit();
 
-                                SharedPreferences testSave =
-                                        activity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
-                                long savedSteps = testSave.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, -1);
-                                // Testing only
-                                savedSteps += offset;
-                                total = savedSteps;
+                                // This block is for testing Google Fit when one cannot physically move the phone.
+//                                SharedPreferences testSave =
+//                                        activity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
+//                                long savedSteps = testSave.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, -1);
+//                                // Testing only
+//                                savedSteps += offset;
+//                                total = savedSteps;
                                 mStepCount = total;
                                 activity.update(total);
                                 editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, total);

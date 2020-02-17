@@ -17,6 +17,7 @@ import com.example.wwrapp.fitness.IFitnessObserver;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class MockWalkActivity extends AppCompatActivity implements IFitnessObserver {
 
@@ -50,7 +51,9 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
     private int inches;
 
     private LocalDateTime mDateTime;
-    private long mMockTime;
+    private long mMockTime = -1;
+
+    private static boolean isMockingWalk = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,27 +142,39 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, currStpes);
         editor.apply();
 
-        //Update most recent walk
-        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor spfsEditor = spfs.edit();
-        long lastSteps = spfs.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
-        long currLastSteps = lastSteps + mSteps;
-        spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, currLastSteps);
-        float lastMiles = spfs.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
-        float currLastMiles = lastMiles + ((float) mMiles);
-        spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
+        // Updates most recent walk
+        if (isMockingWalk) {
+            SharedPreferences lastWalkSharedPreference = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+            SharedPreferences.Editor lastWalkEditor = lastWalkSharedPreference.edit();
+
+            long lastSteps = lastWalkSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
+            long currLastSteps = lastSteps + mSteps;
+            lastWalkEditor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, currLastSteps);
+
+            float lastMiles = lastWalkSharedPreference.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
+            float currLastMiles = lastMiles + ((float) mMiles);
+            lastWalkEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
+
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN);
+            String formattedDate = LocalDateTime.now().format(dateTimeFormatter);
+            lastWalkEditor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, formattedDate);
+            lastWalkEditor.apply();
+        }
+
         mTotalSteps += mSteps;
         mSteps = 0;
 
         SharedPreferences timeSharedPreferences =
                 getSharedPreferences(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_FILE_NAME, MODE_PRIVATE);
         SharedPreferences.Editor timeEditor = timeSharedPreferences.edit();
+        Log.d(TAG, "Mock time is: " + mMockTime);
+        // If the set text is -1
         if (mMockTime == -1) {
             timeEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSYTEM_TIME_KEY, WWRConstants.NO_MOCK_TIME);
         } else {
             timeEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSYTEM_TIME_KEY, mMockTime);
         }
-        spfsEditor.apply();
+        timeEditor.apply();
         Log.d(TAG, "Data Saved to Shared Preferences");
     }
 

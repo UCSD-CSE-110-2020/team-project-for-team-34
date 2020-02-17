@@ -8,6 +8,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.example.wwrapp.HomeScreenActivity;
 import com.example.wwrapp.TimeMachine;
 import com.example.wwrapp.WWRConstants;
 
@@ -21,10 +22,11 @@ import java.util.List;
  * A mock fitness service
  * Credits: https://www.logicbig.com/how-to/java-8-date-time-api/millis-to-date.html
  */
-public class MockFitnessService extends Service implements IFitnessService, IFitnessSubject{
+public class MockFitnessService extends Service implements IFitnessService, IFitnessSubject {
     private static final String TAG = "MockFitnessService";
     // How much the updateStepCount method increases the step count
     private static final int STEP_COUNT_INCREMENT = 10;
+    private static final int MILLISECONDS_PER_SECOND = 1000;
 
     // Initialize the step count only once
     private static long sDailyStepCount = 0;
@@ -33,7 +35,10 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
 
     private final IBinder mBinder = new LocalBinder();
     private Thread stepCountThread;
+    private Thread elapsedTimeThread;
     private boolean isRunning;
+    private boolean readMockedDate = false;
+    private long elapsedMillisecondsSinceMockTimeSet = 0;
 
     public MockFitnessService() {
         Log.d(TAG, "MockFitnessService constructor called");
@@ -76,6 +81,31 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
                         // Simulate walking with periodic step count updates
 //                        Log.d(TAG, "Step count before update: " + MockFitnessService.this.sDailyStepCount);
                         wait(TIMEOUT);
+
+                        LocalDateTime currentDate;
+                        if (HomeScreenActivity.IS_MOCKING) {
+                            ZoneId zoneId = ZoneId.systemDefault(); // or: ZoneId.of("Europe/Oslo");
+                            long startTime = sCurrentDateTime.atZone(zoneId).toEpochSecond();
+                            startTime *= MILLISECONDS_PER_SECOND;
+                            long currentTime = startTime + elapsedMillisecondsSinceMockTimeSet;
+                            currentDate =
+                                    LocalDateTime.ofInstant(Instant.ofEpochMilli(currentTime), ZoneId.systemDefault());
+                            Log.d(TAG, "start mock time is: " + startTime);
+                            Log.d(TAG, "elapsed time in fitness service class is: " + elapsedMillisecondsSinceMockTimeSet);
+
+                            Log.d(TAG, "current mock time is: " + currentTime);
+
+
+                        } else {
+                            currentDate = LocalDateTime.now();
+                        }
+
+                        // Reset the step count and time for a new day
+                        if (!areSameDay(sCurrentDateTime, currentDate)) {
+                            sDailyStepCount = 0;
+                            sCurrentDateTime = currentDate;
+                        }
+
                         MockFitnessService.this.updateStepCount();
 
                         // Save the daily steps
@@ -102,6 +132,32 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
         }
     }
 
+    final class ElapsedTimeThread implements Runnable {
+        private static final long TIMEOUT = 1000;
+        private int startId;
+
+        public ElapsedTimeThread(int startId) {
+            this.startId = startId;
+        }
+
+        @Override
+        public void run() {
+            synchronized (ElapsedTimeThread.this) {
+                while (isRunning) {
+                    try {
+                        wait(TIMEOUT);
+                        elapsedMillisecondsSinceMockTimeSet += MILLISECONDS_PER_SECOND;
+                        Log.d(TAG, "elapsed time in thread class is: " + elapsedMillisecondsSinceMockTimeSet);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                // Stop the service when the thread is stopped
+                Log.d(TAG, "Exited while loop in Thread");
+                stopSelf(startId);
+            }
+        }
+    }
 
 
     @Override
@@ -120,15 +176,6 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "In method onStartCommand");
-        // Launch the step counting
-        // Log.d(TAG, "Number of fitness observers is: " + sFitnessObservers.size());
-
-        // Update the saved id of the thread about to run so that it can be stopped later
-
-        // Update the step count to be its current value; otherwise, the step count will start from 0
-        // Comenting out for now to test static vars
-        // setDailyStepCount(intent.getLongExtra(WWRConstants.EXTRA_DAILY_STEPS_KEY, 0));
-
 
         // Check if any mocking steps/time were provided
         setup();
@@ -138,9 +185,9 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
             isRunning = true;
             stepCountThread = new Thread(new StepCountThread(startId));
             stepCountThread.start();
+            elapsedTimeThread = new Thread(new ElapsedTimeThread(startId));
+            elapsedTimeThread.start();
         }
-
-
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -165,11 +212,17 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
         long currentTime = timeSharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_SYSYTEM_TIME_KEY, -1);
 
         // Set the mock time, if there was one
-        if (isMockTime(currentTime)) {
+        if (isMockTime(currentTime) && !readMockedDate) {
             Instant instant = Instant.ofEpochMilli(currentTime);
             LocalDateTime mockDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
             TimeMachine.useFixedClockAt(mockDateTime);
-            setCurrentDateTime(TimeMachine.now());
+            sCurrentDateTime = TimeMachine.now();
+            readMockedDate = true;
+
+            Log.d(TAG, "Mock date time is: " + sCurrentDateTime.toString());
+        } else {
+            // Use the real current time
+            sCurrentDateTime = LocalDateTime.now();
         }
 
         // Get the total daily steps. This number may be different than what the
@@ -184,7 +237,9 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
     @Override
     public void updateStepCount() {
         // Arbitrary step count increment
-        this.setDailyStepCount(this.getDailyStepCount() + STEP_COUNT_INCREMENT);
+        // If the calendar day has changed, reset the step count
+        if (!areSameDay(sCurrentDateTime, LocalDateTime.now()))
+            this.setDailyStepCount(this.getDailyStepCount() + STEP_COUNT_INCREMENT);
     }
 
     @Override
@@ -229,6 +284,7 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
 
     /**
      * Returns true if the two date objects are on the same calendar day, false otherwise.
+     *
      * @param before
      * @param after
      * @return

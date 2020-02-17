@@ -20,9 +20,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Make sure that default values for radio buttons aren't selected (right now they are)
-// TODO: Allow the user to uncheck radio buttons if they change their mind.
-
 /**
  * Launched after the user ends a walk initiated from the Home screen; prompts user to enter
  * notes about the walk.
