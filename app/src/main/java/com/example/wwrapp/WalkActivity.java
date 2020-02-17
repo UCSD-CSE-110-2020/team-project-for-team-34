@@ -161,7 +161,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         // Store the new Walk as an extra
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
 
-        // mStepsTaken = 1000; // for testing
+        mStepsTaken = 1000; // for testing
 
         // Create a new Walk
         Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);

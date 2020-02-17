@@ -201,7 +201,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         returnIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
                 WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
 
-        returnIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        // returnIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         // Pass this Intent back
         setResult(Activity.RESULT_OK, returnIntent);
         finish();
