@@ -1,6 +1,8 @@
 package com.example.wwrapp.fitness;
 
 import android.content.SharedPreferences;
+import android.os.Binder;
+import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -29,18 +31,28 @@ public class GoogleFitAdapter implements IFitnessService, IFitnessSubject {
     private final String TAG = "GoogleFitAdapter";
     private GoogleSignInAccount account;
 
-    private List<IFitnessObserver> mFitnessObservers;
+    private List<IFitnessObserver> sFitnessObservers;
     private long mStepCount;
 
     private int offset = 5;
 
     private HomeScreenActivity activity;
 
-    public GoogleFitAdapter(HomeScreenActivity activity) {
-        this.activity = activity;
-        mFitnessObservers = new ArrayList<>();
+    public GoogleFitAdapter(HomeScreenActivity homeScreenActivity) {
+        activity = homeScreenActivity;
+        if (sFitnessObservers == null) {
+            sFitnessObservers = new ArrayList<>();
+        }
     }
 
+    private final IBinder mBinder = new GoogleFitAdapter.LocalBinder();
+
+    public class LocalBinder extends Binder {
+        public IFitnessService getService() {
+            // return MockFitnessService.this;
+            return GoogleFitAdapter.this;
+        }
+    }
 
     public void setup() {
         FitnessOptions fitnessOptions = FitnessOptions.builder()
@@ -104,8 +116,9 @@ public class GoogleFitAdapter implements IFitnessService, IFitnessSubject {
                                         dataSet.isEmpty()
                                                 ? 0
                                                 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
+                                Log.d(TAG, "total is: " + total);
 
-                                SharedPreferences saveSteps = activity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME,MODE_PRIVATE);
+                                SharedPreferences saveSteps = activity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
                                 SharedPreferences.Editor editor = saveSteps.edit();
 
                                 SharedPreferences testSave =
@@ -113,9 +126,9 @@ public class GoogleFitAdapter implements IFitnessService, IFitnessSubject {
                                 long savedSteps = testSave.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, -1);
                                 // Testing only
                                 savedSteps += offset;
-//                                total += savedSteps;
+                                total = savedSteps;
                                 mStepCount = total;
-                                activity.setStepCount(total);
+                                activity.update(total);
                                 editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, total);
                                 editor.apply();
 
@@ -140,17 +153,17 @@ public class GoogleFitAdapter implements IFitnessService, IFitnessSubject {
 
     @Override
     public void registerObserver(IFitnessObserver fitnessObserver) {
-        mFitnessObservers.add(fitnessObserver);
+        sFitnessObservers.add(fitnessObserver);
     }
 
     @Override
     public void removeObserver(IFitnessObserver fitnessObserver) {
-        mFitnessObservers.remove(fitnessObserver);
+        sFitnessObservers.remove(fitnessObserver);
     }
 
     @Override
     public void notifyObservers() {
-        for (IFitnessObserver fitnessObserver : mFitnessObservers) {
+        for (IFitnessObserver fitnessObserver : sFitnessObservers) {
             fitnessObserver.update(mStepCount);
         }
     }

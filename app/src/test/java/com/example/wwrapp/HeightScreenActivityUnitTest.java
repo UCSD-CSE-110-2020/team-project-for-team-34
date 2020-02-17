@@ -60,7 +60,7 @@ public class HeightScreenActivityUnitTest {
         scenario.onActivity(heightScreenActivity -> {
             init(heightScreenActivity);
             // Select height
-            feetSpinner.setSelection(6);
+            feetSpinner.setSelection(5);
             String expectedFeet = "5";
             assertEquals(expectedFeet, feetSpinner.getSelectedItem());
             inchSpinner.setSelection(4);
