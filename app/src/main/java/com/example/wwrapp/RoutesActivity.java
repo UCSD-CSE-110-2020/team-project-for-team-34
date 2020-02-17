@@ -177,7 +177,8 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
                     Log.d(TAG, route.toString());
                     mRouteViewModel.updateLastWalk(route);
                 }
-            } else if (requestCode == START_ADD_NEW_ROUTE_ACTIVITY_REQUEST_CODE) {
+            }
+        } else if (requestCode == START_ADD_NEW_ROUTE_ACTIVITY_REQUEST_CODE) {
                 if (resultCode == Activity.RESULT_OK) {
                     // Add the new route
                     Log.d(TAG, "Returned from add new route");
@@ -193,7 +194,6 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
 
             }
         }
-    }
 
     public void generateFakeRoute() {
         Route testRoute = new Route("route", "staring", null, "", 10, 10, null, true, "");
