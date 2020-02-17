@@ -15,6 +15,8 @@ import com.example.wwrapp.WWRConstants;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +29,7 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
     // How much the updateStepCount method increases the step count
     private static final int STEP_COUNT_INCREMENT = 10;
     private static final int MILLISECONDS_PER_SECOND = 1000;
+    private static final int RESET_STEP_COUNT = 0;
 
     // Initialize the step count only once
     private static long sDailyStepCount = 0;
@@ -107,15 +110,28 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
                         }
 
                         MockFitnessService.this.updateStepCount();
-
-                        // Save the daily steps
                         Context context = MockFitnessApplication.getAppContext();
                         SharedPreferences sharedPreferences =
                                 context.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, MockFitnessService.sDailyStepCount);
-                        editor.apply();
 
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        String formatDateTime = sCurrentDateTime.format(formatter);
+                        Log.d(TAG,"time is " + formatDateTime);
+
+                        int dayOfYear = sCurrentDateTime.getDayOfYear();
+                        int nextSecondDayOfYear = sCurrentDateTime.plusSeconds(1).getDayOfYear();
+                        if( dayOfYear == nextSecondDayOfYear ) {
+                            // Save the daily steps
+                            editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, MockFitnessService.sDailyStepCount);
+                            editor.apply();
+                        }
+                        else {
+                            // Reset the daily steps
+                            editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, MockFitnessService.RESET_STEP_COUNT);
+                            editor.apply();
+                        }
+                        sCurrentDateTime = sCurrentDateTime.plusSeconds(1);
 //                        Log.d(TAG, "Step count after update: " + MockFitnessService.this.sDailyStepCount);
 
                         // Inform observers of updated steps
@@ -231,7 +247,6 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
                 getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
         long totalDailySteps = stepsSharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
         MockFitnessService.this.setDailyStepCount(totalDailySteps);
-
     }
 
     @Override

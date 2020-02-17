@@ -293,7 +293,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         updateUi();
     }
 
-
     private boolean checkHasHeight() {
         SharedPreferences saveHeight =
                 getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);

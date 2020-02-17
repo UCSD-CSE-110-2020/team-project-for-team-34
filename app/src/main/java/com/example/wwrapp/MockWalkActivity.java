@@ -94,7 +94,8 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
             public void onClick(View v) {
                 Log.d(TAG, "set MS time button pressed");
                 mMockTime = Long.parseLong(mTimeField.getText().toString());
-                if (mMockTime < 0) {
+                Log.d(TAG, "time set to " + mMockTime + "ms");
+                if( mMockTime < 0 ) {
                     Toast.makeText(MockWalkActivity.this,
                             INVALID_TIME_TOAST
                             , Toast.LENGTH_LONG).show();
@@ -131,6 +132,25 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         if (!mWalkTimer.isCancelled()) {
             mWalkTimer.cancel(false);
         }
+    }
+
+    /**
+     * Launches the activity to enter walk information
+     */
+    public void launchHomeScreenActivity() {
+        Log.d(TAG,"launchHomeScreenActivity called");
+        // Pass the Walk data onto the next Activity
+        String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
+        Intent intent = new Intent(this, HomeScreenActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_FITNESS_SERVICE_VERSION_KEY, WWRConstants.MOCK_FITNESS_SERVICE_VERSION);
+        Log.d(TAG, "mHours is" + mHours);
+        Log.d(TAG, "mMinutes is " + mMinutes);
+        Log.d(TAG, "mSeconds is " + mSeconds);
+        Log.d(TAG, "mSteps is " + mSteps);
+        Log.d(TAG, "mMiles is " + mMiles);
+        Log.d(TAG, "Time is " + mMockTime + "ms");
+        startActivity(intent);
+        finish();
     }
 
     public void saveData() {
