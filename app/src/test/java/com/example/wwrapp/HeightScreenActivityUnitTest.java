@@ -67,7 +67,6 @@ public class HeightScreenActivityUnitTest {
             String expectedInches = "3";
             assertEquals(expectedInches, inchSpinner.getSelectedItem());
 
-            assertEquals(9, feetSpinner.getAdapter().getCount());
 
             // Press done button
             doneBtn.performClick();
