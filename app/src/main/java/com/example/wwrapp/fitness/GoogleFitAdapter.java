@@ -17,14 +17,20 @@ import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static android.content.Context.MODE_PRIVATE;
 
 //import com.google.android.material;
 
-public class GoogleFitAdapter implements IFitnessService {
+public class GoogleFitAdapter implements IFitnessService, IFitnessSubject {
     private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
     private final String TAG = "GoogleFitAdapter";
     private GoogleSignInAccount account;
+
+    private List<IFitnessObserver> mFitnessObservers;
+    private long mStepCount;
 
     private int offset = 5;
 
@@ -32,6 +38,7 @@ public class GoogleFitAdapter implements IFitnessService {
 
     public GoogleFitAdapter(HomeScreenActivity activity) {
         this.activity = activity;
+        mFitnessObservers = new ArrayList<>();
     }
 
 
@@ -107,6 +114,7 @@ public class GoogleFitAdapter implements IFitnessService {
                                 // Testing only
                                 savedSteps += offset;
 //                                total += savedSteps;
+                                mStepCount = total;
                                 activity.setStepCount(total);
                                 editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, total);
                                 editor.apply();
@@ -130,4 +138,20 @@ public class GoogleFitAdapter implements IFitnessService {
         return GOOGLE_FIT_PERMISSIONS_REQUEST_CODE;
     }
 
-   }
+    @Override
+    public void registerObserver(IFitnessObserver fitnessObserver) {
+        mFitnessObservers.add(fitnessObserver);
+    }
+
+    @Override
+    public void removeObserver(IFitnessObserver fitnessObserver) {
+        mFitnessObservers.remove(fitnessObserver);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (IFitnessObserver fitnessObserver : mFitnessObservers) {
+            fitnessObserver.update(mStepCount);
+        }
+    }
+}

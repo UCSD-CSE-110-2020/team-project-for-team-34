@@ -8,14 +8,18 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.example.wwrapp.TimeMachine;
 import com.example.wwrapp.WWRConstants;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A mock fitness service
+ * Credits: https://www.logicbig.com/how-to/java-8-date-time-api/millis-to-date.html
  */
 public class MockFitnessService extends Service implements IFitnessService, IFitnessSubject{
     private static final String TAG = "MockFitnessService";
@@ -26,7 +30,6 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
     private static long sDailyStepCount = 0;
     private static LocalDateTime sCurrentDateTime;
     private static List<IFitnessObserver> sFitnessObservers;
-
 
     private final IBinder mBinder = new LocalBinder();
     private Thread stepCountThread;
@@ -43,7 +46,6 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
 
         if (sFitnessObservers == null) {
             sFitnessObservers = new ArrayList<>();
-
         }
     }
 
@@ -53,8 +55,6 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
             return MockFitnessApplication.getFitnessService();
         }
     }
-
-
 
     /**
      * Worker to update step count
@@ -74,14 +74,10 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
                 try {
                     while (isRunning) {
                         // Simulate walking with periodic step count updates
-//                        Log.d(TAG, "Waiting ...");
 //                        Log.d(TAG, "Step count before update: " + MockFitnessService.this.sDailyStepCount);
                         wait(TIMEOUT);
-                        SharedPreferences sharedPreferencesRead =
-                                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
-                        long totalDailySteps = sharedPreferencesRead.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
-                        MockFitnessService.this.setDailyStepCount(totalDailySteps);
                         MockFitnessService.this.updateStepCount();
+
                         // Save the daily steps
                         Context context = MockFitnessApplication.getAppContext();
                         SharedPreferences sharedPreferences =
@@ -91,6 +87,8 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
                         editor.apply();
 
 //                        Log.d(TAG, "Step count after update: " + MockFitnessService.this.sDailyStepCount);
+
+                        // Inform observers of updated steps
                         MockFitnessService.this.notifyObservers();
                     }
                 } catch (InterruptedException e) {
@@ -131,12 +129,18 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
         // Comenting out for now to test static vars
         // setDailyStepCount(intent.getLongExtra(WWRConstants.EXTRA_DAILY_STEPS_KEY, 0));
 
+
+        // Check if any mocking steps/time were provided
+        setup();
+
         // One-time initialization of thread
         if (stepCountThread == null) {
             isRunning = true;
             stepCountThread = new Thread(new StepCountThread(startId));
             stepCountThread.start();
         }
+
+
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -154,6 +158,26 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
 
     @Override
     public void setup() {
+        // Get the current date. This number may be different than what the fitness
+        // service has if the mock screen set time was used
+        SharedPreferences timeSharedPreferences = getSharedPreferences
+                (WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_FILE_NAME, MODE_PRIVATE);
+        long currentTime = timeSharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_SYSYTEM_TIME_KEY, -1);
+
+        // Set the mock time, if there was one
+        if (isMockTime(currentTime)) {
+            Instant instant = Instant.ofEpochMilli(currentTime);
+            LocalDateTime mockDateTime = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
+            TimeMachine.useFixedClockAt(mockDateTime);
+            setCurrentDateTime(TimeMachine.now());
+        }
+
+        // Get the total daily steps. This number may be different than what the
+        // fitness service has if the mock screen add steps button was used earlier.
+        SharedPreferences stepsSharedPreferences =
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
+        long totalDailySteps = stepsSharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
+        MockFitnessService.this.setDailyStepCount(totalDailySteps);
 
     }
 
@@ -199,13 +223,18 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
         sCurrentDateTime = currentDateTime;
     }
 
+    public static boolean isMockTime(long time) {
+        return time != WWRConstants.NO_MOCK_TIME;
+    }
+
     /**
-     * Returns true if afterDateTime is one full day ahead of beforeDateTime, false otherwise
-     * @param beforeDateTime
-     * @param afterDateTime
+     * Returns true if the two date objects are on the same calendar day, false otherwise.
+     * @param before
+     * @param after
      * @return
      */
-    public static boolean compareDays(LocalDateTime beforeDateTime, LocalDateTime afterDateTime) {
-return false;
+    public static boolean areSameDay(LocalDateTime before, LocalDateTime after) {
+        int dayDiff = Math.abs(after.getDayOfYear() - before.getDayOfYear());
+        return dayDiff > 0;
     }
 }

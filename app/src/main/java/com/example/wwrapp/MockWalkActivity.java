@@ -23,7 +23,6 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
 
     private static final String TAG = "MockWalkActivity";
     public static String INVALID_TIME_TOAST = "Please enter a valid time";
-    public static long NO_MOCK_TIME = -1;
 
     private TextView mHoursTextView, mMinutesTextView, mSecondsTextView, mStepsView, mMilesView;
     private Button mStopBtn, mAddStepsBtn, mSetMsBtn;
@@ -181,10 +180,14 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         spfsEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
         mTotalSteps += mSteps;
         mSteps = 0;
+
+        SharedPreferences timeSharedPreferences =
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_FILE_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor timeEditor = timeSharedPreferences.edit();
         if(mMockTime == -1) {
-            spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_KEY, NO_MOCK_TIME);
+            timeEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSYTEM_TIME_KEY, WWRConstants.NO_MOCK_TIME);
         } else {
-            spfsEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSTEM_TIME_KEY, mMockTime);
+            timeEditor.putLong(WWRConstants.SHARED_PREFERENCES_SYSYTEM_TIME_KEY, mMockTime);
         }
         spfsEditor.apply();
         Log.d(TAG,"Data Saved to Shared Preferences");

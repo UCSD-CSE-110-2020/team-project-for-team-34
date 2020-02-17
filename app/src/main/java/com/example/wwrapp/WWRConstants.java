@@ -24,7 +24,7 @@ public final class WWRConstants {
             "com.example.wwrapp.EXTRA_ENTER_WALK_INFORMATION";
     public static final String EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID =
             "com.example.wwrapp.EXTRA_ROUTE_DETAIL_ACTIVITY";
-    public static final String EXTRA_ROUTE_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_ROUTE_ACTIVITY";
+    public static final String EXTRA_ROUTES_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_ROUTE_ACTIVITY";
 
     // Keys
     public static final String EXTRA_WALK_OBJECT_KEY = "com.example.wwrapp.EXTRA_WALK_KEY";
@@ -46,23 +46,34 @@ public final class WWRConstants {
     public static final String SHARED_PREFERENCES_TOTAL_STEPS_KEY =
             "com.example.wwrapp.SHARED_PREFERENCES_TOTAL_STEPS_KEY";
 
+    // Time file
+    public static final String SHARED_PREFERENCES_SYSTEM_TIME_FILE_NAME =
+            "com.example.wwrapp.SHARED_PREFERENCES_SYSTEM_TIME_FILE_NAME";
+    public static final String SHARED_PREFERENCES_SYSYTEM_TIME_KEY =
+            "com.example.wwrapp.SHARED_PREFERENCES_SYSTEM_TIME_KEY";
+
     // Last walk file
     public static final String SHARED_PREFERENCES_LAST_WALK_FILE_NAME = "com.example.wwrapp.SHARED_PREFERENCES_LAST_WALK_FILE_NAME";
     public static final String SHARED_PREFERENCES_LAST_WALK_STEPS_KEY = "com.example.wwrapp.SHARED_PREFERENCES_LAST_WALK_STEPS_NAME";
     public static final String SHARED_PREFERENCES_LAST_WALK_MILES_KEY = "com.example.wwrapp.SHARED_PREFERENCES_LAST_WALK_MILES_NAME";
     public static final String SHARED_PREFERENCES_LAST_WALK_DATE_KEY = "com.example.wwrapp.SHARED_PREFERENCES_LAST_WALK_DATE_NAME";
-    public static final String SHARED_PREFERENCES_SYSTEM_TIME_KEY = "com.example.wwrapp.SHARED_PREFERENCES_SYSTEM_TIME_NAME";
 
 
     // Date format
     public static final String DATE_FORMATTER_PATTERN = "MM-dd-yyyy: HH:mm";
 
 
-    // Mock Walk was called
+    // Fitness Service constants
     public static final String EXTRA_FITNESS_SERVICE_VERSION_KEY = "com.example.wwrapp.EXTRA_FITNESS_SERVICE_VERSION_KEY";
-    public static String GOOGLE_FIT_VERSION = "com.example.wwrapp.GOOGLE_FIT_VERSION";
-    public static String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
+    public static final String GOOGLE_FIT_VERSION = "com.example.wwrapp.GOOGLE_FIT_VERSION";
+    // Default fitness service
     public static String FITNESS_SERVICE_VERSION = GOOGLE_FIT_VERSION;
+
+
+    // Mocks
+    public static String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
+    public static final long NO_MOCK_TIME = -1;
+
 
 
     public static final boolean PRODUCTION_VERSION = false;

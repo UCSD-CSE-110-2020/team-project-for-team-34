@@ -1,14 +1,10 @@
 package com.example.wwrapp;
 
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -18,7 +14,6 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
-import com.example.wwrapp.fitness.IFitnessSubject;
 import com.example.wwrapp.fitness.MockFitnessService;
 
 
@@ -44,8 +39,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private static boolean sIgnoreHeight = false;
 
 
-    private static IFitnessService sFitnessService;
-    private IFitnessService fitnessService;
     private boolean mIsBound;
 
     // Views for data
@@ -66,22 +59,26 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private double mLastWalkMiles;
     private String mLastWalkTime;
 
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MockFitnessService.LocalBinder localService = (MockFitnessService.LocalBinder) service;
-            Log.d(TAG, "Assigned fitness service in onServiceConnected");
-            fitnessService = localService.getService();
-            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
-            fitnessSubject.registerObserver(HomeScreenActivity.this);
-            mIsBound = true;
-        }
+    private IFitnessService fitnessService;
+    private static FitnessAsyncTask sFitnessService;
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsBound = false;
-        }
-    };
+
+//    private ServiceConnection serviceConnection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            MockFitnessService.LocalBinder localService = (MockFitnessService.LocalBinder) service;
+//            Log.d(TAG, "Assigned fitness service in onServiceConnected");
+//            fitnessService = localService.getService();
+//            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
+//            fitnessSubject.registerObserver(HomeScreenActivity.this);
+//            mIsBound = true;
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            mIsBound = false;
+//        }
+//    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,6 +147,16 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
         Log.d(TAG, "Right before creating Mock Fitness object");
         // fitnessService = MockFitnessApplication.getFitnessService();
+
+//        sFitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
+//        sFitnessService.setup();
+//        sFitnessService.updateStepCount();
+//
+//        // Start the Home screen steps/miles updating in the background
+//        mFitnessRunner = new FitnessAsyncTask();
+//        if (sEnableFitnessRunner) {
+//            mFitnessRunner.execute();
+//        }
     }
 
     @Override
@@ -159,10 +166,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
 //       If authentication was required during google fit setup, this will be called after the user authenticates
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == sFitnessService.getRequestCode()) {
+            if (requestCode == fitnessService.getRequestCode()) {
                 Log.d(TAG, "requestCode is from GoogleFit");
                 // Update the steps/miles if returning from a walk
-                sFitnessService.updateStepCount();
+                fitnessService.updateStepCount();
                 setMiles(mDailyTotalSteps, mFeet, mInches);
                 updateUi();
             }
@@ -176,21 +183,21 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onStart();
         Intent intent = new Intent(HomeScreenActivity.this, MockFitnessService.class);
         // Tell the service how many steps there are in the current day
-        intent.putExtra(WWRConstants.EXTRA_DAILY_STEPS_KEY, mDailyTotalSteps);
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-        startService(intent);
+//        intent.putExtra(WWRConstants.EXTRA_DAILY_STEPS_KEY, mDailyTotalSteps);
+//        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+//        startService(intent);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         // Unbind from the fitness service
-        if (mIsBound) {
-            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
-            fitnessSubject.removeObserver(HomeScreenActivity.this);
-            unbindService(serviceConnection);
-            mIsBound = false;
-        }
+//        if (mIsBound) {
+//            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
+//            fitnessSubject.removeObserver(HomeScreenActivity.this);
+//            unbindService(serviceConnection);
+//            mIsBound = false;
+//        }
         saveData();
         Log.d(TAG, "In method onPause");
     }
@@ -206,13 +213,13 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onDestroy();
         Log.d(TAG, "In method onDestroy");
 
-        if (mIsBound) {
-            unbindService(serviceConnection);
-            mIsBound = false;
-        }
+//        if (mIsBound) {
+//            unbindService(serviceConnection);
+//            mIsBound = false;
+//        }
 
-        Intent intent = new Intent(HomeScreenActivity.this, MockFitnessService.class);
-        stopService(intent);
+//        Intent intent = new Intent(HomeScreenActivity.this, MockFitnessService.class);
+//        stopService(intent);
         saveData();
     }
 
@@ -243,26 +250,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         // Get the user's steps
         SharedPreferences stepsSharedPref = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
         mDailyTotalSteps = stepsSharedPref.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
-
-//        // Override Mock Fitness service's steps
-//        // if using mock
-//        Intent receivedIntent = getIntent();
-//        String fitnessServiceVersion = receivedIntent.getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_VERSION_KEY);
-//        if (WWRConstants.MOCK_FITNESS_SERVICE_VERSION.equals(fitnessServiceVersion)) {
-//            MockFitnessService mockFitnessService = (MockFitnessService) fitnessService;
-//
-//            while (mockFitnessService != null) {
-//                try {
-//                    Log.d(TAG, "in while loop");
-//                    mockFitnessService = (MockFitnessService) fitnessService;
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//            mockFitnessService.setDailyStepCount(mDailyTotalSteps);
-//        } else {
-//            Log.d(TAG, "Running version " + fitnessServiceVersion);
-//        }
 
 
         StepsAndMilesConverter stepsAndMilesConverter = new StepsAndMilesConverter(mFeet, mInches);
@@ -342,10 +329,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         HomeScreenActivity.sIgnoreHeight = ignoreHeight;
     }
 
-    public static IFitnessService getFitnessService() {
-        return sFitnessService;
-    }
-
     /**
      * Starts the WalkActivity
      */
@@ -406,7 +389,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         @Override
         protected void onProgressUpdate(String... update) {
             // Ask the IFitnessService to update the step count, if applicable
-            sFitnessService.updateStepCount();
+            fitnessService.updateStepCount();
             // Update the miles based on the newly set step count
             setMiles(mDailyTotalSteps, mFeet, mInches);
             // Update the Home screen
