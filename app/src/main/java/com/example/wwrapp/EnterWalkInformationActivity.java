@@ -46,6 +46,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
     private RadioGroup mRouteEnvironmentRadioGroup;
     private RadioGroup mRouteSmoothnessRadioGroup;
     private RadioGroup mRouteDifficultyRadioGroup;
+    private RadioGroup mRouteFavoriteRadioGroup;
     private RadioButton mRouteShapeRadioBtn;
     private RadioButton mRouteElevationRadioBtn;
     private RadioButton mRouteEnvironmentRadioBtn;
@@ -70,6 +71,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         mRouteEnvironmentRadioGroup = findViewById(R.id.route_environment_radio_group);
         mRouteSmoothnessRadioGroup = findViewById(R.id.route_smoothness_radio_group);
         mRouteDifficultyRadioGroup = findViewById(R.id.route_difficulty_radio_group);
+        mRouteFavoriteRadioGroup = findViewById(R.id.route_favorite_radio_group);
 
         mRouteShapeRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -123,6 +125,15 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                         Log.d(TAG, "Difficulty is: " + difficultyTags);
                         mTags.add(difficultyTags);
                     }
+                    if (mRouteFavoriteRadioGroup.getCheckedRadioButtonId() != -1) {
+                        int id = mRouteFavoriteRadioGroup.getCheckedRadioButtonId();
+                        mRouteFavoriteRadioBtn = findViewById(id);
+                        if (mRouteFavoriteRadioBtn.isChecked()) {
+                            mRouteFavorite = true;
+                        } else {
+                            mRouteFavorite = false;
+                        }
+                    }
 
                     //  Get and save the notes
                     EditText editText = findViewById(R.id.notes_edit);
@@ -130,8 +141,6 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                     Log.d(TAG, "Notes are: " + mNotes);
 
 
-                    // Get favorite/not favorite
-                    checkButton(v);
                     Log.d(TAG, "Favorite is: " + mRouteFavorite);
 
                     mRouteName = routeName.getText().toString();
@@ -162,21 +171,6 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 finish();
             }
         });
-    }
-
-    /**
-     * This method is required for radio button
-     */
-    public void checkButton(View view) {
-        // can do nothing or store data here instead...
-
-        // check for mRouteFavorite radio button only, rest on top...
-        mRouteFavoriteRadioBtn = findViewById(R.id.favorite);
-        if (mRouteFavoriteRadioBtn.isSelected()) {
-            mRouteFavorite = true;
-        } else {
-            mRouteFavorite = false;
-        }
     }
 
     private void handleDoneButtonClick() {
