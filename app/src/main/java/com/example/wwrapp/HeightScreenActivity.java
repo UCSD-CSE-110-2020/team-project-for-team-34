@@ -19,7 +19,7 @@ public class HeightScreenActivity extends AppCompatActivity {
     private Spinner mFeetSpinner;
     private Spinner mInchesSpinner;
     private Button mDoneBtn;
-    private static final String[] FEET_VALUES = {"", "0", "1", "2", "3", "4", "5", "6", "7"};
+    private static final String[] FEET_VALUES = {"", "1", "2", "3", "4", "5", "6", "7"};
     private static final String[] INCH_VALUES =
             {"", "0","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"};
 

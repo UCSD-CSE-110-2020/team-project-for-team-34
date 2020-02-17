@@ -36,6 +36,9 @@ public class RouteDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route_detail);
 
+        // Get the clicked on route
+        Route route = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
+
         // Register the "X"/close screen button
         findViewById(R.id.close_route_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,11 +54,10 @@ public class RouteDetailActivity extends AppCompatActivity {
         startWalkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startWalkActivity();
+                startWalkActivity(route);
             }
         });
 
-        Route route = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
         TextView routeNameText = findViewById(R.id.route_detail_name);
         routeNameText.setText(route.getRouteName());
@@ -139,10 +141,12 @@ public class RouteDetailActivity extends AppCompatActivity {
     /**
      * Starts the Walk activity from the RouteDetailActivity
      */
-    private void startWalkActivity() {
+    private void startWalkActivity(Route route) {
         Intent intent = new Intent(RouteDetailActivity.this, WalkActivity.class);
         intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
                 WWRConstants.EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID);
+        // Put a route extra so the Walk activity can display its title
+        intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
         startActivityForResult(intent, START_EXISTING_WALK_REQUEST_CODE);
     }
 
@@ -154,6 +158,8 @@ public class RouteDetailActivity extends AppCompatActivity {
         returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
         // Pass this Intent back
         setResult(Activity.RESULT_OK, returnIntent);
+        // Go back to the Routes screen, bypassing the RouteDetail
+        finish();
     }
 
     @Override
