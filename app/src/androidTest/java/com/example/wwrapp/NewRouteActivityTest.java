@@ -46,6 +46,9 @@ public class NewRouteActivityTest {
         HomeScreenActivity.setEnableFitnessRunner(false);
     }
 
+    // test the NewRouteActivity
+    // after going to the route screen and clicking the + button, enter the information
+    // of the new route and click done, see if the route is recorded correctly.
     @Test
     public void newRouteActivityTest(){
         ViewInteraction appCompatButton1 = onView(
@@ -59,27 +62,27 @@ public class NewRouteActivityTest {
         appCompatButton2.perform(click());
 
         ViewInteraction appCompatEditText = onView(
-                allOf(withId(R.id.new_route_name_edit_text),
+                allOf(withId(R.id.route_name_edit_text),
                         isDisplayed()));
         appCompatEditText.perform(replaceText("village"), closeSoftKeyboard());
 
         ViewInteraction appCompatEditText2 = onView(
-                allOf(withId(R.id.new_route_starting_point_edit_text),
+                allOf(withId(R.id.starting_point_edit_text),
                         isDisplayed()));
         appCompatEditText2.perform(replaceText("kitchen"), closeSoftKeyboard());
 
         ViewInteraction appCompatRadioButton = onView(
-                allOf(withId(R.id.out_new), withText("out-and-back"),
+                allOf(withId(R.id.out), withText("out-and-back"),
                         isDisplayed()));
         appCompatRadioButton.perform(click());
 
         ViewInteraction appCompatRadioButton2 = onView(
-                allOf(withId(R.id.trail_new), withText("trail"),
+                allOf(withId(R.id.trail), withText("trail"),
                         isDisplayed()));
         appCompatRadioButton2.perform(click());
 
         ViewInteraction appCompatButton4 = onView(
-                allOf(withId(R.id.enter_new_route_info_done_button), withText("Done"),
+                allOf(withId(R.id.enter_walk_info_done_button), withText("Done"),
                         isDisplayed()));
         appCompatButton4.perform(click());
 

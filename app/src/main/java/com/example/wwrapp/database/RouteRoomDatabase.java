@@ -41,7 +41,7 @@ public abstract class RouteRoomDatabase extends RoomDatabase {
             databaseWriteExecutor.execute(() -> {
                 RouteDao dao = INSTANCE.routeDao();
                 // Clears the database
-                // dao.deleteAll();
+//                dao.deleteAll();
             });
         }
     };

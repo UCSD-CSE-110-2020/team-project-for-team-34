@@ -88,7 +88,6 @@
             android:id="@+id/loop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="loop"
 
             />
@@ -97,7 +96,6 @@
             android:id="@+id/out"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="out-and-back"
             app:layout_constraintEnd_toEndOf="parent"
 
@@ -121,7 +119,6 @@
             android:id="@+id/flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="flat"
 
             />
@@ -130,7 +127,6 @@
             android:id="@+id/hilly"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="hilly"
 
             />
@@ -153,7 +149,6 @@
             android:id="@+id/streets"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="streets"
 
             />
@@ -162,7 +157,6 @@
             android:id="@+id/trail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="trail" />
 
     </RadioGroup>
@@ -183,14 +177,12 @@
             android:id="@+id/even"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="even" />
 
         <RadioButton
             android:id="@+id/uneven"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="uneven"
 
             />
@@ -213,7 +205,6 @@
             android:id="@+id/easy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="easy"
 
             />
@@ -222,7 +213,6 @@
             android:id="@+id/moderate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="moderate"
 
             />
@@ -231,24 +221,39 @@
             android:id="@+id/difficult"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="checkButton"
             android:text="difficult"
 
             />
 
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
     </RadioGroup>
 
-    <RadioButton
-        android:id="@+id/favorite"
-        android:layout_width="wrap_content"
+    <RadioGroup
+        android:id="@+id/route_favorite_radio_group"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
         android:layout_marginTop="1dp"
-        android:text="Add to favorite"
-        android:onClick="checkButton"
+        android:layout_marginEnd="1dp"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/route_difficulty_radio_group" />
+        app:layout_constraintTop_toBottomOf="@+id/route_difficulty_radio_group">
+
+        <RadioButton
+            android:id="@+id/favorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:text="Add to favorite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/route_difficulty_radio_group" />
+    </RadioGroup>
 
     <LinearLayout
         android:id="@+id/note"
@@ -258,7 +263,7 @@
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/favorite">
+        app:layout_constraintTop_toBottomOf="@+id/route_favorite_radio_group">
 
         <TextView
             android:id="@+id/notes_name"
@@ -274,6 +279,5 @@
             android:hint=""
             android:inputType="textMultiLine"
             android:text="" />
-
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

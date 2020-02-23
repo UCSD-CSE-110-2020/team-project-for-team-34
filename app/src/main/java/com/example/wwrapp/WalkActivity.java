@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.wwrapp.database.Route;
 import com.example.wwrapp.database.Walk;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
@@ -25,14 +26,18 @@ import com.example.wwrapp.fitness.MockFitnessService;
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
 
+/**
+ * Represents a walking session.
+ */
 public class WalkActivity extends AppCompatActivity implements IFitnessObserver {
 
     private static final String TAG = "WalkActivity";
 
     // adding a boolean for testing
-    public static boolean ignoreTimer = false;
+    private static boolean ignoreTimer = false;
 
     private TextView mHoursTextView, mMinutesTextView, mSecondsTextView, mStepsView, mMilesView;
+    private TextView mTitleTextView;
     private Button mStopBtn;
     private TimerTask mWalkTimer;
 
@@ -53,9 +58,6 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     private int mHours;
     private int mMinutes;
     private int mSeconds;
-
-
-
 
     private LocalDateTime mDateTime;
     private IFitnessService fitnessService;
@@ -79,15 +81,13 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate called");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
 
         if(ignoreTimer){
             handleWalkStopped();
         }
-
-
-        Log.d(TAG, "onCreate called");
 
         mDateTime = LocalDateTime.now();
         mStepsSharedPreference = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
@@ -100,10 +100,22 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         mMilesView = findViewById(R.id.mileCount);
         mStopBtn = findViewById(R.id.stopButton);
 
-        // Start the service
-        Intent intent = new Intent(WalkActivity.this, MockFitnessService.class);
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-        startService(intent);
+        mTitleTextView = findViewById(R.id.walk_screen_title);
+        // Check if there's a title to set
+        Intent receivedIntent = getIntent();
+
+        Route route = (Route) (receivedIntent.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
+        Log.d(TAG, "ROute object is " + route);
+        // If there's a route extra
+        if (route != null) {
+            mTitleTextView.setText(route.getRouteName());
+        }
+
+        if (HomeScreenActivity.IS_MOCKING) {
+            Intent intent = new Intent(WalkActivity.this, MockFitnessService.class);
+            bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+            startService(intent);
+        }
 
         mWalkTimer = new TimerTask(this);
         // Register the "stop walk" button
@@ -111,6 +123,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         mStopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG,"Stop button pressed");
                 mWalkTimer.cancel(false);
                 // HomeScreenActivity.getFitnessService().updateStepCount();
                 handleWalkStopped();
@@ -122,27 +135,32 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "In method onPause");
+        Log.d(TAG, "onPause called");
         if (!mWalkTimer.isCancelled()) {
             mWalkTimer.cancel(false);
         }
 
-        // Unbind from the fitness service
-        if (mIsBound) {
-            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
-            fitnessSubject.removeObserver(WalkActivity.this);
-            unbindService(serviceConnection);
-            mIsBound = false;
+        if (HomeScreenActivity.IS_MOCKING) {
+            // Unbind from the fitness service
+            if (mIsBound) {
+                IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
+                fitnessSubject.removeObserver(WalkActivity.this);
+                unbindService(serviceConnection);
+                mIsBound = false;
+            }
         }
-        Log.d(TAG, "In method onPause");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "In method onDestroy");
+        Log.d(TAG, "onDestroy called");
         if (!mWalkTimer.isCancelled()) {
             mWalkTimer.cancel(false);
+        }
+        if (HomeScreenActivity.IS_MOCKING) {
+            Intent intent = new Intent(WalkActivity.this, MockFitnessService.class);
+            stopService(intent);
         }
     }
 
@@ -150,17 +168,14 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
      * Launches the activity to enter walk information
      */
     private void startEnterWalkInformationActivity() {
+        Log.d(TAG, "startEnterWalkInformationActivity called");
         // Pass the Walk data onto the next Activity
         Intent intent = new Intent(this, EnterWalkInformationActivity.class);
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
         Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);
         intent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
+        intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_WALK_ACTIVITY_CALLER_ID);
 
-//        Log.d(TAG, "mHours is" + mHours);
-//        Log.d(TAG, "mMinutes is " + mMinutes);
-//        Log.d(TAG, "mSeconds is " + mSeconds);
-//        Log.d(TAG, "mStepsTaken is " + mStepsTaken);
-//        Log.d(TAG, "mMiles is " + mMiles);
         Log.d(TAG, walk.toString());
 
         startActivity(intent);
@@ -170,14 +185,15 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
      * Returns data to the RoutesDetailActivity
      */
     private void returnToRouteDetailActivity() {
+        Log.d(TAG, "returnToRouteDetail called");
         Intent returnIntent = new Intent();
         // Store the new Walk as an extra
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
-        mStepsTaken = 1000; // for testing
+
+        // Create a new Walk
         Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);
         Log.d(TAG, "Walk object returned to RouteDetail is\n" + walk.toString());
         returnIntent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
-
         // Pass this Intent back
         setResult(Activity.RESULT_OK, returnIntent);
     }
@@ -186,6 +202,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
      * Decides what to do when the walk is stopped
      */
     private void handleWalkStopped() {
+        Log.d(TAG, "handleWalkStopped called");
         // Check which activity started this current one:
         Intent incomingIntent = getIntent();
         String callerId = incomingIntent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
@@ -204,7 +221,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
     @Override
     public void update(long steps) {
-        Log.d(TAG, "In method update");
+        Log.d(TAG, "IFitness Implementation: update called");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -216,12 +233,12 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     }
 
     public void updateSteps() {
-
+        Log.d(TAG, "updateSteps called");
         mStepsTaken = mCurrSteps - mStartSteps;
 
-//        Log.d(TAG, "Start steps is: " + mStartSteps);
-//        Log.d(TAG, "Current steps is: " + mCurrSteps);
-//        Log.d(TAG, "Steps taken is: " + mStepsTaken);
+        Log.d(TAG, "Start steps is: " + mStartSteps);
+        Log.d(TAG, "Current steps is: " + mCurrSteps);
+        Log.d(TAG, "Steps taken is: " + mStepsTaken);
 
         mStepsView.setText(Long.toString(mStepsTaken));
 
@@ -252,7 +269,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
         @Override
         public void onPreExecute() {
-            Log.d(TAG, "onPreExecute called");
+            Log.d(TAG, "TimerTask: onPreExecute called");
             // Get a reference to the activity
             WalkActivity walkActivity = walkActivityWeakReference.get();
             SharedPreferences heightSharedPref = walkActivity.getSharedPreferences
@@ -265,7 +282,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
         @Override
         protected String doInBackground(String... params) {
-            Log.d(TAG, "doInBackground called");
+            Log.d(TAG, "TimerTask: doInBackground called");
             while (!isCancelled()) {
                 try {
                     Thread.sleep(SLEEP_TIME);
@@ -281,14 +298,17 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
         @Override
         public void onProgressUpdate(String... text) {
-            Log.d(TAG, "onProgressUpdate called");
+            Log.d(TAG, "TimerTask: onProgressUpdate called");
             updateTime();
             // Call updateSteps in the update() via FitnessObserver
-            // updateSteps();
+            //If not mocking, the Timer Task updates the steps
+            if (!HomeScreenActivity.IS_MOCKING) {
+                updateSteps();
+            }
         }
 
         private void updateTime() {
-            Log.d(TAG, "updateTime called");
+            Log.d(TAG, "TimerTask: updateTime called");
             WalkActivity walkActivity = walkActivityWeakReference.get();
             walkActivity.mHours = (int) (time / NUM_SECONDS_PER_HOUR);
             walkActivity.mMinutes = (int) ((time / NUM_SECONDS_PER_MINUTE) % NUM_SECONDS_PER_MINUTE);
@@ -298,6 +318,30 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
             walkActivity.mMinutesTextView.setText(walkActivity.mMinutes + " min");
             walkActivity.mSecondsTextView.setText(walkActivity.mSeconds + " sec");
         }
+
+        private void updateSteps() {
+            WalkActivity walkActivity = walkActivityWeakReference.get();
+            HomeScreenActivity.fitnessService.updateStepCount();
+            walkActivity.mCurrSteps = walkActivity.mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY,0);
+            walkActivity.mStepsTaken = walkActivity.mCurrSteps - walkActivity.mStartSteps;
+            Log.d(TAG, "start steps: " + walkActivity.mStartSteps);
+            Log.d(TAG, "curr steps: " + walkActivity.mCurrSteps);
+            Log.d(TAG, "taken steps: " + walkActivity.mStepsTaken);
+
+            walkActivity.mStepsView.setText(Long.toString(walkActivity.mStepsTaken));
+
+
+            // Calculate the user's total miles
+            StepsAndMilesConverter converter = new StepsAndMilesConverter(feet, inches);
+            walkActivity.mMiles = converter.getNumMiles(walkActivity.mStepsTaken);
+            //https://www.quora.com/How-can-I-round-a-number-to-1-decimal-digit-in-Java
+            walkActivity.mMiles = Math.round(walkActivity.mMiles * TENTHS_PLACE_ROUNDING_FACTOR) / TENTHS_PLACE_ROUNDING_FACTOR;
+            walkActivity.mMilesView.setText("That's " + walkActivity.mMiles + " miles so far");
+        }
+    }
+
+    public static void setIgnoreTimer(boolean ignoreTimer){
+        WalkActivity.ignoreTimer = ignoreTimer;
     }
 
 
