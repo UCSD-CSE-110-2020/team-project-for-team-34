@@ -29,7 +29,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
     private RouteViewModel mRouteViewModel;
     private Button mAddNewRouteButton;
 
-    private static boolean sIsTest = true;
+    private static boolean sIsTest = false;
 
 
     @Override
@@ -47,10 +47,10 @@ public class RoutesActivity extends AppCompatActivity implements RouteListAdapte
 
         mRouteViewModel = new ViewModelProvider(this).get(RouteViewModel.class);
 
-//        // Testing code block
-//        if (sIsTest) {
-//            generateFakeRoute();
-//        }
+        // Testing code block
+        if (sIsTest) {
+            generateFakeRoute();
+        }
 
         mRouteViewModel.getAllRoutes().observe(this, new Observer<List<Route>>() {
             @Override
