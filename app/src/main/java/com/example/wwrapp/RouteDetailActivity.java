@@ -3,6 +3,7 @@ package com.example.wwrapp;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -62,8 +63,21 @@ public class RouteDetailActivity extends AppCompatActivity {
         TextView routeNameText = findViewById(R.id.route_detail_name);
         routeNameText.setText(route.getRouteName());
 
-        TextView startingPointTezt = findViewById(R.id.starting_point_text_view);
-        startingPointTezt.setText(route.getStartingPoint());
+        TextView startingPointText = findViewById(R.id.starting_point_text_view);
+        startingPointText.setText(route.getStartingPoint());
+        startingPointText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Open starting location on google maps
+                String startingPoint = startingPointText.getText().toString();
+                Log.d(TAG, "Transfer over to Google Maps with query of " + startingPoint );
+                Uri query = Uri.parse("geo:0,0?q=" + startingPoint );
+                Intent mapIntent = new Intent(Intent.ACTION_VIEW, query);
+                mapIntent.setPackage("com.google.android.apps.maps");
+                startActivity(mapIntent);
+            }
+        });
+
 
         LocalDateTime routeDate = route.getDate();
         if (routeDate == null) {
