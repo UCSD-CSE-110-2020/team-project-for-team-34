@@ -88,7 +88,7 @@
             android:id="@+id/loop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="loop"
+            android:text="@string/loop"
 
             />
 
@@ -96,7 +96,7 @@
             android:id="@+id/out"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="out-and-back"
+            android:text="@string/out_and_back"
             app:layout_constraintEnd_toEndOf="parent"
 
             />
@@ -119,7 +119,7 @@
             android:id="@+id/flat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="flat"
+            android:text="@string/flat"
 
             />
 
@@ -127,7 +127,7 @@
             android:id="@+id/hilly"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="hilly"
+            android:text="@string/hilly"
 
             />
 
@@ -149,7 +149,7 @@
             android:id="@+id/streets"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="streets"
+            android:text="@string/streets"
 
             />
 
@@ -157,7 +157,7 @@
             android:id="@+id/trail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="trail" />
+            android:text="@string/trail" />
 
     </RadioGroup>
 
@@ -177,13 +177,13 @@
             android:id="@+id/even"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="even" />
+            android:text="@string/even" />
 
         <RadioButton
             android:id="@+id/uneven"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="uneven"
+            android:text="@string/uneven"
 
             />
 
@@ -205,7 +205,7 @@
             android:id="@+id/easy"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="easy"
+            android:text="@string/easy"
 
             />
 
@@ -213,7 +213,7 @@
             android:id="@+id/moderate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="moderate"
+            android:text="@string/moderate"
 
             />
 
@@ -221,7 +221,7 @@
             android:id="@+id/difficult"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="difficult"
+            android:text="@string/difficult"
 
             />
 
@@ -248,7 +248,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
-            android:text="Add to favorite"
+            android:text="@string/add_favorite"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -269,14 +269,14 @@
             android:id="@+id/notes_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Notes:" />
+            android:text="@string/notes" />
 
         <EditText
             android:id="@+id/notes_edit"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:ems="10"
-            android:hint=""
+            android:hint="@string/empty"
             android:inputType="textMultiLine"
             android:text="" />
     </LinearLayout>
