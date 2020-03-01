@@ -1,5 +1,7 @@
 package com.example.wwrapp;
 
+import java.sql.Timestamp;
+
 /**
  * Contains constants for use throughout the project
  */
@@ -74,6 +76,36 @@ public final class WWRConstants {
     public static String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
     public static final long NO_MOCK_TIME = -1;
 
+    //DataBase collection Strings
+    public static String USER_COLLECTION_KEY = "users";
+    public static String TEAM_COLLECTION_KEY = "teams";
+    public static String DEFAULT_DATABASE_VALUE = "";
+    public static String USER_EMAIL_KEY = "email";
+    public static String USER_NAME_KEY = "name";
+    public static String USER_ROUTES_OWNED_KEY = "routesOwned";
+    public static String USER_ROUTES_NOT_OWNED_KEY = "routesNotOwned";
+    public static String USER_TEAM_KEY = "team";
+    public static String USER_TEAM_PENDING_KEY = "teamPendingDemoTeam";
+    public static String TEAM_NAME_KEY = "name";
+    public static String TEAM_USERS_KEY = "users";
+    public static String ROUTE_STARTING_POINT_KEY = "startingPoint";
+    public static String ROUTE_STEPS_KEY = "steps";
+    public static String ROUTE_MILES_KEY = "miles";
+    public static String ROUTE_DATE_KEY = "date";
+    public static String ROUTE_TAGS_KEY = "tag";
+    public static String TAG_NAME_KEY = "name";
+    public static String TAG_LOOP_KEY = "loop";
+    public static String TAG_OUTANDBACK_KEY = "outAndBack";
+    public static String TAG_FLAT_KEY = "flat";
+    public static String TAG_HILLY_KEY = "hilly";
+    public static String TAG_STREETS_KEY = "streets";
+    public static String TAG_TRAIL_KEY = "trail";
+    public static String TAG_EVEN_KEY = "even";
+    public static String TAG_UNEVEN_KEY = "uneven";
+    public static String TAG_EASY_KEY = "easy";
+    public static String TAG_MODERATE_KEY = "moderate";
+    public static String TAG_DIFFICULT_KEY = "difficult";
+    public static String TAG_FAVORITE_KEY = "favorite";
 
 
     public static final boolean PRODUCTION_VERSION = false;

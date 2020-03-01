@@ -168,4 +168,9 @@ public class GoogleFitAdapter implements IFitnessService, IFitnessSubject {
             fitnessObserver.update(mStepCount);
         }
     }
+
+    //Add user to database or log user into database
+    public GoogleSignInAccount getAccount() {
+        return account;
+    }
 }
