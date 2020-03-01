@@ -42,10 +42,10 @@
     <string name="last_walk_distance">Last walk\'s distance</string>
 
     <string name="mock">mock</string>
-    <string name="you_ve_walked">You've walked</string>
+    <string name="you_ve_walked">You\'ve walked</string>
     <string name="zero_step">0</string>
     <string name="steps_on_this_walk">Steps on this walk</string>
-    <string name="miles_so_far">That's 0.0 miles so far</string>
+    <string name="miles_so_far">That\'s 0.0 miles so far</string>
     <string name="zero_hr">0 hr</string>
     <string name="zero_min">0 min</string>
     <string name="zero_sec">0 sec</string>
@@ -67,4 +67,4 @@
     <string name="sample_miles">Miles: 000.0</string>
     <string name="sample_step">Steps: 000000</string>
 
-    </resources>
+</resources>
