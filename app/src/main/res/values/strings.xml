@@ -34,5 +34,11 @@
     <string name="add_member_email_text">Email: </string>
     <string name="add_member_title">Add Team Member</string>
 
+    <!-- For Invite Member Screen xml file-->
+    <string name="invite_screen_title">Team Invite</string>
+    <string name="invite_accept">Accept</string>
+    <string name="invite_decline">Decline</string>
+    <string name="invite_description">Invited you to their team</string>
+
 
 </resources>
