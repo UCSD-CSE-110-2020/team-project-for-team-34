@@ -181,7 +181,7 @@ public class RouteDetailActivity extends AppCompatActivity {
                 route.setSteps(walk.getSteps());
                 route.setMiles(walk.getMiles());
 
-                Log.d(TAG, "Route object in RouteDetailActivity is\n" + route.toString());
+                // Log.d(TAG, "Route object in RouteDetailActivity is\n" + route.toString());
 
                 // Return data to the routes activity
                 returnToRoutesActivity(route);

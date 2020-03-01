@@ -32,6 +32,7 @@ public final class WWRConstants {
     public static final String EXTRA_MANUALLY_CREATED_ROUTE_KEY =
             "com.example.wwrapp.EXTRA_MANUALLY_CREATED_ROUTE_KEY";
     public static final String EXTRA_DAILY_STEPS_KEY = "com.example.wwrapp.EXTRA_DAILY_STEPS_KEY";
+    public static final String EXTRA_ROUTE_ID_KEY = "com.example.wwrapp.EXTRA_ROUTE_ID_KEY";
 
     // SharedPreferences constants
 
@@ -73,6 +74,14 @@ public final class WWRConstants {
     // Mocks
     public static String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
     public static final long NO_MOCK_TIME = -1;
+
+    // Firestore collection constants
+    public static final String FIRESTORE_COLLECTION_USER_PATH = "users";
+
+    // Firestore document constants
+    public static final String FIRESTORE_DOCUMENT_ROUTE_NAME = "routeName";
+    public static final String FIRESTORE_DOCUMENT_STARTING_POINT = "startingPoint";
+
 
 
 

@@ -7,8 +7,6 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.wwrapp.database.Route;
-import com.example.wwrapp.database.RouteDao;
-import com.example.wwrapp.database.RouteRoomDatabase;
 
 import org.junit.After;
 import org.junit.Before;
