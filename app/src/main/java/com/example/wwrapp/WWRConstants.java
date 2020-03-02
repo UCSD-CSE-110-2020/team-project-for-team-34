@@ -61,7 +61,9 @@ public final class WWRConstants {
 
 
     // Date format
-    public static final String DATE_FORMATTER_PATTERN = "MM-dd-yyyy: HH:mm";
+    public static final String DATE_FORMATTER_PATTERN_DETAILED = "MM-dd-yyyy: HH:mm";
+    public static final String DATE_FORMATTER_PATTERN_SUMMARY = "MM-dd-yyyy";
+
 
 
     // Fitness Service constants
@@ -77,6 +79,11 @@ public final class WWRConstants {
 
     // Firestore collection constants
     public static final String FIRESTORE_COLLECTION_USER_PATH = "users";
+    public static final String FIRESTORE_COLLECTION_MY_ROUTES_PATH = "myRoutes";
+
+    // For testing only
+    public static final String FIRESTORE_DOCUMENT_DUMMY_USER_PATH = "dummyUser";
+
 
     // Firestore document constants
     public static final String FIRESTORE_DOCUMENT_ROUTE_NAME = "routeName";

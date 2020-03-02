@@ -15,11 +15,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.example.wwrapp.database.Route;
-import com.example.wwrapp.database.Walk;
+import com.example.wwrapp.model.Route;
+import com.example.wwrapp.model.Walk;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -62,17 +63,19 @@ public class RouteDetailActivity extends AppCompatActivity {
         TextView routeNameText = findViewById(R.id.route_detail_name);
         routeNameText.setText(route.getRouteName());
 
-        TextView startingPointTezt = findViewById(R.id.starting_point_text_view);
-        startingPointTezt.setText(route.getStartingPoint());
+        TextView startingPointText = findViewById(R.id.starting_point_text_view);
+        startingPointText.setText(route.getStartingPoint());
 
-        LocalDateTime routeDate = route.getDate();
+        Date routeDate = route.getDate();
         if (routeDate == null) {
-            routeDate = LocalDateTime.now();
+            // Convert LocalDateTime to Date
+            routeDate = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
         }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
-        String formattedDate = routeDate.format(formatter);
+        //TODO: Migrate from LocalDateTime
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+//        String formattedDate = routeDate.format(formatter);
         TextView routeDateText = findViewById(R.id.route_detail_date);
-        routeDateText.setText(formattedDate);
+        routeDateText.setText(routeDate.toString());
 
         double miles = route.getMiles();
         TextView routeMilesText = findViewById(R.id.miles_text_view);

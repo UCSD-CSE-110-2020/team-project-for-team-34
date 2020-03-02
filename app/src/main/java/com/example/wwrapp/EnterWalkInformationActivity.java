@@ -13,11 +13,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wwrapp.database.Route;
-import com.example.wwrapp.database.Walk;
+import com.example.wwrapp.model.Route;
+import com.example.wwrapp.model.Walk;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -223,7 +223,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 Walk walk = (Walk) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
                 long walkSteps = walk.getSteps();
                 double walkMiles = walk.getMiles();
-                LocalDateTime walkDate = walk.getDate();
+                Date walkDate = walk.getDate();
                 String duration = walk.getDuration();
 
                 Log.d(TAG, walk.toString());

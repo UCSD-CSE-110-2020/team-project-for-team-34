@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -23,13 +22,8 @@ import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
 import com.example.wwrapp.fitness.MockFitnessService;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -51,7 +45,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
 
     // True to enable the FitnessRunner, false otherwise
-    private static boolean sEnableFitnessRunner = true;
+    private static boolean sEnableFitnessRunner = false;
     private static boolean sIgnoreHeight = false;
 
     public static boolean IS_MOCKING = false;
@@ -118,23 +112,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
         Log.e(TAG, "In method onCreate");
-
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        Map<String, Object> test = new HashMap<>();
-        test.put(WWRConstants.FIRESTORE_DOCUMENT_ROUTE_NAME, "testRouteName");
-        firestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document("TestUser")
-                .set(test).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.e(TAG, "DocumentSnapshot successfully written!");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
 
         mStepsTextView = findViewById(R.id.homeSteps);
         mMilesTextView = findViewById(R.id.homeMiles);
