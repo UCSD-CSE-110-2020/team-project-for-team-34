@@ -32,7 +32,11 @@ public final class WWRConstants {
     public static final String EXTRA_MANUALLY_CREATED_ROUTE_KEY =
             "com.example.wwrapp.EXTRA_MANUALLY_CREATED_ROUTE_KEY";
     public static final String EXTRA_DAILY_STEPS_KEY = "com.example.wwrapp.EXTRA_DAILY_STEPS_KEY";
+
+    // Firestore Keys
     public static final String EXTRA_ROUTE_ID_KEY = "com.example.wwrapp.EXTRA_ROUTE_ID_KEY";
+    public static final String EXTRA_ROUTE_PATH_KEY = "com.example.wwrapp.EXTRA_ROUTE_PATH_KEY";
+
 
     // SharedPreferences constants
 

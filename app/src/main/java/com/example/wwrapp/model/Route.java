@@ -1,10 +1,8 @@
 package com.example.wwrapp.model;
 
 import com.google.firebase.firestore.IgnoreExtraProperties;
-import com.google.firebase.firestore.ServerTimestamp;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,8 +24,6 @@ public class Route implements Serializable {
     // All the information that a Route should store
     private String routeName;
     private String startingPoint;
-    @ServerTimestamp
-    private Date date;
     private String duration;
     private long steps;
     private double miles;
@@ -48,7 +44,6 @@ public class Route implements Serializable {
      *
      * @param routeName
      * @param startingPoint
-     * @param date
      * @param duration
      * @param steps
      * @param miles
@@ -56,11 +51,10 @@ public class Route implements Serializable {
      * @param isFavorite
      * @param notes
      */
-    public Route(String routeName, String startingPoint, Date date, String duration,
+    public Route(String routeName, String startingPoint, String duration,
                  long steps, double miles, List<String> tags, boolean isFavorite, String notes) {
         this.routeName = routeName;
         this.startingPoint = startingPoint;
-        this.date = date;
         this.duration = duration;
         this.steps = steps;
         this.miles = miles;
@@ -84,14 +78,6 @@ public class Route implements Serializable {
 
     public void setStartingPoint(String startingPoint) {
         this.startingPoint = startingPoint;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public String getDuration() {
@@ -167,9 +153,9 @@ public class Route implements Serializable {
             routesAreEqual = this.getStartingPoint().equals(other.getStartingPoint());
         }
 
-        if (this.getDate() != null) {
-            routesAreEqual = this.getDate().equals(other.getDate());
-        }
+//        if (this.getDate() != null) {
+//            routesAreEqual = this.getDate().equals(other.getDate());
+//        }
 
         if (this.getDuration() != null) {
             routesAreEqual = this.getDuration().equals(other.getDuration());
@@ -197,7 +183,7 @@ public class Route implements Serializable {
         stringBuilder.append("Route:\n");
         stringBuilder.append("Route name: ").append(this.getRouteName()).append("\n");
         stringBuilder.append("Route starting point: ").append(this.getStartingPoint()).append("\n");
-        stringBuilder.append("Route date: ").append(this.getDate()).append("\n");
+//        stringBuilder.append("Route date: ").append(this.getDate()).append("\n");
         stringBuilder.append("Route duration: ").append(this.getDuration()).append("\n");
         stringBuilder.append("Route steps: ").append(this.getSteps()).append("\n");
         stringBuilder.append("Route miles: ").append(this.getMiles()).append("\n");

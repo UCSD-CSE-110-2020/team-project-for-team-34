@@ -18,10 +18,6 @@ import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-
 /**
  * Adapter for the Route Recycler View
  * TODO:
@@ -56,15 +52,15 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
         holder.routeStartingPoint.setText(model.getStartingPoint());
 
         // Set date
-        Date date = model.getDate();
-        if (date == null) {
-            // Convert LocalDateTime to Date
-            date = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
-        }
+//        Date date = model.getDate();
+//        if (date == null) {
+//            // Convert LocalDateTime to Date
+//            date = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
+//        }
         // TODO: Migrate from LocalDateTime
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_SUMMARY);
 //        String formattedDate = date.format(formatter);
-        holder.routeDate.setText(date.toString());
+        holder.routeDate.setText("DATE in progress");
 
         // Set steps and miles
         holder.routeSteps.setText(String.valueOf(model.getSteps()));

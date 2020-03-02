@@ -190,7 +190,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         Log.d(TAG, "In method returnToRoutesActivity");
         Intent returnIntent = new Intent();
         // Create a new route, but without any walk stats
-        Route route = new Route(mRouteName, mStartingPoint, null, null, 0,
+        Route route = new Route(mRouteName, mStartingPoint, null, 0,
                 0, mTags, mRouteFavorite, mNotes);
 
         returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
@@ -230,7 +230,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
 
                 // Bundle up data to pass to the Routes activity
                 outgoingIntent = new Intent(EnterWalkInformationActivity.this, RoutesActivity.class);
-                route = new Route(mRouteName, mStartingPoint, walkDate, duration, walkSteps,
+                route = new Route(mRouteName, mStartingPoint, duration, walkSteps,
                         walkMiles, mTags, mRouteFavorite, mNotes);
 
                 outgoingIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);

@@ -25,7 +25,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class RoutesActivity extends AppCompatActivity implements RouteAdapter.OnRouteSelectedListener {
 
@@ -88,9 +88,9 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                 Intent incomingIntent = getIntent();
                 Route route = (Route) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
-                if (route.getDate() == null) {
-                    Log.e(TAG, "LocalDateTime is null");
-                }
+//                if (route.getDate() == null) {
+//                    Log.e(TAG, "LocalDateTime is null");
+//                }
 
                 // Log.d(TAG, route.toString());
 
@@ -120,7 +120,8 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                 // TODO: Remove upon migration from LocalDateTime
 //                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);
 //                String formattedDate = route.getDate().format(dateTimeFormatter);
-                Date date = route.getDate();
+//                Date date = route.getDate();
+                LocalDateTime date = LocalDateTime.now();
                 editor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, date.toString());
 
                 editor.apply();
@@ -173,7 +174,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
         CollectionReference myRoutes = userDoc.collection(WWRConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH);
 
         // Query for the user's routes
-        mQuery = myRoutes.orderBy(Route.FIELD_NAME, Query.Direction.ASCENDING);
+        mQuery = myRoutes.orderBy(Route.FIELD_NAME, Query.Direction.DESCENDING);
     }
 
     private void initRecyclerView() {
@@ -249,9 +250,37 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                 if (route == null) {
                     Log.d(TAG, "Route object returned in onActivityResult is null");
                 } else {
-                    // TODO: Update a re-walk
+                    // TODO: Update a re-walk and find user based on email/key
                     // Otherwise, update the appropriate route object
                     Log.d(TAG, route.toString());
+
+                    // Traverse the data hierarchy
+                    CollectionReference userRef = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
+                    DocumentReference userDoc = userRef.document(WWRConstants.FIRESTORE_DOCUMENT_DUMMY_USER_PATH);
+                    CollectionReference myRoutesCol = userDoc.collection(WWRConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH);
+
+                    // TODO: Find a simpler way to get the reference to the document to be updated
+                    String path = data.getStringExtra(WWRConstants.EXTRA_ROUTE_PATH_KEY);
+                    int indexOfLastSlash = path.lastIndexOf("/");
+                    String docName = path.substring(indexOfLastSlash + 1);
+                    Log.d(TAG, "Received doc key is " + docName);
+
+                    // Perform the update
+                    myRoutesCol.document(docName).update(
+                            Route.FIELD_STEPS, route.getSteps(),
+                            Route.FIELD_MILES, route.getMiles()
+                    ).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "DocumentSnapshot successfully updated!");
+                        }
+                    })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error updating document", e);
+                                }
+                            });
                 }
             } else {
                 // If the RouteDetailActivity did not finish normally, do nothing
@@ -264,7 +293,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                 Route route = (Route) (data.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
                 // Log.d(TAG, route.toString());
 
-                // TODO: Get the document corresponding to this user and update the Route.
+                // TODO: Get the document corresponding to this user and add the Route.
                 // TODO: Currently, there is only a dummy user
                 // Traverse the data hierarchy
                 CollectionReference userCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
@@ -296,7 +325,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
     }
 
     public void generateFakeRoute() {
-        Route testRoute = new Route("route", "staring", null, "", 10, 10, null, true, "");
+        Route testRoute = new Route("route", "staring", "", 10, 10, null, true, "");
 //        mRouteViewModel.insert(testRoute);
     }
 
@@ -309,11 +338,14 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
         Route route = documentSnapshot.toObject(Route.class);
         String routeId = documentSnapshot.getId();
         String path = documentSnapshot.getReference().getPath();
+        Log.d(TAG, "Route id is " + route);
+        Log.d(TAG, "Path is " + path);
 
         // When a route is tapped, launch its detail page:
         Intent intent = new Intent(RoutesActivity.this, RouteDetailActivity.class);
         intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
         intent.putExtra(WWRConstants.EXTRA_ROUTE_ID_KEY, routeId);
+        intent.putExtra(WWRConstants.EXTRA_ROUTE_PATH_KEY, path);
 
         startActivityForResult(intent, START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE);
     }
