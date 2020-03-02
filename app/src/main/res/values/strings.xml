@@ -8,13 +8,27 @@
     <string name="hint_route_name">Route name</string>
     <string name="label_starting_point">Starting point</string>
     <string name="hint_starting_point">Starting point</string>
-    <string name="title_activity_home_screen">MockHomeScreenActivitytivity</string>
+    <string name="title_activity_home_screen">MockHomeScreenActivity</string>
     <string name="home_screen_step_string">Your steps for the day:</string>
     <string name="home_screen_miles_string">Your miles for the day:</string>
     <string name="home_toolbar_string">Home</string>
     <string name="start_new_walk_string">Start new walk/run</string>
     <string name="routes_screen_button_label">Go to Routes</string>
-    <string name="plus"> + </string>
+    <string name="plus">+</string>
+    <string name="loop">loop</string>
+    <string name="out_and_back">out-and-back</string>
+    <string name="flat">flat</string>
+    <string name="hilly">hilly</string>
+    <string name="streets">streets</string>
+    <string name="trail">trail</string>
+    <string name="even">even</string>
+    <string name="uneven">uneven</string>
+    <string name="easy">easy</string>
+    <string name="moderate">moderate</string>
+    <string name="difficult">difficult</string>
+    <string name="add_favorite">Add to favorite</string>
+    <string name="notes">Notes:</string>
+    <string name="empty"></string>
 
 
     <string name="title_activity_height_page">HeightScreenActivity</string>
@@ -40,5 +54,30 @@
     <string name="invite_decline">Decline</string>
     <string name="invite_description">Invited you to their team</string>
 
+    <string name="mock">mock</string>
+    <string name="you_ve_walked">You\'ve walked</string>
+    <string name="zero_step">0</string>
+    <string name="steps_on_this_walk">Steps on this walk</string>
+    <string name="miles_so_far">That\'s 0.0 miles so far</string>
+    <string name="zero_hr">0 hr</string>
+    <string name="zero_min">0 min</string>
+    <string name="zero_sec">0 sec</string>
+    <string name="stop_and_save_changes">Stop and save changes</string>
+    <string name="add_five_hundred_Steps">Add 500 Steps</string>
+    <string name="set_ms">set ms</string>
+    <string name="tags">Tags:</string>
+    <string name="date">Date:</string>
+    <string name="route_name">Route_name</string>
+    <string name="x">X</string>
+    <string name="starting_Point">Starting Point: </string>
+    <string name="steps">Steps: </string>
+    <string name="miles">Miles: </string>
+    <string name="start_walk">Start Walk</string>
+    <string name="edit">Edit</string>
+    <string name="stop">stop</string>
+    <string name="staring_point">staring_point</string>
+    <string name="sample_time">2000/01/01</string>
+    <string name="sample_miles">Miles: 000.0</string>
+    <string name="sample_step">Steps: 000000</string>
 
 </resources>
