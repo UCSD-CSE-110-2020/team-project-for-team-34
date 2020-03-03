@@ -228,7 +228,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
          editor.apply();
 
          //Initialize DB
-         FirebaseApp.initializeApp(this);
          db = FirebaseFirestore.getInstance();
          createUser();
 
