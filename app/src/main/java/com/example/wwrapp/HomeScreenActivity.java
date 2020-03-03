@@ -1,14 +1,10 @@
 package com.example.wwrapp;
 
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -17,11 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.wwrapp.fitness.FitnessServiceFactory;
-import com.example.wwrapp.fitness.GoogleFitAdapter;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
-import com.example.wwrapp.fitness.IFitnessSubject;
-import com.example.wwrapp.fitness.MockFitnessService;
 
 import java.lang.ref.WeakReference;
 
@@ -40,13 +33,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     // String constants
     public static final String NO_LAST_WALK_TIME_TEXT = "No last walk time available";
 
-    // FitnessService keys
-    private static final String fitnessServiceKey = "GOOGLE_FIT";
-    public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
-
     // True to enable the FitnessRunner, false otherwise
     private static boolean sEnableFitnessRunner = false;
-    private static boolean sIgnoreHeight = false;
+    private static boolean sIgnoreHeight = true;
 
     public static boolean IS_MOCKING = false;
     private boolean mIsBound;
@@ -61,51 +50,18 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     // User data
     private int mFeet, mInches;
-
     private long mDailyTotalSteps;
     private double mDailyTotalMiles;
-
     private long mLastWalkSteps;
     private double mLastWalkMiles;
     private String mLastWalkTime;
 
+    // Fitness service
+    // TODO: Implement proper mocking of FitnessServices. Google Fit needs to be decoupled from
+    // TODO: HomeScreenActivity
     public static IFitnessService fitnessService;
+    // TODO: Eliminate this FitnessAsyncTask once proper dependency injection has been applied.
     private static FitnessAsyncTask fitnessRunner;
-
-    private ServiceConnection googleServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MockFitnessService.LocalBinder localService = (MockFitnessService.LocalBinder) service;
-            Log.d(TAG, "Assigned fitness service in onServiceConnected");
-            fitnessService = localService.getService();
-            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
-            fitnessSubject.registerObserver(HomeScreenActivity.this);
-            mIsBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsBound = false;
-        }
-    };
-
-
-    private ServiceConnection mockServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MockFitnessService.LocalBinder localService = (MockFitnessService.LocalBinder) service;
-            Log.d(TAG, "Assigned fitness service in onServiceConnected");
-            fitnessService = localService.getService();
-            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
-            fitnessSubject.registerObserver(HomeScreenActivity.this);
-            mIsBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsBound = false;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +78,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         // Check for a saved height
         if (!sIgnoreHeight) {
             if (!checkHasHeight()) {
@@ -136,7 +91,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
         // Update the UI
         updateUi();
-
 
         // Register the start walk button
         findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
@@ -172,7 +126,30 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
          editor.clear();
          editor.apply();
 
-        Log.d(TAG, "Right before creating Mock Fitness object");
+         // Get fitness service, if one doesn't already exist
+        if (fitnessService == null) {
+            Intent intent = getIntent();
+            String fitnessServiceKey = intent.getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
+            // If the factory key is null, use the DummyFitnessService by default:
+            if (fitnessServiceKey == null) {
+                fitnessService = FitnessServiceFactory.createFitnessService(WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY, this);
+            } else {
+                fitnessService = FitnessServiceFactory.createFitnessService(fitnessServiceKey, this);
+            }
+
+            fitnessService.setup();
+            fitnessService.updateStepCount();
+
+            // TODO: Remove this coupling of the fitness AsyncTask
+            // Check if Google Fit is being used; only start this async task if Google Fit is used
+            if (WWRConstants.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY.equals(fitnessServiceKey)) {
+                // Start the Home screen steps/miles updating in the background
+                fitnessRunner = new FitnessAsyncTask(this);
+                if (sEnableFitnessRunner) {
+                    fitnessRunner.execute();
+                }
+            }
+        }
     }
 
     @Override
@@ -180,17 +157,13 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "In method onActivityResult");
 
-        // If mocking is requested
+        // If returning from the mock screen
         if (requestCode == MOCK_ACTIVITY_REQUEST_CODE) {
             if (IS_MOCKING) {
                 // Stop Google Fit
                 fitnessRunner.cancel(false);
                 // Start the mocking service
-                Intent intent = new Intent(HomeScreenActivity.this, MockFitnessService.class);
-                // Tell the service how many steps there are in the current day
-                intent.putExtra(WWRConstants.EXTRA_DAILY_STEPS_KEY, mDailyTotalSteps);
-                bindService(intent, mockServiceConnection, Context.BIND_AUTO_CREATE);
-                startService(intent);
+                // TODO: Implement mocking service
             }
         } else {
             // If authentication was required during google fit setup, this will be called after the user authenticates
@@ -213,31 +186,20 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onStart();
         if (IS_MOCKING) {
             // Cancel Google Fit
-            if (!fitnessRunner.isCancelled()) {
+            if (fitnessRunner != null && !fitnessRunner.isCancelled()) {
                 fitnessRunner.cancel(false);
             }
-            Intent intent = new Intent(HomeScreenActivity.this, MockFitnessService.class);
-            // Tell the service how many steps there are in the current day
-            intent.putExtra(WWRConstants.EXTRA_DAILY_STEPS_KEY, mDailyTotalSteps);
-            bindService(intent, mockServiceConnection, Context.BIND_AUTO_CREATE);
-            startService(intent);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (!fitnessRunner.isCancelled()) {
+        if (fitnessRunner != null && !fitnessRunner.isCancelled()) {
             fitnessRunner.cancel(false);
         }
         if (IS_MOCKING) {
-            // Unbind from the fitness service
-            if (mIsBound) {
-                IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
-                fitnessSubject.removeObserver(HomeScreenActivity.this);
-                unbindService(mockServiceConnection);
-                mIsBound = false;
-            }
+            // TODO: Implement true mock
         }
         saveData();
         Log.d(TAG, "In method onPause");
@@ -255,12 +217,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         Log.d(TAG, "In method onDestroy");
 
         if (IS_MOCKING) {
-            if (mIsBound) {
-                unbindService(mockServiceConnection);
-                mIsBound = false;
-            }
-            Intent intent = new Intent(HomeScreenActivity.this, MockFitnessService.class);
-            stopService(intent);
+            // TODO: Implement true mock
         }
         saveData();
     }
@@ -270,25 +227,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onResume();
         Log.d(TAG, "In method onResume");
         Log.d(TAG , "Mocking? " + IS_MOCKING);
-        // If not mocking, use Google Fit
-        if (!IS_MOCKING) {
-            // Initialize the FitnessService implementation
-            FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
-                @Override
-                public IFitnessService create(HomeScreenActivity homeScreenActivity) {
-                    return new GoogleFitAdapter(homeScreenActivity);
-                }
-            });
-            fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
-            fitnessService.setup();
-            fitnessService.updateStepCount();
+        // TODO: Keep in mind that you may have to reinitialize the fitness service in onResume
 
-            // Start the Home screen steps/miles updating in the background
-            fitnessRunner = new FitnessAsyncTask(this);
-            if (sEnableFitnessRunner) {
-                fitnessRunner.execute();
-            }
-        }
         initSavedData();
         updateUi();
     }
@@ -397,7 +337,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
      * Starts the WalkActivity
      */
     private void startWalkActivity() {
-        if (!fitnessRunner.isCancelled()) {
+        if (fitnessRunner != null && !fitnessRunner.isCancelled()) {
             Log.w(TAG, "Fitness runner to be canceled");
             fitnessRunner.cancel(false);
         }
@@ -411,7 +351,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
      * Starts the RoutesActivity
      */
     private void startRoutesActivity() {
-        if (!fitnessRunner.isCancelled()) {
+        if (fitnessRunner != null && !fitnessRunner.isCancelled()) {
             fitnessRunner.cancel(false);
         }
         Intent intent = new Intent(HomeScreenActivity.this, RoutesActivity.class);

@@ -71,14 +71,20 @@ public final class WWRConstants {
 
 
     // Fitness Service constants
-    public static final String EXTRA_FITNESS_SERVICE_VERSION_KEY = "com.example.wwrapp.EXTRA_FITNESS_SERVICE_VERSION_KEY";
+    public static final String EXTRA_FITNESS_SERVICE_TYPE_KEY = "com.example.wwrapp.EXTRA_FITNESS_SERVICE_VERSION_KEY";
+    public static final String GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY =
+            "com.example.wwrapp.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY";
+    public static final String DUMMY_FITNESS_SERVICE_FACTORY_KEY =
+            "com.example.wwrapp.DUMMY_FITNESS_SERVICE_FACTORY_KEY";
+
+
+
+
     public static final String GOOGLE_FIT_VERSION = "com.example.wwrapp.GOOGLE_FIT_VERSION";
     // Default fitness service
     public static String FITNESS_SERVICE_VERSION = GOOGLE_FIT_VERSION;
-
-
     // Mocks
-    public static String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
+    public static final String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
     public static final long NO_MOCK_TIME = -1;
 
     // Firestore collection constants
