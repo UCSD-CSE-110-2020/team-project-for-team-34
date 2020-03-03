@@ -1,28 +1,29 @@
-package com.example.wwrapp.database;
+package com.example.wwrapp.model;
 
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
-import androidx.room.TypeConverters;
+import com.google.firebase.firestore.IgnoreExtraProperties;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
  * Represents a route that the user has walked
  */
-@Entity(tableName = "route_table")
-@TypeConverters({LocalDateTimeConverter.class, ListConverter.class})
-
+@IgnoreExtraProperties
 public class Route implements Serializable {
 
-    @PrimaryKey(autoGenerate = true)
-    private int id;
+    public static final String FIELD_NAME = "routeName";
+    public static final String FIELD_STARTING_POINT = "startingPoint";
+    public static final String FIELD_DATE = "date";
+    public static final String FIELD_STEPS = "steps";
+    public static final String FIELD_MILES = "miles";
+    public static final String FIELD_FAVORITE = "favorite";
+    public static final String FIELD_TAGS = "tags";
+    public static final String FIELD_NOTES = "notes";
+
 
     // All the information that a Route should store
     private String routeName;
     private String startingPoint;
-    private LocalDateTime date;
     private String duration;
     private long steps;
     private double miles;
@@ -32,13 +33,17 @@ public class Route implements Serializable {
     private boolean isFavorite;
     private String notes;
 
+    /**
+     * Empty constructor required for Firestore
+     */
+    public Route() {
+    }
 
     /**
      * Constructor with additional information: tags, favorite, notes
      *
      * @param routeName
      * @param startingPoint
-     * @param date
      * @param duration
      * @param steps
      * @param miles
@@ -46,25 +51,16 @@ public class Route implements Serializable {
      * @param isFavorite
      * @param notes
      */
-    public Route(String routeName, String startingPoint, LocalDateTime date, String duration,
+    public Route(String routeName, String startingPoint, String duration,
                  long steps, double miles, List<String> tags, boolean isFavorite, String notes) {
         this.routeName = routeName;
         this.startingPoint = startingPoint;
-        this.date = date;
         this.duration = duration;
         this.steps = steps;
         this.miles = miles;
         this.tags = tags;
         this.isFavorite = isFavorite;
         this.notes = notes;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getRouteName() {
@@ -81,14 +77,6 @@ public class Route implements Serializable {
 
     public void setStartingPoint(String startingPoint) {
         this.startingPoint = startingPoint;
-    }
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
     }
 
     public String getDuration() {
@@ -140,61 +128,12 @@ public class Route implements Serializable {
     }
 
     @Override
-    public boolean equals(Object object) {
-
-        // The same object equals itself
-        if (object == this) {
-            return true;
-        }
-
-        // Check if the object passed in is actually a Route
-        if (!(object instanceof Route)) {
-            return false;
-        }
-
-        // Now we've verified that object is a Route type
-        Route other = (Route) object;
-
-        // Compare the two Routes
-        boolean routesAreEqual = false;
-
-        routesAreEqual = this.getRouteName().equals(other.getRouteName());
-
-        if (this.getStartingPoint() != null) {
-            routesAreEqual = this.getStartingPoint().equals(other.getStartingPoint());
-        }
-
-        if (this.getDate() != null) {
-            routesAreEqual = this.getDate().equals(other.getDate());
-        }
-
-        if (this.getDuration() != null) {
-            routesAreEqual = this.getDuration().equals(other.getDuration());
-        }
-
-        routesAreEqual = (Long.compare(this.getSteps(), other.getSteps()) == 0);
-        routesAreEqual = (Double.compare(this.getMiles(), other.getMiles()) == 0);
-
-        if (this.getTags() != null) {
-            routesAreEqual = this.getTags().equals(other.getTags());
-        }
-
-        routesAreEqual = this.isFavorite() == other.isFavorite();
-
-        if (this.getNotes() != null) {
-            routesAreEqual = this.getNotes().equals(other.getNotes());
-        }
-
-        return routesAreEqual;
-    }
-
-    @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Route:\n");
         stringBuilder.append("Route name: ").append(this.getRouteName()).append("\n");
         stringBuilder.append("Route starting point: ").append(this.getStartingPoint()).append("\n");
-        stringBuilder.append("Route date: ").append(this.getDate()).append("\n");
+//        stringBuilder.append("Route date: ").append(this.getDate()).append("\n");
         stringBuilder.append("Route duration: ").append(this.getDuration()).append("\n");
         stringBuilder.append("Route steps: ").append(this.getSteps()).append("\n");
         stringBuilder.append("Route miles: ").append(this.getMiles()).append("\n");
@@ -209,9 +148,6 @@ public class Route implements Serializable {
         stringBuilder.append("\n");
         stringBuilder.append("Route favorite? ").append(this.isFavorite).append("\n");
         stringBuilder.append("Route notes: ").append(this.getNotes());
-
         return stringBuilder.toString();
     }
-
-
 }

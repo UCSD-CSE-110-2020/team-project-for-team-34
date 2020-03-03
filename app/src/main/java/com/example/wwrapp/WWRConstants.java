@@ -33,6 +33,11 @@ public final class WWRConstants {
             "com.example.wwrapp.EXTRA_MANUALLY_CREATED_ROUTE_KEY";
     public static final String EXTRA_DAILY_STEPS_KEY = "com.example.wwrapp.EXTRA_DAILY_STEPS_KEY";
 
+    // Firestore Keys
+    public static final String EXTRA_ROUTE_ID_KEY = "com.example.wwrapp.EXTRA_ROUTE_ID_KEY";
+    public static final String EXTRA_ROUTE_PATH_KEY = "com.example.wwrapp.EXTRA_ROUTE_PATH_KEY";
+
+
     // SharedPreferences constants
 
     // Height file
@@ -60,7 +65,9 @@ public final class WWRConstants {
 
 
     // Date format
-    public static final String DATE_FORMATTER_PATTERN = "MM-dd-yyyy: HH:mm";
+    public static final String DATE_FORMATTER_PATTERN_DETAILED = "MM-dd-yyyy: HH:mm";
+    public static final String DATE_FORMATTER_PATTERN_SUMMARY = "MM-dd-yyyy";
+
 
 
     // Fitness Service constants
@@ -73,6 +80,19 @@ public final class WWRConstants {
     // Mocks
     public static String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
     public static final long NO_MOCK_TIME = -1;
+
+    // Firestore collection constants
+    public static final String FIRESTORE_COLLECTION_USER_PATH = "users";
+    public static final String FIRESTORE_COLLECTION_MY_ROUTES_PATH = "myRoutes";
+
+    // For testing only
+    public static final String FIRESTORE_DOCUMENT_DUMMY_USER_PATH = "dummyUser";
+
+
+    // Firestore document constants
+    public static final String FIRESTORE_DOCUMENT_ROUTE_NAME = "routeName";
+    public static final String FIRESTORE_DOCUMENT_STARTING_POINT = "startingPoint";
+
 
 
 

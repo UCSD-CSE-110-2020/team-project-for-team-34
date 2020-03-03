@@ -45,7 +45,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     public static final String FITNESS_SERVICE_KEY = "FITNESS_SERVICE_KEY";
 
     // True to enable the FitnessRunner, false otherwise
-    private static boolean sEnableFitnessRunner = true;
+    private static boolean sEnableFitnessRunner = false;
     private static boolean sIgnoreHeight = false;
 
     public static boolean IS_MOCKING = false;
@@ -111,7 +111,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
-        Log.d(TAG, "In method onCreate");
+        Log.e(TAG, "In method onCreate");
 
         mStepsTextView = findViewById(R.id.homeSteps);
         mMilesTextView = findViewById(R.id.homeMiles);

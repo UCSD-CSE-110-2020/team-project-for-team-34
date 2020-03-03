@@ -3,51 +3,51 @@
     package="com.example.wwrapp">
 
     <application
+        android:name=".fitness.MockFitnessApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name=".fitness.MockFitnessApplication">
+        android:theme="@style/AppTheme">
+
         <service
             android:name=".fitness.MockFitnessService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity
             android:name=".RouteDetailActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".MockWalkActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".MockWalkActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"> </activity>
-        <activity android:name=".EnterWalkInformationActivity"></activity>
+            android:theme="@style/AppTheme"></activity>
+        <activity android:name=".EnterWalkInformationActivity" />
         <activity
             android:name=".HomeScreenActivity"
-            android:screenOrientation="portrait"
             android:label="HomeScreen"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
-        <activity android:name=".WalkActivity"
-            android:screenOrientation="portrait"
-            />
+        <activity
+            android:name=".WalkActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".RoutesActivity"
-            android:screenOrientation="portrait"
-
-            android:label="Routes" />
+            android:label="Routes"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".HeightScreenActivity"
             android:screenOrientation="portrait"
-
             android:theme="@style/AppTheme.NoActionBar" />
-
     </application>
 
 </manifest>
