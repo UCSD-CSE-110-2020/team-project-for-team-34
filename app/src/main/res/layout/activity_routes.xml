@@ -16,6 +16,7 @@
         >
 
     </androidx.recyclerview.widget.RecyclerView>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -24,8 +25,8 @@
             android:background="@drawable/button_background"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:text="+"
-            android:textSize="32dp"
+            android:text="@string/plus"
+            android:textSize="@dimen/content_height_size"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_alignParentRight="true"

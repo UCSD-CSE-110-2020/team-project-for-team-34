@@ -8,15 +8,15 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:id="@+id/favoriteBtn"
-        android:textOn=""
-        android:textOff=""
+        android:textOn="@string/empty"
+        android:textOff="@string/empty"
         ></ToggleButton>
 
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:text="route_name"
+        android:text="@string/route_name"
         android:id="@+id/route_name"
         android:layout_toRightOf="@+id/favoriteBtn"
         android:textSize="30sp"
@@ -27,7 +27,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:text="staring_point"
+        android:text="@string/staring_point"
         android:id="@+id/starting_point"
         android:layout_toRightOf="@+id/route_name"
         android:textSize="20sp"
@@ -39,7 +39,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:text="2000/01/01"
+        android:text="@string/sample_time"
         android:layout_below="@+id/route_name"
         android:id="@+id/route_date"
         android:textSize="15sp"
@@ -49,7 +49,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:text="Miles: 000.0"
+        android:text="@string/sample_miles"
         android:layout_below="@+id/route_name"
         android:layout_toRightOf="@+id/route_date"
         android:id="@+id/route_mile"
@@ -60,7 +60,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:text="Steps: 000000"
+        android:text="@string/sample_step"
         android:layout_below="@+id/route_name"
         android:layout_toRightOf="@+id/route_mile"
         android:id="@+id/route_step"

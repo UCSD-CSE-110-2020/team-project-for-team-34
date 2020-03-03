@@ -87,9 +87,6 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
 
-        if(ignoreTimer){
-            handleWalkStopped();
-        }
 
         mDateTime = LocalDateTime.now();
         mStepsSharedPreference = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
@@ -107,10 +104,14 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         Intent receivedIntent = getIntent();
 
         Route route = (Route) (receivedIntent.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
-        Log.d(TAG, "ROute object is " + route);
+        Log.d(TAG, "Route object is " + route);
         // If there's a route extra
         if (route != null) {
             mTitleTextView.setText(route.getRouteName());
+        }
+
+        if(ignoreTimer){
+            handleWalkStopped();
         }
 
         if (HomeScreenActivity.IS_MOCKING) {

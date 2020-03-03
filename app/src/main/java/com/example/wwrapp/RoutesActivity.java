@@ -44,7 +44,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
     private FirebaseFirestore mFirestore;
     private Query mQuery;
 
-    private static boolean sIsTest = true;
+    private static boolean sIsTest = false;
 
 
     @Override
@@ -62,10 +62,10 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
         // Enable Firestore logging
         FirebaseFirestore.setLoggingEnabled(true);
 
-//        // Testing code block
-//        if (sIsTest) {
-//            generateFakeRoute();
-//        }
+        // Testing code block
+        if (sIsTest) {
+            generateFakeRoute();
+        }
 
         // Register the add new route button
         mAddNewRouteButton = findViewById(R.id.addNewRouteButton);

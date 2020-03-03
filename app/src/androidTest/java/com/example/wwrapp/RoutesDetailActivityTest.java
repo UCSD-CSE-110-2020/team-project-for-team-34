@@ -50,21 +50,21 @@ public class RoutesDetailActivityTest {
         appCompatButton2.perform(click());
 
         onView(withId(R.id.recycler_view_route)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
-        /*ViewInteraction relativeLayout = onView(
-                allOf(withId(R.id.parent_layout),
-                        isDisplayed()));
-        relativeLayout.perform(click());*/
+//        ViewInteraction relativeLayout = onView(
+//                allOf(withId(R.id.recycler_view_route),
+//                        isDisplayed()));
+//        relativeLayout.perform(click());
 
         ViewInteraction toggleButton = onView(
                 allOf(withId(R.id.favoriteBtnDetail),
                         isDisplayed()));
         toggleButton.check(matches(isDisplayed()));
 
-        ViewInteraction textView = onView(
-                allOf(withId(R.id.route_detail_name), withText("route"),
 
+        ViewInteraction textView = onView(
+                allOf(withId(R.id.route_detail_name), withText("Route_name"),
                         isDisplayed()));
-        textView.check(matches(withText("route")));
+        textView.check(matches(withText("Route_name")));
 
         ViewInteraction textView2 = onView(
                 allOf(withText("Starting Point: "),
