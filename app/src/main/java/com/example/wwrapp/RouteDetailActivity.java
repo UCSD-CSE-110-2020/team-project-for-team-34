@@ -15,11 +15,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.example.wwrapp.database.Route;
-import com.example.wwrapp.database.Walk;
+import com.example.wwrapp.model.Route;
+import com.example.wwrapp.model.Walk;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -62,17 +60,19 @@ public class RouteDetailActivity extends AppCompatActivity {
         TextView routeNameText = findViewById(R.id.route_detail_name);
         routeNameText.setText(route.getRouteName());
 
-        TextView startingPointTezt = findViewById(R.id.starting_point_text_view);
-        startingPointTezt.setText(route.getStartingPoint());
+        TextView startingPointText = findViewById(R.id.starting_point_text_view);
+        startingPointText.setText(route.getStartingPoint());
 
-        LocalDateTime routeDate = route.getDate();
-        if (routeDate == null) {
-            routeDate = LocalDateTime.now();
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
-        String formattedDate = routeDate.format(formatter);
+//        Date routeDate = route.getDate();
+//        if (routeDate == null) {
+//            // Convert LocalDateTime to Date
+//            routeDate = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
+//        }
+        //TODO: Migrate from LocalDateTime
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+//        String formattedDate = routeDate.format(formatter);
         TextView routeDateText = findViewById(R.id.route_detail_date);
-        routeDateText.setText(formattedDate);
+        routeDateText.setText("DATE in progress");
 
         double miles = route.getMiles();
         TextView routeMilesText = findViewById(R.id.miles_text_view);
@@ -156,6 +156,12 @@ public class RouteDetailActivity extends AppCompatActivity {
     private void returnToRoutesActivity(Route route) {
         Intent returnIntent = new Intent();
         returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+        // Return the Firestore info that was passed into this activity
+        Intent incomingIntent = getIntent();
+
+        returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_PATH_KEY, incomingIntent.getStringExtra(WWRConstants.EXTRA_ROUTE_PATH_KEY));
+        returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_ID_KEY, incomingIntent.getStringExtra(WWRConstants.EXTRA_ROUTE_ID_KEY));
+
         // Pass this Intent back
         setResult(Activity.RESULT_OK, returnIntent);
         // Go back to the Routes screen, bypassing the RouteDetail
@@ -176,12 +182,12 @@ public class RouteDetailActivity extends AppCompatActivity {
                 // Update the corresponding Route with the new Walk
                 Route route = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
-                route.setDate(walk.getDate());
+//                route.setDate(walk.getDate());
                 route.setDuration(walk.getDuration());
                 route.setSteps(walk.getSteps());
                 route.setMiles(walk.getMiles());
 
-                Log.d(TAG, "Route object in RouteDetailActivity is\n" + route.toString());
+                // Log.d(TAG, "Route object in RouteDetailActivity is\n" + route.toString());
 
                 // Return data to the routes activity
                 returnToRoutesActivity(route);

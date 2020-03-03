@@ -16,15 +16,17 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wwrapp.database.Route;
-import com.example.wwrapp.database.Walk;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
 import com.example.wwrapp.fitness.MockFitnessService;
+import com.example.wwrapp.model.Route;
+import com.example.wwrapp.model.Walk;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 /**
  * Represents a walking session.
@@ -173,7 +175,11 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         // Pass the Walk data onto the next Activity
         Intent intent = new Intent(this, EnterWalkInformationActivity.class);
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
-        Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);
+
+        // Convert LocalDateTime to Date
+        Date date = Date.from(mDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+        Walk walk = new Walk(mStepsTaken, mMiles, date, duration);
         intent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
         intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_WALK_ACTIVITY_CALLER_ID);
 
@@ -192,7 +198,13 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
 
         // Create a new Walk
-        Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);
+        // TODO: Test that a walk is updated with a dummy number of steps.
+        // TODO: Remove the dummy steps in production.
+        mStepsTaken = 100;
+        // Convert LocalDateTime to Date
+        Date date = Date.from(mDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        Walk walk = new Walk(mStepsTaken, mMiles, date, duration);
+
         Log.d(TAG, "Walk object returned to RouteDetail is\n" + walk.toString());
         returnIntent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
         // Pass this Intent back

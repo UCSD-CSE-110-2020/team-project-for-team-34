@@ -175,7 +175,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
             float currLastMiles = lastMiles + ((float) mMiles);
             lastWalkEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, currLastMiles);
 
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN);
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);
             String formattedDate = LocalDateTime.now().format(dateTimeFormatter);
             lastWalkEditor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, formattedDate);
             lastWalkEditor.apply();
