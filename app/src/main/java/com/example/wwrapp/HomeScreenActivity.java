@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -22,8 +23,23 @@ import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
 import com.example.wwrapp.fitness.MockFitnessService;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -72,6 +88,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     public static IFitnessService fitnessService;
     private static FitnessAsyncTask fitnessRunner;
 
+    public static GoogleSignInAccount account;
+    private FirebaseFirestore db;
+
+    private boolean tempUserExists;
+
     private ServiceConnection googleServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -79,6 +100,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             Log.d(TAG, "Assigned fitness service in onServiceConnected");
             fitnessService = localService.getService();
             IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
+
             fitnessSubject.registerObserver(HomeScreenActivity.this);
             mIsBound = true;
         }
@@ -166,11 +188,49 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             }
         });
 
+        // Register the team screen button
+        findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DocumentReference docRef = db.collection(WWRConstants.USER_COLLECTION_KEY).document(account.getEmail());
+                docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                if( document.get(WWRConstants.USER_TEAM_KEY) == WWRConstants.USER_TEAM_PENDING_KEY ) {
+                                    //Intent intent = new Intent(HomeScreenActivity.this, TeamInviteActivity.class);
+                                    //startActivityForResult(intent, MOCK_ACTIVITY_REQUEST_CODE);
+                                    Log.d(TAG, "Launch teamInviteActivity");
+                                }
+                                else {
+                                    //Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
+                                    //startActivityForResult(intent, MOCK_ACTIVITY_REQUEST_CODE);
+                                    Log.d(TAG, "Launch teamActivity");
+                                }
+                            } else {
+                                Log.d(TAG, "No such document");
+                            }
+                        } else {
+                            Log.d(TAG, "No account existed with that email... creating now", task.getException());
+
+                        }
+                    }
+                });
+            }
+        });
+
         // use this code to reset the last walk's stats
          SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
          SharedPreferences.Editor editor = spfs.edit();
          editor.clear();
          editor.apply();
+
+         //Initialize DB
+         FirebaseApp.initializeApp(this);
+         db = FirebaseFirestore.getInstance();
+         createUser();
 
         Log.d(TAG, "Right before creating Mock Fitness object");
     }
@@ -276,7 +336,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
                 @Override
                 public IFitnessService create(HomeScreenActivity homeScreenActivity) {
-                    return new GoogleFitAdapter(homeScreenActivity);
+                    GoogleFitAdapter adapter = new GoogleFitAdapter(homeScreenActivity);
+                    // Statically declares email of user for database access
+                    GoogleSignInAccount account = adapter.getAccount();
+                    HomeScreenActivity.account = account;
+                    return adapter;
                 }
             });
             fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
@@ -299,6 +363,45 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         int testVal = saveHeight.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, -1);
         // If testVal == -1, then there was no height
         return testVal != -1;
+    }
+
+    public void userExist() {
+        tempUserExists = true;
+    }
+    public void userDoesNotExist() {
+        tempUserExists = false;
+    }
+
+    public boolean userExists() {
+        CollectionReference usersCollection = db.collection(WWRConstants.USER_COLLECTION_KEY);
+        usersCollection
+                .whereEqualTo(WWRConstants.USER_EMAIL_KEY, account.getEmail())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                            userExist();
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                        userDoesNotExist();
+                    }
+                });
+        return tempUserExists;
+    }
+    public void createUser() {
+        if(userExists()) { return; }
+        Map<String, Object> user = new HashMap<>();
+        user.put(WWRConstants.USER_EMAIL_KEY, account.getEmail());
+        user.put(WWRConstants.USER_NAME_KEY ,account.getDisplayName());
+        user.put(WWRConstants.USER_ROUTES_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
+        user.put(WWRConstants.USER_ROUTES_NOT_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
+        user.put(WWRConstants.USER_TEAM_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
+        db.collection(WWRConstants.USER_COLLECTION_KEY).document(account.getEmail()).set(user);
     }
 
     public void initSavedData() {

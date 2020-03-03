@@ -151,7 +151,7 @@
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/homeMilesTextView"
-        app:layout_constraintVertical_bias="0.758" />
+        app:layout_constraintVertical_bias="0.714" />
 
     <Button
         android:id="@+id/routeScreenButton"
@@ -160,10 +160,10 @@
         android:text="@string/routes_screen_button_label"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/startNewWalkButton"
-        app:layout_constraintVertical_bias="0.693" />
+        app:layout_constraintVertical_bias="0.107" />
 
     <Button
         android:id="@+id/mockButton"
@@ -177,6 +177,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/teamScreenButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Go To Team"
+        app:layout_constraintTop_toBottomOf="@+id/routeScreenButton"
+        tools:layout_editor_absoluteX="152dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
