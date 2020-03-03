@@ -33,6 +33,11 @@ public final class WWRConstants {
             "com.example.wwrapp.EXTRA_MANUALLY_CREATED_ROUTE_KEY";
     public static final String EXTRA_DAILY_STEPS_KEY = "com.example.wwrapp.EXTRA_DAILY_STEPS_KEY";
 
+    // For user objects
+    public static final String EXTRA_USER_KEY = "com.example.wwrapp.EXTRA_USER_KEY";
+
+
+
     // Firestore Keys
     public static final String EXTRA_ROUTE_ID_KEY = "com.example.wwrapp.EXTRA_ROUTE_ID_KEY";
     public static final String EXTRA_ROUTE_PATH_KEY = "com.example.wwrapp.EXTRA_ROUTE_PATH_KEY";
@@ -78,8 +83,6 @@ public final class WWRConstants {
             "com.example.wwrapp.DUMMY_FITNESS_SERVICE_FACTORY_KEY";
 
 
-
-
     public static final String GOOGLE_FIT_VERSION = "com.example.wwrapp.GOOGLE_FIT_VERSION";
     // Default fitness service
     public static String FITNESS_SERVICE_VERSION = GOOGLE_FIT_VERSION;
@@ -91,6 +94,9 @@ public final class WWRConstants {
     public static final String FIRESTORE_COLLECTION_USER_PATH = "users";
     public static final String FIRESTORE_COLLECTION_MY_ROUTES_PATH = "myRoutes";
 
+    public static final String FIRESTORE_COLLECTION_TEAMS_PATH = "teams";
+
+
     // For testing only
     public static final String FIRESTORE_DOCUMENT_DUMMY_USER_PATH = "dummyUser";
 
@@ -99,8 +105,10 @@ public final class WWRConstants {
     public static final String FIRESTORE_DOCUMENT_ROUTE_NAME = "routeName";
     public static final String FIRESTORE_DOCUMENT_STARTING_POINT = "startingPoint";
 
-
-
+    // Firestore user invite status constants
+    public static final String FIRESTORE_TEAM_INVITE_ACCEPTED = "accepted";
+    public static final String FIRESTORE_TEAM_INVITE_DECLINED = "declined";
+    public static final String FIRESTORE_TEAM_INVITE_PENDING = "pending";
 
     public static final boolean PRODUCTION_VERSION = false;
 }
