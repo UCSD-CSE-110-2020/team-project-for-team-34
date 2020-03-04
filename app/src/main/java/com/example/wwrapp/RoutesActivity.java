@@ -39,6 +39,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
     private RouteAdapter mRouteAdapter;
     private RecyclerView mRoutesRecycler;
     private Button mAddNewRouteButton;
+    private Button mTeammateRouteButton;
 
     // Backend-related objects
     private FirebaseFirestore mFirestore;
@@ -73,6 +74,15 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
             @Override
             public void onClick(View v) {
                 startAddNewRouteActivity();
+            }
+        });
+
+        mTeammateRouteButton = findViewById(R.id.teammateRouteBtn);
+        mTeammateRouteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(RoutesActivity.this, TeammateRouteActivity.class);
+                startActivity(intent);
             }
         });
 
