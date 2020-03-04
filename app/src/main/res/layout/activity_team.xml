@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <Button
-            android:id="@+id/addNewRouteButton"
+            android:id="@+id/addNewTeamButton"
             android:background="@drawable/button_background"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
