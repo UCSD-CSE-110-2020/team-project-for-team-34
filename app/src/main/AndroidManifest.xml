@@ -23,7 +23,7 @@
         <activity
             android:name=".MockWalkActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
         <activity android:name=".EnterWalkInformationActivity" />
         <activity
             android:name=".HomeScreenActivity"
@@ -35,7 +35,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".WalkActivity"

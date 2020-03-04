@@ -74,8 +74,6 @@ public final class WWRConstants {
     public static final String DATE_FORMATTER_PATTERN_DETAILED = "MM-dd-yyyy: HH:mm";
     public static final String DATE_FORMATTER_PATTERN_SUMMARY = "MM-dd-yyyy";
 
-
-
     // Fitness Service constants
     public static final String EXTRA_FITNESS_SERVICE_TYPE_KEY = "com.example.wwrapp.EXTRA_FITNESS_SERVICE_VERSION_KEY";
     public static final String GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY =
@@ -87,13 +85,15 @@ public final class WWRConstants {
     public static final String GOOGLE_USER_FACTORY_KEY = "com.example.wwrapp.GOOGLE_USER_FACTORY_KEY";
     public static final String MOCK_USER_FACTORY_KEY = "com.example.wwrapp.MOCK_USER_FACTORY_KEY";
 
-
-    public static final String GOOGLE_FIT_VERSION = "com.example.wwrapp.GOOGLE_FIT_VERSION";
-    // Default fitness service
-    public static String FITNESS_SERVICE_VERSION = GOOGLE_FIT_VERSION;
     // Mocks
     public static final String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
     public static final long NO_MOCK_TIME = -1;
+
+    // Attributes of a mock user
+    public static final String MOCK_USER_NAME = "mock user name";
+    public static final String MOCK_USER_EMAIL = "mock user email";
+
+
 
     // Firestore collection constants
     public static final String FIRESTORE_COLLECTION_USER_PATH = "users";
@@ -111,6 +111,36 @@ public final class WWRConstants {
     // Firestore document constants
     public static final String FIRESTORE_DOCUMENT_ROUTE_NAME = "routeName";
     public static final String FIRESTORE_DOCUMENT_STARTING_POINT = "startingPoint";
+
+    //DataBase collection Strings
+    public static String TEAM_COLLECTION_KEY = "teams";
+    public static String DEFAULT_DATABASE_VALUE = "";
+    public static String USER_EMAIL_KEY = "email";
+    public static String USER_NAME_KEY = "name";
+    public static String USER_ROUTES_OWNED_KEY = "routesOwned";
+    public static String USER_ROUTES_NOT_OWNED_KEY = "routesNotOwned";
+    public static String USER_TEAM_KEY = "team";
+    public static String USER_TEAM_PENDING_KEY = "teamPendingDemoTeam";
+    public static String TEAM_NAME_KEY = "name";
+    public static String TEAM_USERS_KEY = "users";
+    public static String ROUTE_STARTING_POINT_KEY = "startingPoint";
+    public static String ROUTE_STEPS_KEY = "steps";
+    public static String ROUTE_MILES_KEY = "miles";
+    public static String ROUTE_DATE_KEY = "date";
+    public static String ROUTE_TAGS_KEY = "tag";
+    public static String TAG_NAME_KEY = "name";
+    public static String TAG_LOOP_KEY = "loop";
+    public static String TAG_OUTANDBACK_KEY = "outAndBack";
+    public static String TAG_FLAT_KEY = "flat";
+    public static String TAG_HILLY_KEY = "hilly";
+    public static String TAG_STREETS_KEY = "streets";
+    public static String TAG_TRAIL_KEY = "trail";
+    public static String TAG_EVEN_KEY = "even";
+    public static String TAG_UNEVEN_KEY = "uneven";
+    public static String TAG_EASY_KEY = "easy";
+    public static String TAG_MODERATE_KEY = "moderate";
+    public static String TAG_DIFFICULT_KEY = "difficult";
+    public static String TAG_FAVORITE_KEY = "favorite";
 
     // Firestore user invite status constants
     public static final String FIRESTORE_TEAM_INVITE_ACCEPTED = "accepted";

@@ -47,6 +47,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         IUser invitee = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
         String inviteeEmail = invitee.getEmail();
 
+        // Find the users who have invited the invitee
+        // TODO: Handle multiple inviters (not just 1)
         CollectionReference invitationsCol =
                 mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
         invitationsCol.whereEqualTo(TeamInvitation.FIELD_INVITEE, inviteeEmail).get()
@@ -97,7 +99,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         mDeclineBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // go to team route but user's info will not be stored.
+                // Just go to the Team screen or TODO: handle more invites
                 Intent intent = getIntent();
                 IUser invitee =  (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
                 CollectionReference teamCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);

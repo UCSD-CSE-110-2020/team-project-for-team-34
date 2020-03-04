@@ -1,16 +1,22 @@
 package com.example.wwrapp.fitness;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.HomeScreenActivity;
 import com.example.wwrapp.WWRConstants;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptionsExtension;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataSet;
@@ -18,6 +24,7 @@ import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,19 +61,18 @@ public class GoogleFitAdapter implements IFitnessService, IFitnessSubject {
         }
     }
 
+
     public void setup() {
         FitnessOptions fitnessOptions = FitnessOptions.builder()
                 .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .build();
-
-
-        account = GoogleSignIn.getAccountForExtension(activity, fitnessOptions);
-        if (!GoogleSignIn.hasPermissions(account, fitnessOptions)) {
+        account = GoogleSignIn.getAccountForExtension(activity,fitnessOptions);
+        if (!GoogleSignIn.hasPermissions(HomeScreenActivity.account, fitnessOptions)) {
             GoogleSignIn.requestPermissions(
                     activity, // your activity
                     GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
-                    account,
+                    HomeScreenActivity.account,
                     fitnessOptions);
         } else {
             updateStepCount();
@@ -167,5 +173,10 @@ public class GoogleFitAdapter implements IFitnessService, IFitnessSubject {
         for (IFitnessObserver fitnessObserver : sFitnessObservers) {
             fitnessObserver.update(mStepCount);
         }
+    }
+
+    //Add user to database or log user into database
+    public GoogleSignInAccount getAccount() {
+        return account;
     }
 }
