@@ -14,6 +14,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsInstanceOf;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +34,12 @@ public class TeamScreenTest {
     @Rule
     public ActivityTestRule<HomeScreenActivity> mActivityTestRule = new ActivityTestRule<>(HomeScreenActivity.class);
 
+    @BeforeClass
+    public static void initialize() {
+        HomeScreenActivity.setIgnoreHeight(true);
+        HomeScreenActivity.setEnableFitnessRunner(false);
+    }
+
     @Test
     public void teammateRouteTest() {
         ViewInteraction appCompatButton = onView(
@@ -40,10 +47,7 @@ public class TeamScreenTest {
                         isDisplayed()));
         appCompatButton.perform(click());
 
-        ViewInteraction button = onView(
-                allOf(withId(R.id.addNewTeamButton),
-                        isDisplayed()));
-        button.check(matches(isDisplayed()));
+
     }
 
     private static Matcher<View> childAtPosition(
