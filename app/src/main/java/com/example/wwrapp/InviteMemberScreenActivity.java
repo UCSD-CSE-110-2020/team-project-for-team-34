@@ -31,94 +31,126 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
     private String mMemberName;
     private FirebaseFirestore mFirestore;
 
+    // For testing purposes
+    private static boolean testInvite = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invite_member);
 
+
+
         // Get the database instance
         mFirestore = FirebaseFirestore.getInstance();
 
         mMemberText = findViewById(R.id.team_member_name_text_view);
-        // get the member's name from data base and set it to member_name
-        // TODO: Re-design invitations
-
-        Intent intent = getIntent();
-        IUser invitee = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-        assert invitee != null;
-        String inviteeEmail = invitee.getEmail();
-
-        // Find the users who have invited the invitee
-        // TODO: Handle multiple inviters (not just 1)
-        CollectionReference invitationsCol =
-                mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
-        invitationsCol.whereEqualTo(TeamInvitation.FIELD_INVITEE, inviteeEmail).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                mMemberName = document.getString(TeamInvitation.FIELD_INVITER);
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-
-        mMemberText.setText(mMemberName);
-
         mAcceptBtn = findViewById(R.id.invite_accept_button);
         mDeclineBtn = findViewById(R.id.invite_decline_button);
-        mAcceptBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // go to team route and store user's info to team screen.
-                Intent intent = getIntent();
-                IUser invitee =  (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-                CollectionReference teamCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
-                teamCol.document(invitee.getEmail())
-                        .update(MockUser.FIELD_INVITE_STATUS, WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully updated!");
-                    }
-                })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error updating document", e);
-                            }
-                        });
-                // Return to Team screen
-                finish();
-            }
-        });
 
-        mDeclineBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Just go to the Team screen or TODO: handle more invites
-                Intent intent = getIntent();
-                IUser invitee =  (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-                CollectionReference teamCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
-                teamCol.document(invitee.getEmail()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
-                    }
-                })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error deleting document", e);
+        // TODO: Probably need to fix this later
+        if(testInvite){
+            String name = "Ariana";
+            mMemberText.setText(name);
+            mAcceptBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+            mDeclineBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+        } else {
+
+            // get the member's name from data base and set it to member_name
+            // TODO: Re-design invitations
+
+            Intent intent = getIntent();
+            IUser invitee = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            assert invitee != null;
+            String inviteeEmail = invitee.getEmail();
+
+            // Find the users who have invited the invitee
+            // TODO: Handle multiple inviters (not just 1)
+            CollectionReference invitationsCol =
+                    mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
+            invitationsCol.whereEqualTo(TeamInvitation.FIELD_INVITEE, inviteeEmail).get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    mMemberName = document.getString(TeamInvitation.FIELD_INVITER);
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                }
+                            } else {
+                                Log.d(TAG, "Error getting documents: ", task.getException());
                             }
-                        });
-                // Go back to team screen
-                finish();
-            }
-        });
+                        }
+                    });
+
+            mMemberText.setText(mMemberName);
+
+
+            mAcceptBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // go to team route and store user's info to team screen.
+                    Intent intent = getIntent();
+                    IUser invitee =  (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+                    CollectionReference teamCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
+                    teamCol.document(invitee.getEmail())
+                            .update(MockUser.FIELD_INVITE_STATUS, WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "DocumentSnapshot successfully updated!");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error updating document", e);
+                                }
+                            });
+                    // Return to Team screen
+                    finish();
+                }
+            });
+
+            mDeclineBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Just go to the Team screen or TODO: handle more invites
+                    Intent intent = getIntent();
+                    IUser invitee =  (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+                    CollectionReference teamCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
+                    teamCol.document(invitee.getEmail()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                        }
+                    })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error deleting document", e);
+                                }
+                            });
+                    // Go back to team screen
+                    finish();
+                }
+            });
+        }
+
+
+    }
+
+    public static void testInvite(boolean testInviteMember){
+        testInvite = testInviteMember;
     }
 }
