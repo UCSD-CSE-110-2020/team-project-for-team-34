@@ -60,6 +60,7 @@ public class TeamActivity extends AppCompatActivity {
                 final IUser user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
                 intent.putExtra(WWRConstants.EXTRA_USER_KEY, user);
                 intent.putExtra(WWRConstants.EXTRA_USER_TYPE_KEY, WWRConstants.MOCK_USER_FACTORY_KEY);
+                intent.putExtra("TEST", "TEST_DOC_NAME");
                 startActivityForResult(intent, ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE);
             }
         });
