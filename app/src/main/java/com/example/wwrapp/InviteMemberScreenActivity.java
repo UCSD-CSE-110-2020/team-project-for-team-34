@@ -64,7 +64,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                     finish();
                 }
             });
-        } else {
+        } else
 
             // get the member's name from data base and set it to member_name
             // TODO: Re-design invitations

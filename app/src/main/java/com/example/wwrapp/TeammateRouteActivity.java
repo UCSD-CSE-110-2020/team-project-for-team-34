@@ -14,6 +14,7 @@ import com.example.wwrapp.model.Route;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -29,6 +30,9 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
     private FirebaseFirestore mFirestore;
     private Query mQuery;
     private boolean mUserBelongsToTeam;
+
+    // For testing purposes
+    private static boolean testTeammateRoute = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +73,12 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
 
     private void initFirestore() {
         mFirestore = FirebaseFirestore.getInstance();
+
+        if(testTeammateRoute){
+            CollectionReference teamRouteCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH);
+            Route testRoute = new Route("testRoute", "Geisel", "0", 0, 0, null, false, "");
+            teamRouteCol.document("ellen@gmail.com").set(testRoute);
+        }
 
         // TODO: Check if this user belongs to a team
         // TODO: Check the "invitations" collection and ensure that the user is not a pending invitee
@@ -131,5 +141,9 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
         intent.putExtra(WWRConstants.EXTRA_ROUTE_PATH_KEY, path);
 
         startActivityForResult(intent, START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE);
+    }
+
+    public static void setTestTeammateRoute(boolean testTeamRoute){
+        testTeammateRoute = testTeamRoute;
     }
 }
