@@ -11,12 +11,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.model.IUser;
+import com.example.wwrapp.model.IUserFactory;
 import com.example.wwrapp.model.MockUser;
+import com.example.wwrapp.model.TeamInvitation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -37,8 +40,6 @@ public class AddTeamMemberActivity extends AppCompatActivity {
     private boolean mInviterIsOnTeam;
     private boolean mInviteeIsOnTeam;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +58,8 @@ public class AddTeamMemberActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Save member_name and member_email to database and go to team screen.
                 Intent intent = getIntent();
+
+                String userType = intent.getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
                 IUser inviter = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
                 // Check if the inviter is already in a team
@@ -64,17 +67,39 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 
                 // Add the inviter to the team, if they don't belong to the team already
                 if (!mInviterIsOnTeam) {
-                    IUser userToAdd = new MockUser(inviter.getName(), inviter.getEmail(), WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
+                    IUser userToAdd = IUserFactory.createUser
+                            (userType, inviter.getName(), inviter.getEmail(), WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
                     addUserToTeam(userToAdd, mFirestore);
                 }
 
-                IUser invitee = new MockUser(mMemberName, mMemberEmail, WWRConstants.FIRESTORE_TEAM_INVITE_PENDING);
+                IUser invitee = IUserFactory.createUser
+                        (userType, mMemberName, mMemberEmail, WWRConstants.FIRESTORE_TEAM_INVITE_PENDING);
                 // Check if the inviter is already invited (i.e. already in a team)
                 setInviteeIsOnTeam(invitee, mFirestore);
                 // Add the invitee to the team, if they don't belong to the team already
                 if (!mInviteeIsOnTeam) {
                     addUserToTeam(invitee, mFirestore);
                 }
+
+                // Create an invitation so that the inviter's name can be checked.
+                TeamInvitation teamInvitation = new TeamInvitation(inviter.getEmail(),
+                        invitee.getEmail(), WWRConstants.FIRESTORE_TEAM_INVITE_PENDING);
+                CollectionReference teamInvitationsCol =
+                        mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
+                teamInvitationsCol.add(teamInvitation)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error adding document", e);
+                            }
+                        });
+
 
                 // Go to the Team screen
                 finish();
@@ -159,6 +184,5 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                         Log.w(TAG, "Error writing document", e);
                     }
                 });
-
     }
 }

@@ -35,6 +35,7 @@ public final class WWRConstants {
 
     // For user objects
     public static final String EXTRA_USER_KEY = "com.example.wwrapp.EXTRA_USER_KEY";
+    public static final String EXTRA_USER_TYPE_KEY = "com.example.wwrapp.EXTRA_USER_TYPE_KEY";
 
 
 
@@ -82,6 +83,10 @@ public final class WWRConstants {
     public static final String DUMMY_FITNESS_SERVICE_FACTORY_KEY =
             "com.example.wwrapp.DUMMY_FITNESS_SERVICE_FACTORY_KEY";
 
+    // User Factory keys/types
+    public static final String GOOGLE_USER_FACTORY_KEY = "com.example.wwrapp.GOOGLE_USER_FACTORY_KEY";
+    public static final String MOCK_USER_FACTORY_KEY = "com.example.wwrapp.MOCK_USER_FACTORY_KEY";
+
 
     public static final String GOOGLE_FIT_VERSION = "com.example.wwrapp.GOOGLE_FIT_VERSION";
     // Default fitness service
@@ -95,6 +100,8 @@ public final class WWRConstants {
     public static final String FIRESTORE_COLLECTION_MY_ROUTES_PATH = "myRoutes";
 
     public static final String FIRESTORE_COLLECTION_TEAMS_PATH = "teams";
+    public static final String FIRESTORE_COLLECTION_INVITATIONS_PATH = "invitations";
+
 
 
     // For testing only
