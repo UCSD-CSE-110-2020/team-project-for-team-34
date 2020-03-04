@@ -1,19 +1,23 @@
 package com.example.wwrapp;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.wwrapp.adapters.TeammateRouteAdapter;
 import com.example.wwrapp.model.Route;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class TeammateRouteActivity extends AppCompatActivity implements TeammateRouteAdapter.OnRouteSelectedListener {
     private static final String TAG = "TeammateRoutesActivity";
@@ -24,6 +28,7 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
 
     private FirebaseFirestore mFirestore;
     private Query mQuery;
+    private boolean mUserBelongsToTeam;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,24 +50,47 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
     protected void onStart() {
         super.onStart();
         Log.d(TAG, "in onStart");
-        mTeammateRouteAdapter.startListening();
+        // TODO: Remove null check once database fully functions
+        if (mTeammateRouteAdapter != null) {
+            mTeammateRouteAdapter.startListening();
+
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "in onStop");
-        mTeammateRouteAdapter.stopListening();
+        // TODO: Remove null check once database fully functions
+        if (mTeammateRouteAdapter != null) {
+            mTeammateRouteAdapter.stopListening();
+        }
     }
 
     private void initFirestore() {
         mFirestore = FirebaseFirestore.getInstance();
 
-        Query teamRoutes = mFirestore.collection("route").whereEqualTo("team","teamid")
-               .whereLessThan("Owner","userId")
-               .whereGreaterThan("Owner","userId");
+        // TODO: Check if this user belongs to a team
+        // TODO: Check the "invitations" collection and ensure that the user is not a pending invitee
+        // TODO: Or check the user's invite status
+        mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMS_PATH).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if (task.getResult().size() > 0) {
+                                mUserBelongsToTeam = true;
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
 
-        mQuery = teamRoutes.orderBy(Route.FIELD_NAME, Query.Direction.DESCENDING);
+        // TODO: Query only for the routes that don't belong to this user
+        if (mUserBelongsToTeam) {
+            mQuery = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH).orderBy(Route.FIELD_NAME, Query.Direction.DESCENDING);
+        }
     }
 
     private void initRecyclerView() {
@@ -70,21 +98,22 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
 
         if (mQuery == null) {
             Log.w(TAG, "No query!!!");
+        } else {
+            // Set up adapter
+            FirestoreRecyclerOptions<Route> options =
+                    new FirestoreRecyclerOptions.Builder<Route>().setQuery(mQuery, Route.class).build();
+            mTeammateRouteAdapter = new TeammateRouteAdapter(options);
+
+            // Set up recycler view
+            mTeammateRoutesRecycler = findViewById(R.id.recycler_teammate_view_route);
+            mTeammateRoutesRecycler.setHasFixedSize(true);
+            mTeammateRoutesRecycler.setLayoutManager(new LinearLayoutManager(this));
+            mTeammateRoutesRecycler.setAdapter(mTeammateRouteAdapter);
+
+            // Make this activity listen for changes to the adapter
+            mTeammateRouteAdapter.setOnRouteSelectedListener(this);
         }
 
-        // Set up adapter
-        FirestoreRecyclerOptions<Route> options =
-                new FirestoreRecyclerOptions.Builder<Route>().setQuery(mQuery, Route.class).build();
-        mTeammateRouteAdapter = new TeammateRouteAdapter(options);
-
-        // Set up recycler view
-        mTeammateRoutesRecycler = findViewById(R.id.recycler_teammate_view_route);
-        mTeammateRoutesRecycler.setHasFixedSize(true);
-        mTeammateRoutesRecycler.setLayoutManager(new LinearLayoutManager(this));
-        mTeammateRoutesRecycler.setAdapter(mTeammateRouteAdapter);
-
-        // Make this activity listen for changes to the adapter
-        mTeammateRouteAdapter.setOnRouteSelectedListener(this);
     }
 
     @Override

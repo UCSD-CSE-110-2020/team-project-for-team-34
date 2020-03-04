@@ -101,6 +101,8 @@ public final class WWRConstants {
 
     public static final String FIRESTORE_COLLECTION_TEAMS_PATH = "teams";
     public static final String FIRESTORE_COLLECTION_INVITATIONS_PATH = "invitations";
+    public static final String FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH = "teammateRoutes";
+
 
 
 
