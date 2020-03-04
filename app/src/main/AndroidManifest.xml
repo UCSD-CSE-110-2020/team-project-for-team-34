@@ -10,10 +10,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".TeammateRouteActivity"
-            android:label="Routes"
+        <activity android:name=".TeammateRouteDetailActivity"
             android:screenOrientation="portrait"
-            />
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".TeammateRouteActivity"
+            android:label="Routes"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".fitness.MockFitnessService"

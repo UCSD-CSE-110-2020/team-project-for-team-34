@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.example.wwrapp.adapters.RouteAdapter;
 import com.example.wwrapp.adapters.TeammateRouteAdapter;
 import com.example.wwrapp.model.Route;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -97,7 +96,7 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
         Log.d(TAG, "Path is " + path);
 
         // When a route is tapped, launch its detail page:
-        Intent intent = new Intent(TeammateRouteActivity.this, RouteDetailActivity.class);
+        Intent intent = new Intent(TeammateRouteActivity.this, TeammateRouteDetailActivity.class);
         intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
         intent.putExtra(WWRConstants.EXTRA_ROUTE_ID_KEY, routeId);
         intent.putExtra(WWRConstants.EXTRA_ROUTE_PATH_KEY, path);
