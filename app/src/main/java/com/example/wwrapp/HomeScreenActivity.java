@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -25,6 +26,11 @@ import com.example.wwrapp.fitness.IFitnessSubject;
 import com.example.wwrapp.fitness.MockFitnessService;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.fitness.FitnessOptions;
+import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -88,9 +94,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     public static IFitnessService fitnessService;
     private static FitnessAsyncTask fitnessRunner;
 
-    public static GoogleSignInAccount account;
+    public static GoogleSignInAccount account = null;
     private FirebaseFirestore db;
-
     private boolean tempUserExists;
 
     private ServiceConnection googleServiceConnection = new ServiceConnection() {
@@ -111,7 +116,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         }
     };
 
-
     private ServiceConnection mockServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -128,6 +132,21 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             mIsBound = false;
         }
     };
+
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        Log.d(TAG, "handleSigninResult called");
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            // Signed in successfully, show authenticated UI.
+            Toast.makeText(this, "your email is " + account.getEmail(), Toast.LENGTH_SHORT).show();
+            HomeScreenActivity.account = account;
+            Log.d(TAG,"fuck yeah");
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Log.d(TAG, "signInResult:failed code=" + e.getStatusCode());
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -229,15 +248,51 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
          //Initialize DB
          db = FirebaseFirestore.getInstance();
-         createUser();
+         signIn();
+         Log.d(TAG, "Right before creating Mock Fitness object");
+    }
 
-        Log.d(TAG, "Right before creating Mock Fitness object");
+    private void signIn() {
+        FitnessOptions fitnessOptions = FitnessOptions.builder()
+                .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .build();
+        if(GoogleSignIn.getLastSignedInAccount(this) == null) {
+            Log.d(TAG, "first time login");
+            GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .requestProfile()
+                    .addExtension(fitnessOptions)
+                    .build();
+            GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, options);
+            Intent signInIntent = googleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, 420);
+            boolean isEmailLoaded = false;
+            while (!isEmailLoaded) {
+                Log.d(TAG, "Email not loaded");
+                isEmailLoaded = HomeScreenActivity.account.getEmail() != null;
+            }
+        }
+        else {
+            HomeScreenActivity.account = GoogleSignIn.getLastSignedInAccount(this);
+            Log.d(TAG, "Email from last log in is " + account.getEmail());
+        }
+        createUser();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "In method onActivityResult");
+
+        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+        if (requestCode == 420) {
+            // The Task returned from this call is always completed, no need to attach
+            // a listener.
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+            return;
+        }
 
         // If mocking is requested
         if (requestCode == MOCK_ACTIVITY_REQUEST_CODE) {
@@ -335,11 +390,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
                 @Override
                 public IFitnessService create(HomeScreenActivity homeScreenActivity) {
-                    GoogleFitAdapter adapter = new GoogleFitAdapter(homeScreenActivity);
-                    // Statically declares email of user for database access
-                    GoogleSignInAccount account = adapter.getAccount();
-                    HomeScreenActivity.account = account;
-                    return adapter;
+                    return new GoogleFitAdapter(homeScreenActivity);
                 }
             });
             fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
@@ -356,25 +407,16 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         updateUi();
     }
 
-    private boolean checkHasHeight() {
-        SharedPreferences saveHeight =
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
-        int testVal = saveHeight.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, -1);
-        // If testVal == -1, then there was no height
-        return testVal != -1;
-    }
-
     public void userExist() {
         tempUserExists = true;
     }
     public void userDoesNotExist() {
         tempUserExists = false;
     }
-
     public boolean userExists() {
         CollectionReference usersCollection = db.collection(WWRConstants.USER_COLLECTION_KEY);
         usersCollection
-                .whereEqualTo(WWRConstants.USER_EMAIL_KEY, account.getEmail())
+                .whereEqualTo(WWRConstants.USER_EMAIL_KEY, HomeScreenActivity.account.getEmail())
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -394,13 +436,27 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     }
     public void createUser() {
         if(userExists()) { return; }
+        boolean isEmailLoaded = false;
+        while(!isEmailLoaded) {
+            Log.d(TAG, "Email not loaded");
+            isEmailLoaded = HomeScreenActivity.account.getDisplayName() != null;
+
+        }
         Map<String, Object> user = new HashMap<>();
-        user.put(WWRConstants.USER_EMAIL_KEY, account.getEmail());
-        user.put(WWRConstants.USER_NAME_KEY ,account.getDisplayName());
+        user.put(WWRConstants.USER_EMAIL_KEY, HomeScreenActivity.account.getEmail());
+        user.put(WWRConstants.USER_NAME_KEY , HomeScreenActivity.account.getDisplayName());
         user.put(WWRConstants.USER_ROUTES_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
         user.put(WWRConstants.USER_ROUTES_NOT_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
         user.put(WWRConstants.USER_TEAM_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
-        db.collection(WWRConstants.USER_COLLECTION_KEY).document(account.getEmail()).set(user);
+        db.collection(WWRConstants.USER_COLLECTION_KEY).document(HomeScreenActivity.account.getEmail()).set(user);
+    }
+
+    private boolean checkHasHeight() {
+        SharedPreferences saveHeight =
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
+        int testVal = saveHeight.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, -1);
+        // If testVal == -1, then there was no height
+        return testVal != -1;
     }
 
     public void initSavedData() {
