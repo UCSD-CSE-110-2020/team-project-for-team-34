@@ -1,7 +1,5 @@
 package com.example.wwrapp;
 
-import java.sql.Timestamp;
-
 /**
  * Contains constants for use throughout the project
  */
@@ -76,8 +74,6 @@ public final class WWRConstants {
     public static final String DATE_FORMATTER_PATTERN_DETAILED = "MM-dd-yyyy: HH:mm";
     public static final String DATE_FORMATTER_PATTERN_SUMMARY = "MM-dd-yyyy";
 
-
-
     // Fitness Service constants
     public static final String EXTRA_FITNESS_SERVICE_TYPE_KEY = "com.example.wwrapp.EXTRA_FITNESS_SERVICE_VERSION_KEY";
     public static final String GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY =
@@ -89,13 +85,15 @@ public final class WWRConstants {
     public static final String GOOGLE_USER_FACTORY_KEY = "com.example.wwrapp.GOOGLE_USER_FACTORY_KEY";
     public static final String MOCK_USER_FACTORY_KEY = "com.example.wwrapp.MOCK_USER_FACTORY_KEY";
 
-
-    public static final String GOOGLE_FIT_VERSION = "com.example.wwrapp.GOOGLE_FIT_VERSION";
-    // Default fitness service
-    public static String FITNESS_SERVICE_VERSION = GOOGLE_FIT_VERSION;
     // Mocks
     public static final String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
     public static final long NO_MOCK_TIME = -1;
+
+    // Attributes of a mock user
+    public static final String MOCK_USER_NAME = "mock user name";
+    public static final String MOCK_USER_EMAIL = "mock user email";
+
+
 
     // Firestore collection constants
     public static final String FIRESTORE_COLLECTION_USER_PATH = "users";
@@ -115,7 +113,6 @@ public final class WWRConstants {
     public static final String FIRESTORE_DOCUMENT_STARTING_POINT = "startingPoint";
 
     //DataBase collection Strings
-    public static String USER_COLLECTION_KEY = "users";
     public static String TEAM_COLLECTION_KEY = "teams";
     public static String DEFAULT_DATABASE_VALUE = "";
     public static String USER_EMAIL_KEY = "email";

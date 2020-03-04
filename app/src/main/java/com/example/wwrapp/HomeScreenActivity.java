@@ -17,6 +17,9 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
+import com.example.wwrapp.model.IUser;
+import com.example.wwrapp.model.IUserFactory;
+import com.example.wwrapp.model.TeamInvitation;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -27,8 +30,6 @@ import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -83,9 +84,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private static FitnessAsyncTask fitnessRunner;
 
     public static GoogleSignInAccount account = null;
-    private FirebaseFirestore db;
+    private FirebaseFirestore mFirestore;
 
     private boolean tempUserExists;
+    private boolean mUserIsBeingInvited;
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         Log.d(TAG, "handleSigninResult called");
@@ -94,7 +96,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             // Signed in successfully, show authenticated UI.
             Toast.makeText(this, "your email is " + account.getEmail(), Toast.LENGTH_SHORT).show();
             HomeScreenActivity.account = account;
-            Log.d(TAG,"fuck yeah");
+            Log.d(TAG,"good");
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
@@ -159,49 +161,87 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             }
         });
 
+        // TODO: Implement real sign-in logic. Using a dummy user for now to make testing possible.
+
+        IUser user = null;
+        // Determine what type of user to use:
+        String userType = getIntent().getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
+        if (userType == null) {
+            // Default to the mock user
+            Log.d(TAG, "Creating Mock user");
+            user = IUserFactory.createUser
+                    (WWRConstants.MOCK_USER_FACTORY_KEY,
+                            WWRConstants.MOCK_USER_NAME, WWRConstants. MOCK_USER_EMAIL,
+                            WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
+        } else {
+            // TODO: Implement factory creation for Google user
+            Log.d(TAG, "Creating Google user");
+        }
+
+        // To use for authentication
+        final String userEmail = user.getEmail();
+
+
+        // TODO: Update this with actual sign-in logic later
         // Register the team screen button
+        IUser finalUser = user;
         findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DocumentReference docRef = db.collection(WWRConstants.USER_COLLECTION_KEY).document(account.getEmail());
-                docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                if( document.get(WWRConstants.USER_TEAM_KEY) == WWRConstants.USER_TEAM_PENDING_KEY ) {
-                                    //Intent intent = new Intent(HomeScreenActivity.this, TeamInviteActivity.class);
-                                    //startActivityForResult(intent, MOCK_ACTIVITY_REQUEST_CODE);
-                                    Log.d(TAG, "Launch teamInviteActivity");
-                                }
-                                else {
-                                    //Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
-                                    //startActivityForResult(intent, MOCK_ACTIVITY_REQUEST_CODE);
-                                    Log.d(TAG, "Launch teamActivity");
-                                }
-                            } else {
-                                Log.d(TAG, "No such document");
-                            }
-                        } else {
-                            Log.d(TAG, "No account existed with that email... creating now", task.getException());
+                // TODO: Revisit this line once Google User has been fixed
+//                DocumentReference docRef = db.collection(WWRConstants.USER_COLLECTION_KEY).document(account.getEmail());
 
-                        }
-                    }
-                });
+                // TODO: Temporary fix for User
+                // Check if the user is being invited by anyone:
+                boolean userIsBeingInvited = userIsBeingInvited(userEmail, mFirestore);
+                userIsBeingInvited = true;
+                if (userIsBeingInvited) {
+                    Intent intent = new Intent(HomeScreenActivity.this, InviteMemberScreenActivity.class);
+                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
+                    startActivity(intent);
+                } else {
+//                    Intent intent = new Intent(HomeScreenActivity.this, TeamScreenActivity.class);
+//                    startActivity(intent);
+                }
             }
         });
 
         // use this code to reset the last walk's stats
+        // TODO: Comment out in production.
          SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
          SharedPreferences.Editor editor = spfs.edit();
          editor.clear();
          editor.apply();
 
+        // Get fitness service, if one doesn't already exist
+        if (fitnessService == null) {
+            String fitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
+            // If the factory key is null, use the DummyFitnessService by default:
+            if (fitnessServiceKey == null) {
+                fitnessService = FitnessServiceFactory.createFitnessService(WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY, this);
+            } else {
+                fitnessService = FitnessServiceFactory.createFitnessService(fitnessServiceKey, this);
+            }
+
+            fitnessService.setup();
+            fitnessService.updateStepCount();
+
+            // TODO: Remove this coupling of the fitness AsyncTask
+            // Check if Google Fit is being used; only start this async task if Google Fit is used
+            if (WWRConstants.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY.equals(fitnessServiceKey)) {
+                // Start the Home screen steps/miles updating in the background
+                fitnessRunner = new FitnessAsyncTask(this);
+                if (sEnableFitnessRunner) {
+                    fitnessRunner.execute();
+                }
+            }
+        }
+
+
          //Initialize DB
-         db = FirebaseFirestore.getInstance();
-         signIn();
-         Log.d(TAG, "Right before creating Mock Fitness object");
+         mFirestore = FirebaseFirestore.getInstance();
+        // TODO: Implement signIn() once we know that Google Fit is working
+         // signIn();
     }
 
     private void signIn() {
@@ -230,30 +270,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             Log.d(TAG, "Email from last log in is " + account.getEmail());
         }
         createUser();
-         // Get fitness service, if one doesn't already exist
-        if (fitnessService == null) {
-            Intent intent = getIntent();
-            String fitnessServiceKey = intent.getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
-            // If the factory key is null, use the DummyFitnessService by default:
-            if (fitnessServiceKey == null) {
-                fitnessService = FitnessServiceFactory.createFitnessService(WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY, this);
-            } else {
-                fitnessService = FitnessServiceFactory.createFitnessService(fitnessServiceKey, this);
-            }
 
-            fitnessService.setup();
-            fitnessService.updateStepCount();
-
-            // TODO: Remove this coupling of the fitness AsyncTask
-            // Check if Google Fit is being used; only start this async task if Google Fit is used
-            if (WWRConstants.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY.equals(fitnessServiceKey)) {
-                // Start the Home screen steps/miles updating in the background
-                fitnessRunner = new FitnessAsyncTask(this);
-                if (sEnableFitnessRunner) {
-                    fitnessRunner.execute();
-                }
-            }
-        }
     }
 
     @Override
@@ -293,6 +310,26 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 Log.e(TAG, "ERROR, google fit result code: " + resultCode);
             }
         }
+    }
+
+    private boolean userIsBeingInvited(String userEmail, FirebaseFirestore firestore) {
+        // Get the "invitations" collection
+        CollectionReference invitationsCol =
+                mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
+
+        // Query for all invitations where the current user is the invitee:
+        invitationsCol.whereEqualTo(TeamInvitation.FIELD_INVITEE, userEmail).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@androidx.annotation.NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            mUserIsBeingInvited = (task.getResult().size() > 0);
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+        return mUserIsBeingInvited;
     }
 
     @Override
@@ -349,7 +386,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     }
 
     public boolean userExists() {
-        CollectionReference usersCollection = db.collection(WWRConstants.USER_COLLECTION_KEY);
+        CollectionReference usersCollection = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
         usersCollection
                 .whereEqualTo(WWRConstants.USER_EMAIL_KEY, HomeScreenActivity.account.getEmail())
                 .get()
@@ -383,7 +420,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         user.put(WWRConstants.USER_ROUTES_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
         user.put(WWRConstants.USER_ROUTES_NOT_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
         user.put(WWRConstants.USER_TEAM_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
-        db.collection(WWRConstants.USER_COLLECTION_KEY).document(HomeScreenActivity.account.getEmail()).set(user);
+        mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(HomeScreenActivity.account.getEmail()).set(user);
     }
 
     private boolean checkHasHeight() {
@@ -400,6 +437,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     public void userDoesNotExist() {
         tempUserExists = false;
     }
+
 
     public void initSavedData() {
         // Get the user's height
