@@ -10,6 +10,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".TeammateRouteDetailActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".TeammateRouteActivity"
+            android:label="Routes"
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".fitness.MockFitnessService"
@@ -47,12 +54,12 @@
             android:name=".HeightScreenActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".InviteMemberScreenActivity"
+        <activity
+            android:name=".InviteMemberScreenActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".AddTeamMemberActivity"
+        <activity
+            android:name=".AddTeamMemberActivity"
             android:screenOrientation="portrait" />
-
-
     </application>
 
 </manifest>
