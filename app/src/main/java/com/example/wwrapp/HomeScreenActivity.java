@@ -32,8 +32,6 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.CollectionReference;
@@ -96,6 +94,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     public static GoogleSignInAccount account = null;
     private FirebaseFirestore db;
+
     private boolean tempUserExists;
 
     private ServiceConnection googleServiceConnection = new ServiceConnection() {
@@ -390,7 +389,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             FitnessServiceFactory.put(fitnessServiceKey, new FitnessServiceFactory.BluePrint() {
                 @Override
                 public IFitnessService create(HomeScreenActivity homeScreenActivity) {
-                    return new GoogleFitAdapter(homeScreenActivity);
+                    GoogleFitAdapter adapter = new GoogleFitAdapter(homeScreenActivity);
+                    // Statically declares email of user for database access
+                    GoogleSignInAccount account = adapter.getAccount();
+                    HomeScreenActivity.account = account;
+                    return adapter;
                 }
             });
             fitnessService = FitnessServiceFactory.create(fitnessServiceKey, this);
@@ -407,12 +410,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         updateUi();
     }
 
-    public void userExist() {
-        tempUserExists = true;
-    }
-    public void userDoesNotExist() {
-        tempUserExists = false;
-    }
     public boolean userExists() {
         CollectionReference usersCollection = db.collection(WWRConstants.USER_COLLECTION_KEY);
         usersCollection
@@ -457,6 +454,13 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         int testVal = saveHeight.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, -1);
         // If testVal == -1, then there was no height
         return testVal != -1;
+    }
+
+    public void userExist() {
+        tempUserExists = true;
+    }
+    public void userDoesNotExist() {
+        tempUserExists = false;
     }
 
     public void initSavedData() {
