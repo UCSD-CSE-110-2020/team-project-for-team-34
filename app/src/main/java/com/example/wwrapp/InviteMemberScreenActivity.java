@@ -45,6 +45,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         IUser invitee = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        assert invitee != null;
         String inviteeEmail = invitee.getEmail();
 
         // Find the users who have invited the invitee

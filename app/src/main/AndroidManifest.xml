@@ -57,8 +57,9 @@
         <activity
             android:name=".InviteMemberScreenActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".AddTeamMemberActivity"
+        <activity android:name=".AddTeamMemberActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".TeamActivity"
             android:screenOrientation="portrait" />
     </application>
 

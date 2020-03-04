@@ -33,7 +33,7 @@
     <LinearLayout
         android:id="@+id/add_member_textbox"
         android:layout_width="390dp"
-        android:layout_height="0dp"
+        android:layout_height="150dp"
         android:layout_marginBottom="415dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -54,7 +54,7 @@
             android:ems="10"
             android:hint="@string/add_member_name_text"
             android:inputType="textPersonName"
-            android:text="" />
+             />
 
         <TextView
             android:id="@+id/add_member_email_text_view"
@@ -84,5 +84,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -90,9 +90,8 @@ public final class WWRConstants {
     public static final long NO_MOCK_TIME = -1;
 
     // Attributes of a mock user
-    public static final String MOCK_USER_NAME = "mock user name";
-    public static final String MOCK_USER_EMAIL = "mock user email";
-
+    public static final String MOCK_USER_NAME = "Ariana";
+    public static final String MOCK_USER_EMAIL = "ariana@gmail.com";
 
 
     // Firestore collection constants
