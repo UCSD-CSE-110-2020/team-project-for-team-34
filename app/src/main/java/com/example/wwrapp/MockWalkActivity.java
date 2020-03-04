@@ -142,7 +142,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         // Pass the Walk data onto the next Activity
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
         Intent intent = new Intent(this, HomeScreenActivity.class);
-        intent.putExtra(WWRConstants.EXTRA_FITNESS_SERVICE_VERSION_KEY, WWRConstants.MOCK_FITNESS_SERVICE_VERSION);
+        intent.putExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY, WWRConstants.MOCK_FITNESS_SERVICE_VERSION);
         Log.d(TAG, "mHours is" + mHours);
         Log.d(TAG, "mMinutes is " + mMinutes);
         Log.d(TAG, "mSeconds is " + mSeconds);
@@ -287,7 +287,7 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
 
     private void returnToHomeActivity() {
         Intent intent = new Intent(this, HomeScreenActivity.class);
-        intent.putExtra(WWRConstants.EXTRA_FITNESS_SERVICE_VERSION_KEY, WWRConstants.MOCK_FITNESS_SERVICE_VERSION);
+        intent.putExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY, WWRConstants.MOCK_FITNESS_SERVICE_VERSION);
         setResult(RESULT_OK, intent);
         HomeScreenActivity.IS_MOCKING = true;
     }

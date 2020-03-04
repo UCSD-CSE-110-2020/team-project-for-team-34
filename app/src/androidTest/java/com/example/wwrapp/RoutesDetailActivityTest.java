@@ -15,6 +15,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,6 +42,7 @@ public class RoutesDetailActivityTest {
         RoutesActivity.setIsTest(true);
     }
 
+    @Ignore
     @Test
     public void routesDetailActivityTest() {
 

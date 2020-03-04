@@ -76,4 +76,17 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 
+    <!-- For Add Member xml file-->
+    <string name="add_member">Send Invite</string>
+    <string name="add_member_cancel">Cancel</string>
+    <string name="add_member_name_text">Name: </string>
+    <string name="add_member_email_text">Email: </string>
+    <string name="add_member_title">Add Team Member</string>
+
+    <!-- For Invite Member Screen xml file-->
+    <string name="invite_screen_title">Team Invite</string>
+    <string name="invite_accept">Accept</string>
+    <string name="invite_decline">Decline</string>
+    <string name="invite_description">Invited you to their team</string>
+
 </resources>
