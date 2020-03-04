@@ -38,10 +38,19 @@ public class TeamActivity extends AppCompatActivity {
     private Query mQuery;
     private boolean mUserIsOnTeam;
 
+    // For testing InviteMemberScreen
+    private static boolean testInvite = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_team);
+
+        // For testing InviteMember
+        if(testInvite){
+            Intent intent = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
+            startActivity(intent);
+        }
 
         // Set up Firestore and query for the routes to display
         initFirestore();
@@ -145,6 +154,10 @@ public class TeamActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "Request code not recognized: " + requestCode);
         }
+    }
+
+    public static void mockInviteMemberScreen(boolean testInviteMember){
+        testInvite = testInviteMember;
     }
 
 
