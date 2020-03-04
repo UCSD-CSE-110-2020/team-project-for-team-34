@@ -1,14 +1,10 @@
 package com.example.wwrapp;
 
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,15 +12,15 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wwrapp.database.Route;
-import com.example.wwrapp.database.Walk;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
-import com.example.wwrapp.fitness.IFitnessSubject;
-import com.example.wwrapp.fitness.MockFitnessService;
+import com.example.wwrapp.model.Route;
+import com.example.wwrapp.model.Walk;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 /**
  * Represents a walking session.
@@ -61,23 +57,6 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
     private LocalDateTime mDateTime;
     private IFitnessService fitnessService;
-    private boolean mIsBound;
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MockFitnessService.LocalBinder localService = (MockFitnessService.LocalBinder) service;
-            fitnessService = localService.getService();
-            IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
-            fitnessSubject.registerObserver(WalkActivity.this);
-            mIsBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mIsBound = false;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,12 +91,6 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
             handleWalkStopped();
         }
 
-        if (HomeScreenActivity.IS_MOCKING) {
-            Intent intent = new Intent(WalkActivity.this, MockFitnessService.class);
-            bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
-            startService(intent);
-        }
-
         mWalkTimer = new TimerTask(this);
         // Register the "stop walk" button
 
@@ -140,16 +113,6 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         if (!mWalkTimer.isCancelled()) {
             mWalkTimer.cancel(false);
         }
-
-        if (HomeScreenActivity.IS_MOCKING) {
-            // Unbind from the fitness service
-            if (mIsBound) {
-                IFitnessSubject fitnessSubject = (IFitnessSubject) fitnessService;
-                fitnessSubject.removeObserver(WalkActivity.this);
-                unbindService(serviceConnection);
-                mIsBound = false;
-            }
-        }
     }
 
     @Override
@@ -158,10 +121,6 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         Log.d(TAG, "onDestroy called");
         if (!mWalkTimer.isCancelled()) {
             mWalkTimer.cancel(false);
-        }
-        if (HomeScreenActivity.IS_MOCKING) {
-            Intent intent = new Intent(WalkActivity.this, MockFitnessService.class);
-            stopService(intent);
         }
     }
 
@@ -173,7 +132,11 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         // Pass the Walk data onto the next Activity
         Intent intent = new Intent(this, EnterWalkInformationActivity.class);
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
-        Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);
+
+        // Convert LocalDateTime to Date
+        Date date = Date.from(mDateTime.atZone(ZoneId.systemDefault()).toInstant());
+
+        Walk walk = new Walk(mStepsTaken, mMiles, date, duration);
         intent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
         intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_WALK_ACTIVITY_CALLER_ID);
 
@@ -192,7 +155,13 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
 
         // Create a new Walk
-        Walk walk = new Walk(mStepsTaken, mMiles, mDateTime, duration);
+        // TODO: Test that a walk is updated with a dummy number of steps.
+        // TODO: Remove the dummy steps in production.
+        mStepsTaken = 100;
+        // Convert LocalDateTime to Date
+        Date date = Date.from(mDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        Walk walk = new Walk(mStepsTaken, mMiles, date, duration);
+
         Log.d(TAG, "Walk object returned to RouteDetail is\n" + walk.toString());
         returnIntent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
         // Pass this Intent back
