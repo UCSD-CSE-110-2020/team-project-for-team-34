@@ -58,7 +58,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private static boolean sIgnoreHeight = true;
 
     public static boolean IS_MOCKING = false;
-    private boolean mIsBound;
 
     // Views for data
     private TextView mStepsTextView;
@@ -88,6 +87,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     private boolean tempUserExists;
     private boolean mUserIsBeingInvited;
+
+    // TODO: Set this variable to true if you want to test the invite member screen
+    // TODO: else set to false if you want to test the team screen
+    public static boolean TESTING_USER_IS_BEING_INVITED;
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         Log.d(TAG, "handleSigninResult called");
@@ -162,7 +165,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         });
 
         // TODO: Implement real sign-in logic. Using a dummy user for now to make testing possible.
-
         IUser user = null;
         // Determine what type of user to use:
         String userType = getIntent().getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
@@ -178,10 +180,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             Log.d(TAG, "Creating Google user");
         }
 
-        // To use for authentication
-        final String userEmail = user.getEmail();
-
-
         // TODO: Update this with actual sign-in logic later
         // Register the team screen button
         IUser finalUser = user;
@@ -193,15 +191,17 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
                 // TODO: Temporary fix for User
                 // Check if the user is being invited by anyone:
-                boolean userIsBeingInvited = userIsBeingInvited(userEmail, mFirestore);
-                userIsBeingInvited = true;
-                if (userIsBeingInvited) {
+                boolean userIsBeingInvited = userIsBeingInvited(finalUser.getEmail(), mFirestore);
+                if (TESTING_USER_IS_BEING_INVITED) {
+                    // If the user is being invited, prompt them to decide on the invites.
                     Intent intent = new Intent(HomeScreenActivity.this, InviteMemberScreenActivity.class);
                     intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
                     startActivity(intent);
                 } else {
-//                    Intent intent = new Intent(HomeScreenActivity.this, TeamScreenActivity.class);
-//                    startActivity(intent);
+                    // If the user is not being invited, take them to the Team screen.
+                    Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
+                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
+                    startActivity(intent);
                 }
             }
         });
