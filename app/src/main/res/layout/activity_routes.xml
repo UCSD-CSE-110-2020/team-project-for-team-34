@@ -32,5 +32,17 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentBottom="true"
             />
+
+        <Button
+            android:id="@+id/teammateRouteBtn"
+            android:layout_width="314dp"
+            android:layout_height="69dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="92dp"
+            android:layout_marginBottom="1dp"
+            android:text="Teammate Routes"
+            android:textSize="20dp" />
     </RelativeLayout>
 </RelativeLayout>
