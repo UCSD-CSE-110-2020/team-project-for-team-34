@@ -3,6 +3,8 @@ package com.example.wwrapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,18 +19,22 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 public class TeammateRouteActivity extends AppCompatActivity implements TeammateRouteAdapter.OnRouteSelectedListener {
     private static final String TAG = "TeammateRoutesActivity";
     private static final int START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE = 1;
+    public static boolean IS_TESTING_EMPTY = false;
 
     private TeammateRouteAdapter mTeammateRouteAdapter;
     private RecyclerView mTeammateRoutesRecycler;
+    private TextView mEmptyStringView;
 
     private FirebaseFirestore mFirestore;
     private Query mQuery;
     private boolean mUserBelongsToTeam;
+    private static boolean mEmpty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +43,10 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
 
         Log.d(TAG, "in onCreate");
 
+        if(IS_TESTING_EMPTY) {
+            mEmpty = true;
+            return;
+        }
         // Set up Firestore and query for the routes to display
         initFirestore();
 
@@ -93,12 +103,53 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
         }
     }
 
+    public static boolean isEmpty() {
+        return mEmpty;
+    }
+    private void checkIfEmpty() {
+        if(mQuery == null) {
+            mEmpty = true;
+        }
+        else {
+            mQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        boolean isEmpty = true;
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            isEmpty = false;
+                        }
+                        mEmpty = isEmpty;
+                    } else {
+                        Log.d(TAG, "Error getting documents: ", task.getException());
+                    }
+                }
+            });
+        }
+    }
+
+    private void hideOrShowEmptyString() {
+        mEmptyStringView = findViewById(R.id.emptyStringView);
+
+        if(mEmpty) {
+            mEmptyStringView.setVisibility(View.VISIBLE);
+        }
+        else {
+            mEmptyStringView.setVisibility(View.GONE);
+        }
+    }
+
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
-
+        checkIfEmpty();
+        hideOrShowEmptyString();
         if (mQuery == null) {
             Log.w(TAG, "No query!!!");
-        } else {
+        }
+        else if (mEmpty){
+            Log.w(TAG, "Query is empty");
+        }
+        else {
             // Set up adapter
             FirestoreRecyclerOptions<Route> options =
                     new FirestoreRecyclerOptions.Builder<Route>().setQuery(mQuery, Route.class).build();
