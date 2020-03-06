@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,10 +12,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wwrapp.model.IUser;
-import com.example.wwrapp.model.IUserFactory;
-import com.example.wwrapp.model.MockUser;
-import com.example.wwrapp.model.TeamInvitation;
+import com.example.wwrapp.R;
+import com.example.wwrapp.utils.WWRConstants;
+import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.IUserFactory;
+import com.example.wwrapp.models.MockUser;
+import com.example.wwrapp.models.TeamInvitation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;

@@ -7,9 +7,9 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.example.wwrapp.HomeScreenActivity;
-import com.example.wwrapp.TimeMachine;
-import com.example.wwrapp.WWRConstants;
+import com.example.wwrapp.activities.HomeScreenActivity;
+import com.example.wwrapp.utils.TimeMachine;
+import com.example.wwrapp.utils.WWRConstants;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

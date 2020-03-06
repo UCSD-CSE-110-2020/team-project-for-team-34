@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,12 +14,15 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.wwrapp.R;
+import com.example.wwrapp.utils.StepsAndMilesConverter;
+import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
-import com.example.wwrapp.model.IUser;
-import com.example.wwrapp.model.IUserFactory;
-import com.example.wwrapp.model.TeamInvitation;
+import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.IUserFactory;
+import com.example.wwrapp.models.TeamInvitation;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;

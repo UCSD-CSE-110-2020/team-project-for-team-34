@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +13,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.wwrapp.R;
+import com.example.wwrapp.utils.StepsAndMilesConverter;
+import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.fitness.IFitnessObserver;
 
 import java.lang.ref.WeakReference;

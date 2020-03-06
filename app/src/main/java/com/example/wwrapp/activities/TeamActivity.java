@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -13,9 +13,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.wwrapp.R;
+import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.adapters.TeamAdapter;
-import com.example.wwrapp.model.IUser;
-import com.example.wwrapp.model.MockUser;
+import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.MockUser;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;

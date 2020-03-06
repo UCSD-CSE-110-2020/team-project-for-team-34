@@ -1,6 +1,6 @@
-package com.example.wwrapp.model;
+package com.example.wwrapp.models;
 
-import com.example.wwrapp.WWRConstants;
+import com.example.wwrapp.utils.WWRConstants;
 
 /**
  * Factory class for User objects

@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -15,15 +15,17 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
-import com.example.wwrapp.model.Route;
-import com.example.wwrapp.model.Walk;
+import com.example.wwrapp.R;
+import com.example.wwrapp.utils.WWRConstants;
+import com.example.wwrapp.models.Route;
+import com.example.wwrapp.models.Walk;
 
 import java.util.List;
 
 /**
  * Detailed information page for a Route
  */
-public class RouteDetailActivity extends AppCompatActivity {
+public class TeammateRouteDetailActivity extends AppCompatActivity {
     private static final String TAG = "RouteDetailActivity";
     private static final int START_EXISTING_WALK_REQUEST_CODE = 1;
 
@@ -48,11 +50,11 @@ public class RouteDetailActivity extends AppCompatActivity {
         });
 
         // Register the "start" walk button
-        Button startWalkBtn = findViewById(R.id.start_existing_walk_btn);
+        Button startWalkBtn = findViewById(R.id.proposeWalkBtn);
         startWalkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startWalkActivity(route);
+                //TODO : implement propose walk
             }
         });
 
@@ -84,6 +86,10 @@ public class RouteDetailActivity extends AppCompatActivity {
 
         TextView noteText = findViewById(R.id.notes_text_view);
         noteText.setText(route.getNotes());
+
+        TextView teammateText = findViewById(R.id.teammateName);
+        //TODO: implement owner name in route model
+        teammateText.setText("teammate");
 
         List<String> tags = route.getTags();
         if (tags != null) {
@@ -142,7 +148,7 @@ public class RouteDetailActivity extends AppCompatActivity {
      * Starts the Walk activity from the RouteDetailActivity
      */
     private void startWalkActivity(Route route) {
-        Intent intent = new Intent(RouteDetailActivity.this, WalkActivity.class);
+        Intent intent = new Intent(TeammateRouteDetailActivity.this, WalkActivity.class);
         intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
                 WWRConstants.EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID);
         // Put a route extra so the Walk activity can display its title

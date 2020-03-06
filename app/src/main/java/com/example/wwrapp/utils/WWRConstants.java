@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.utils;
 
 /**
  * Contains constants for use throughout the project

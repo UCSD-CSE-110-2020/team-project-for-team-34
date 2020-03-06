@@ -2,8 +2,8 @@ package com.example.wwrapp.fitness;
 
 import android.util.Log;
 
-import com.example.wwrapp.HomeScreenActivity;
-import com.example.wwrapp.WWRConstants;
+import com.example.wwrapp.activities.HomeScreenActivity;
+import com.example.wwrapp.utils.WWRConstants;
 
 import java.util.HashMap;
 import java.util.Map;

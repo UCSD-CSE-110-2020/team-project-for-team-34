@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,10 +12,13 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.wwrapp.R;
+import com.example.wwrapp.utils.StepsAndMilesConverter;
+import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
-import com.example.wwrapp.model.Route;
-import com.example.wwrapp.model.Walk;
+import com.example.wwrapp.models.Route;
+import com.example.wwrapp.models.Walk;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;

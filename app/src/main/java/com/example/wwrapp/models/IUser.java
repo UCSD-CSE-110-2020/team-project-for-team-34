@@ -1,4 +1,4 @@
-package com.example.wwrapp.model;
+package com.example.wwrapp.models;
 
 import java.io.Serializable;
 

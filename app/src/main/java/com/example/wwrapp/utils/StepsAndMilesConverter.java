@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.utils;
 
 /**
  * Class to convert between steps and miles using height.

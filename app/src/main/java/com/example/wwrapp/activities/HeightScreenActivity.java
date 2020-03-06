@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.activities;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,6 +9,9 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.wwrapp.R;
+import com.example.wwrapp.utils.WWRConstants;
 
 /**
  * Prompts the user for their height and saves the measurements. This activity is launched by

@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -13,9 +13,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.wwrapp.model.Route;
-import com.example.wwrapp.model.RouteBuilder;
-import com.example.wwrapp.model.Walk;
+import com.example.wwrapp.R;
+import com.example.wwrapp.utils.WWRConstants;
+import com.example.wwrapp.models.Route;
+import com.example.wwrapp.models.RouteBuilder;
+import com.example.wwrapp.models.Walk;
 
 import java.util.ArrayList;
 import java.util.Date;
