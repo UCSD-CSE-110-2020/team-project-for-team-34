@@ -117,8 +117,5 @@ public class DummyFitnessService extends Service implements IFitnessService, IFi
         for (IFitnessObserver observer : mFitnessObservers) {
             observer.update(mSteps);
         }
-
     }
-
-
 }

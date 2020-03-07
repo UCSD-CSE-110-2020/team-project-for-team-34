@@ -15,8 +15,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.fitness.DummyFitnessApplication;
+import com.example.wwrapp.fitness.FitnessApplication;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
+import com.example.wwrapp.fitness.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
@@ -118,8 +119,13 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.e(TAG, "In method onCreate");
 
-        IFitnessService dummyFS =  DummyFitnessApplication.getDummyFitnessServiceInstance();
-        ((IFitnessSubject) dummyFS).registerObserver(this);
+//        IFitnessService dummyFS =  DummyFitnessApplication.getDummyFitnessServiceInstance();
+//        ((IFitnessSubject) dummyFS).registerObserver(this);
+//        ((DummyFitnessServiceWrapper) dummyFS).startDummyService();
+
+        IFitnessService googleFS =  FitnessApplication.getGoogleFitnessServiceInstance();
+        ((IFitnessSubject) googleFS).registerObserver(this);
+        ((GoogleFitnessServiceWrapper) googleFS).startGoogleService(this);
 
         mStepsTextView = findViewById(R.id.homeSteps);
         mMilesTextView = findViewById(R.id.homeMiles);
@@ -366,7 +372,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         saveData();
 
         // Remove this activity from listening to the fitness service
-        IFitnessService dummyFS =  DummyFitnessApplication.getDummyFitnessServiceInstance();
+        IFitnessService dummyFS =  FitnessApplication.getDummyFitnessServiceInstance();
         ((IFitnessSubject) dummyFS).removeObserver(this);
 
 

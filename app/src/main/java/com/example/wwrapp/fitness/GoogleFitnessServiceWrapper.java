@@ -1,5 +1,6 @@
 package com.example.wwrapp.fitness;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -10,28 +11,38 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DummyFitnessServiceWrapper implements IFitnessService,
-        IFitnessObserver, IFitnessSubject {
-    private static final String TAG = "DummyWrapper";
+public class GoogleFitnessServiceWrapper implements IFitnessService, IFitnessSubject, IFitnessObserver {
+    private static final String TAG = "GoogleWrapper";
     private Context mContext;
     private long mSteps;
     private List<IFitnessObserver> mFitnessObservers;
-    private DummyFitnessService mFitnessService;
+    private GoogleFitAdapterService mFitnessService;
     private boolean mIsBound;
 
-    public DummyFitnessServiceWrapper(Context context) {
+    private Activity mActivity;
+
+    public GoogleFitnessServiceWrapper(Context context) {
         mContext = context;
         mFitnessObservers = new ArrayList<>();
+    }
+
+    public Context getContext() {
+        return mContext;
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "In method onServiceConnected()");
-            DummyFitnessService.LocalService localService = (DummyFitnessService.LocalService) service;
+            GoogleFitAdapterService.LocalService localService = (GoogleFitAdapterService.LocalService) service;
             mFitnessService = localService.getService();
             mIsBound = true;
-            mFitnessService.registerObserver(DummyFitnessServiceWrapper.this);
+            mFitnessService.registerObserver(GoogleFitnessServiceWrapper.this);
+
+            // Pass in an activity so Google Fit can request sign in
+            ((GoogleFitAdapterService) mFitnessService).setActivity(mActivity);
+            ((GoogleFitAdapterService) mFitnessService).setup();
+
 
         }
 
@@ -42,21 +53,23 @@ public class DummyFitnessServiceWrapper implements IFitnessService,
         }
     };
 
-    public void startDummyService() {
+    public void startGoogleService(Activity activity) {
+        // Save the activity
+        this.mActivity = activity;
         Log.d(TAG, "In method startDummyService()");
         if (!mIsBound) {
             Log.d(TAG, "Binding service");
-            Intent intent = new Intent(mContext, DummyFitnessService.class);
+            Intent intent = new Intent(mContext, GoogleFitAdapterService.class);
             mContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
             mContext.startService(intent);
         }
     }
 
-    public void stopDummyService() {
+    public void stopGoogleService() {
         Log.d(TAG, "In method stopDummyService()");
         if (mIsBound) {
             Log.d(TAG, "Unbinding service");
-            Intent intent = new Intent(mContext, DummyFitnessService.class);
+            Intent intent = new Intent(mContext, GoogleFitAdapterService.class);
             mContext.unbindService(serviceConnection);
             mContext.stopService(intent);
             mIsBound = false;
@@ -102,4 +115,6 @@ public class DummyFitnessServiceWrapper implements IFitnessService,
             observer.update(mSteps);
         }
     }
+
+
 }
