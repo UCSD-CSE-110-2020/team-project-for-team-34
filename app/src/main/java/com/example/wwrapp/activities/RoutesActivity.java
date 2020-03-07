@@ -84,6 +84,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(RoutesActivity.this, TeammateRouteActivity.class);
+                intent.putExtra(WWRConstants.EXTRA_USER_KEY,getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
                 startActivity(intent);
             }
         });

@@ -14,10 +14,12 @@ public class MockUser implements IUser, Serializable {
 
     private String name;
     private String email;
+    private String teamName;
 
     public MockUser(String name, String email) {
         this.name = name;
         this.email = email;
+        this.teamName = "team";
     }
 
     @Override
@@ -37,7 +39,7 @@ public class MockUser implements IUser, Serializable {
 
     @Override
     public String getTeamName() {
-        return null;
+        return teamName;
     }
 
     @Override

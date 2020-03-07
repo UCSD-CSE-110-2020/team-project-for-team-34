@@ -9,10 +9,12 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.view.menu.MenuView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.Route;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -31,14 +33,17 @@ public class TeammateRouteAdapter extends FirestoreRecyclerAdapter<Route, Teamma
     private OnRouteSelectedListener mOnRouteSelectedListener;
     private LayoutInflater mInflater;
 
+    private IUser mUser;
+
     /**
      * Create a new RecyclerView adapter that listens to a Firestore Query.  See {@link
      * FirestoreRecyclerOptions} for configuration options.
      *
      * @param options
      */
-    public TeammateRouteAdapter(@NonNull FirestoreRecyclerOptions<Route> options) {
+    public TeammateRouteAdapter(@NonNull FirestoreRecyclerOptions<Route> options, IUser user) {
         super(options);
+        mUser = user;
         Log.d(TAG, "in TeammateRouteAdapter constructor");
     }
 
@@ -48,6 +53,15 @@ public class TeammateRouteAdapter extends FirestoreRecyclerAdapter<Route, Teamma
         Log.d(TAG, "in onBindViewHolder");
 
         // Set name and starting point
+        Log.d(TAG, model.getOwnerEmail());
+        Log.d(TAG, mUser.getEmail());
+        if(model.getOwnerEmail().equals(mUser.getEmail()))
+        {
+            Log.d(TAG, "onBindViewHolder: ");
+            holder.itemView.setVisibility(View.GONE);
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0,0));
+            return;
+        }
         holder.routeName.setText(model.getRouteName());
         holder.routeStartingPoint.setText(model.getStartingPoint());
 
@@ -106,6 +120,7 @@ public class TeammateRouteAdapter extends FirestoreRecyclerAdapter<Route, Teamma
         TextView routeSteps;
         TextView teammateName;
         ToggleButton favoriteBtn;
+        View itemView;
 
         public TeammateRouteViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -117,6 +132,7 @@ public class TeammateRouteAdapter extends FirestoreRecyclerAdapter<Route, Teamma
             routeSteps = itemView.findViewById(R.id.route_step);
             favoriteBtn = itemView.findViewById(R.id.favoriteBtn);
             teammateName = itemView.findViewById(R.id.teammate_name);
+            this.itemView = itemView;
 
             // Register this view to respond to clicks
             itemView.setOnClickListener(new View.OnClickListener() {

@@ -89,6 +89,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private boolean tempUserExists;
     private boolean mUserIsBeingInvited;
 
+    private IUser mUser;
+
     // TODO: Set this variable to true if you want to test the invite member screen
     // TODO: else set to false if you want to test the team screen
     public static boolean TESTING_USER_IS_BEING_INVITED;
@@ -107,13 +109,13 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         mFirestore = FirebaseFirestore.getInstance();
 
         // TODO: Implement real sign-in logic. Using a dummy user for now to make testing possible.
-        IUser user = null;
+        mUser = null;
         // Determine what type of user to use:
         String userType = getIntent().getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
         if (userType == null) {
             // Default to the mock user
             Log.d(TAG, "Creating Mock user");
-            user = IUserFactory.createUser
+            mUser = IUserFactory.createUser
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
                             WWRConstants.MOCK_USER_NAME, WWRConstants.MOCK_USER_EMAIL
                     );
@@ -124,7 +126,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
         // TODO: Update this with actual sign-in logic later
         // Register the team screen button
-        IUser finalUser = user;
+        IUser finalUser = mUser;
         findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -340,6 +342,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         Intent intent = new Intent(HomeScreenActivity.this, RoutesActivity.class);
         intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
                 WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+        intent.putExtra(WWRConstants.EXTRA_USER_KEY,mUser);
         startActivity(intent);
     }
 
