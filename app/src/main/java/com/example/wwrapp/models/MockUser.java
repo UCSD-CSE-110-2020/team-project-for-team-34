@@ -1,6 +1,7 @@
 package com.example.wwrapp.models;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * A mock user for testing
@@ -13,12 +14,10 @@ public class MockUser implements IUser, Serializable {
 
     private String name;
     private String email;
-    private String inviteStatus;
 
-    public MockUser(String name, String email, String inviteStatus) {
+    public MockUser(String name, String email) {
         this.name = name;
         this.email = email;
-        this.inviteStatus = inviteStatus;
     }
 
     @Override
@@ -32,11 +31,23 @@ public class MockUser implements IUser, Serializable {
     }
 
     @Override
-    public String getInviteStatus() {
-        return inviteStatus;
+    public String getInviterEmail() {
+        return null;
     }
 
-    public void setInviteStatus(String inviteStatus) {
-        this.inviteStatus = inviteStatus;
+    @Override
+    public String getTeamName() {
+        return null;
     }
+
+    @Override
+    public List<String> getInvitees() {
+        return null;
+    }
+
+    @Override
+    public List<Route> getRoutes() {
+        return null;
+    }
+
 }

@@ -4,6 +4,7 @@ import com.google.firebase.firestore.IgnoreExtraProperties;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a route that the user has walked
@@ -19,6 +20,9 @@ public class Route implements Serializable {
     public static final String FIELD_FAVORITE = "favorite";
     public static final String FIELD_TAGS = "tags";
     public static final String FIELD_NOTES = "notes";
+    public static final String FIELD_OWNER_EMAIL = "ownerEmail";
+    public static final String FIELD_WALKERS = "walkers";
+
 
 
     // All the information that a Route should store
@@ -32,6 +36,11 @@ public class Route implements Serializable {
     private List<String> tags;
     private boolean isFavorite;
     private String notes;
+
+    // Further information for a Route
+    private String ownerEmail;
+    private Map<String, Walk> walkers;
+
 
     /**
      * Empty constructor required for Firestore
@@ -125,6 +134,22 @@ public class Route implements Serializable {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
+    }
+
+    public Map<String, Walk> getWalkers() {
+        return walkers;
+    }
+
+    public void setWalkers(Map<String, Walk> walkers) {
+        this.walkers = walkers;
     }
 
     @Override

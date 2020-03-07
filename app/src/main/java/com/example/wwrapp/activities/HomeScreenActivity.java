@@ -115,8 +115,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             Log.d(TAG, "Creating Mock user");
             user = IUserFactory.createUser
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
-                            WWRConstants.MOCK_USER_NAME, WWRConstants.MOCK_USER_EMAIL,
-                            WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
+                            WWRConstants.MOCK_USER_NAME, WWRConstants.MOCK_USER_EMAIL
+                    );
         } else {
             // TODO: Implement factory creation for Google user
             Log.d(TAG, "Creating Google user");

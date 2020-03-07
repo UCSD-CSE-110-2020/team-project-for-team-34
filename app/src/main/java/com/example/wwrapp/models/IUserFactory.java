@@ -8,11 +8,11 @@ import com.example.wwrapp.utils.WWRConstants;
  */
 public class IUserFactory {
 
-    public static IUser createUser(String type, String name, String email, String inviteStatus) {
+    public static IUser createUser(String type, String name, String email) {
         IUser user = null;
         switch(type) {
             case WWRConstants.MOCK_USER_FACTORY_KEY:
-                user = new MockUser(name, email, inviteStatus);
+                user = new MockUser(name, email);
                 break;
 
             case WWRConstants.GOOGLE_USER_FACTORY_KEY:
