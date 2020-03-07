@@ -15,14 +15,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.utils.StepsAndMilesConverter;
-import com.example.wwrapp.utils.WWRConstants;
+import com.example.wwrapp.fitness.DummyFitnessApplication;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
+import com.example.wwrapp.fitness.IFitnessSubject;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
 import com.example.wwrapp.models.TeamInvitation;
+import com.example.wwrapp.utils.StepsAndMilesConverter;
+import com.example.wwrapp.utils.WWRConstants;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -115,6 +117,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
         Log.e(TAG, "In method onCreate");
+
+        IFitnessService dummyFS =  DummyFitnessApplication.getDummyFitnessServiceInstance();
+        ((IFitnessSubject) dummyFS).registerObserver(this);
 
         mStepsTextView = findViewById(R.id.homeSteps);
         mMilesTextView = findViewById(R.id.homeMiles);
@@ -216,6 +221,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
          editor.clear();
          editor.apply();
 
+         // TODO: Apply Service class to Fitness Service
         // Get fitness service, if one doesn't already exist
         if (fitnessService == null) {
             String fitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
@@ -349,6 +355,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "In method onPause");
+
         if (fitnessRunner != null && !fitnessRunner.isCancelled()) {
             fitnessRunner.cancel(false);
         }
@@ -356,7 +364,12 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             // TODO: Implement true mock
         }
         saveData();
-        Log.d(TAG, "In method onPause");
+
+        // Remove this activity from listening to the fitness service
+        IFitnessService dummyFS =  DummyFitnessApplication.getDummyFitnessServiceInstance();
+        ((IFitnessSubject) dummyFS).removeObserver(this);
+
+
     }
 
     @Override
@@ -564,6 +577,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     @Override
     public void update(long steps) {
         Log.d(TAG, "In method update");
+        Log.d(TAG, "Steps is = " + steps);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

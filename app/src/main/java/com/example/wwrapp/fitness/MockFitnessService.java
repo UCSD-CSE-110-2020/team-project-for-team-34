@@ -23,6 +23,7 @@ import java.util.List;
  */
 public class MockFitnessService extends Service implements IFitnessService, IFitnessSubject {
     private static final String TAG = "MockFitnessService";
+
     // How much the updateStepCount method increases the step count
     private static final int STEP_COUNT_INCREMENT = 10;
     private static final int MILLISECONDS_PER_SECOND = 1000;

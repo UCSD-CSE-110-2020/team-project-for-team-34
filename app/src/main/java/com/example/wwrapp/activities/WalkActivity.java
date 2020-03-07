@@ -13,6 +13,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.fitness.DummyFitnessApplication;
+import com.example.wwrapp.fitness.IFitnessSubject;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
 import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.fitness.IFitnessObserver;
@@ -67,6 +69,9 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
 
+        // TODO: Integrate Service-based fitness service
+        IFitnessService dummyFS =  DummyFitnessApplication.getDummyFitnessServiceInstance();
+        ((IFitnessSubject) dummyFS).registerObserver(this);
 
         mDateTime = LocalDateTime.now();
         mStepsSharedPreference = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
