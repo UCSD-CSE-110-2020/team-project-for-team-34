@@ -94,7 +94,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     public static boolean TESTING_USER_IS_BEING_INVITED;
 
     private String mFitnessServiceKey;
-    private boolean isObserving;
+    private boolean mIsObserving;
 
 
     @Override
@@ -198,20 +198,22 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             }
         });
 
-        // Set up stored inches, steps, and miles
-        initSavedData();
+        // Save the values of stored height, steps and miles, and last walk stats to their
+        // respective member variables
+        initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
 
         // Update the UI
-        updateUi();
+        updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
 
 
         // use this code to reset the last walk's stats
         // TODO: Comment out in production. If you don't, the last walk stats won't work.
-        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor editor = spfs.edit();
-        editor.clear();
-        editor.apply();
-
+//        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+//        SharedPreferences.Editor editor = spfs.edit();
+//        editor.clear();
+//        editor.apply();
     }
 
     @Override
@@ -226,14 +228,17 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         Log.d(TAG, "Mocking? " + IS_MOCKING);
 
         // Re-register this activity as an observer if it has been un-registered.
-        if (!isObserving) {
+        if (!mIsObserving) {
             // The current value of the key tells us which fitness service we last started.
             startObservingFitnessService(mFitnessServiceKey);
         }
 
-        // TODO: Should these lines be in onResume or onCreate ?
-        initSavedData();
-        updateUi();
+        // TODO: Should these lines be in onResume or onCreate (or both) ?
+        initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
+        updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
+        Log.d(TAG, "onCreate daily steps = " + mDailyTotalSteps);
     }
 
     @Override
@@ -242,13 +247,14 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         Log.d(TAG, "In method onPause");
 
         // Un-register this activity from the fitness service if it was registered
-        if (isObserving) {
+        if (mIsObserving) {
             // The current value of the key tells us which fitness service we last started.
             stopObservingFitnessService(mFitnessServiceKey);
         }
 
         // Save whatever data the fitness service had provided up until now
-        saveData();
+        saveDataToSharedPreferences(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE),
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE), mDailyTotalSteps, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
     }
 
 
@@ -262,13 +268,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "In method onDestroy");
-
-        // TODO: Determine if this call is needed (won't onPause be called before anyway?)
-        saveData();
+        Log.d(TAG, "mSteps jin nDestroy is = " + mDailyTotalSteps);
     }
 
     private void startObservingFitnessService(String fitnessServiceKey) {
-        isObserving = true;
+        mIsObserving = true;
         // Provide a default implementation if key is null
         if (fitnessServiceKey == null) {
             // If the factory key is null, use the DummyFitnessService by default:
@@ -314,7 +318,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 break;
         }
 
-        isObserving = false;
+        mIsObserving = false;
     }
 
     /**
@@ -388,62 +392,77 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     /**
      * Retrieves the user's stored height, daily steps and miles, and last walk stats and sets
      * the corresponding instance variables with those values.
+     * @param heightSharedPreferences
+     * @param lastWalkSharedPreferences
+     * @param stepsSharedPreferences
      */
-    public void initSavedData() {
+    private void initSavedData(SharedPreferences heightSharedPreferences,
+                               SharedPreferences lastWalkSharedPreferences,
+                               SharedPreferences stepsSharedPreferences) {
         // Get the user's height
-        SharedPreferences heightSharedPref =
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
-        mFeet = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
-        mInches = heightSharedPref.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, 0);
+        mFeet = heightSharedPreferences.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
+        mInches = heightSharedPreferences.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, 0);
 
-        // Get the user's steps
-        SharedPreferences stepsSharedPref = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
-        mDailyTotalSteps = stepsSharedPref.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
-
+        // Get the user's steps, and use this value to calculate the miles
+        mDailyTotalSteps = stepsSharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
         StepsAndMilesConverter stepsAndMilesConverter = new StepsAndMilesConverter(mFeet, mInches);
         mDailyTotalMiles = stepsAndMilesConverter.getNumMiles(mDailyTotalSteps);
 
         // Get the last walk's stats
-        SharedPreferences sharedPreferences =
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-        mLastWalkSteps = sharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
-        mLastWalkMiles = sharedPreferences.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
-        mLastWalkTime = sharedPreferences.getString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
-    }
-
-    /**
-     * Saves the user's daily steps and miles  and last walk stats to Shared Preferences.
-     */
-    public void saveData() {
-        // Save the daily steps
-        SharedPreferences stepsSharedPreference =
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor stepsEditor = stepsSharedPreference.edit();
-        stepsEditor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, mDailyTotalSteps);
-        stepsEditor.apply();
-
-        // Save the last walk
-        SharedPreferences lastWalkSharedPreference =
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-        SharedPreferences.Editor lastWalkEditor = lastWalkSharedPreference.edit();
-        lastWalkEditor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, mLastWalkSteps);
-        lastWalkEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, (float) mLastWalkMiles);
-        lastWalkEditor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, mLastWalkTime);
-        lastWalkEditor.apply();
+        mLastWalkSteps = lastWalkSharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, 0);
+        mLastWalkMiles = lastWalkSharedPreferences.getFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, 0);
+        mLastWalkTime = lastWalkSharedPreferences.getString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
     }
 
     /**
      * Sets the values of the UI elements corresponding to the user's daily steps and miles
      * and last walk stats.
+     * @param dailyTotalSteps
+     * @param dailyTotalMiles
+     * @param lastWalkSteps
+     * @param lastWalkMiles
+     * @param lastWalkTime
      */
-    public void updateUi() {
-        mStepsTextView.setText(String.valueOf(mDailyTotalSteps));
-        mMilesTextView.setText(String.valueOf(Math.round(mDailyTotalMiles * TENTHS_PLACE_ROUNDING_FACTOR) /
+    private void updateHomeDisplay(long dailyTotalSteps, double dailyTotalMiles,
+                                   long lastWalkSteps, double lastWalkMiles, String lastWalkTime) {
+        // Set values for steps and miles
+        mStepsTextView.setText(String.valueOf(dailyTotalSteps));
+        mMilesTextView.setText(String.valueOf(Math.round(dailyTotalMiles * TENTHS_PLACE_ROUNDING_FACTOR) /
                 TENTHS_PLACE_ROUNDING_FACTOR));
 
-        mLastWalkStepsTextView.setText(String.valueOf(mLastWalkSteps));
-        mLastWalkMilesTextView.setText(String.valueOf(mLastWalkMiles));
-        mLastWalkTimeTextView.setText(String.valueOf(mLastWalkTime));
+        // Set values for last walk stats
+        mLastWalkStepsTextView.setText(String.valueOf(lastWalkSteps));
+        mLastWalkMilesTextView.setText(String.valueOf(lastWalkMiles));
+        mLastWalkTimeTextView.setText(String.valueOf(lastWalkTime));
+    }
+
+    /**
+     * Saves the user's daily steps and miles  and last walk stats to Shared Preferences.
+     * @param stepsSharedPreference
+     * @param lastWalkSharedPreference
+     * @param dailyTotalSteps
+     * @param lastWalkSteps
+     * @param lastWalkMiles
+     * @param lastWalkDate
+     */
+    private void saveDataToSharedPreferences(SharedPreferences stepsSharedPreference,
+                                             SharedPreferences lastWalkSharedPreference,
+                                             long dailyTotalSteps,
+                                             long lastWalkSteps,
+                                             double lastWalkMiles,
+                                             String lastWalkDate) {
+        // Save the daily steps
+        Log.d(TAG, "Steps to save in Shared Preferences is " + dailyTotalSteps);
+        SharedPreferences.Editor stepsEditor = stepsSharedPreference.edit();
+        stepsEditor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, dailyTotalSteps);
+        stepsEditor.apply();
+
+        // Save the last walk
+        SharedPreferences.Editor lastWalkEditor = lastWalkSharedPreference.edit();
+        lastWalkEditor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, lastWalkSteps);
+        lastWalkEditor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, (float) lastWalkMiles);
+        lastWalkEditor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, lastWalkDate);
+        lastWalkEditor.apply();
     }
 
     /**
@@ -469,7 +488,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         // Set the miles based on the steps
         setMiles(mDailyTotalSteps, mFeet, mInches);
         // Update the UI
-        updateUi();
+        updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
     }
 
     public void setHeight(int feet, int inches) {
@@ -488,7 +507,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 // Update the miles based on the newly set step count
                 setMiles(mDailyTotalSteps, mFeet, mInches);
                 // Update the Home screen
-                updateUi();
+                updateHomeDisplay(HomeScreenActivity.this.mDailyTotalSteps,
+                        HomeScreenActivity.this.mDailyTotalMiles,
+                        HomeScreenActivity.this.mLastWalkSteps,
+                        HomeScreenActivity.this.mLastWalkMiles,
+                        HomeScreenActivity.this.mLastWalkTime);
             }
         });
     }

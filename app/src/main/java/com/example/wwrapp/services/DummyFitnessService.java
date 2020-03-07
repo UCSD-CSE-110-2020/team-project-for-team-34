@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
+import com.example.wwrapp.utils.WWRConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,13 +28,14 @@ public class DummyFitnessService extends Service implements IFitnessService, IFi
     private boolean mIsRunning;
 
     // Total step count
-    private long mSteps;
+    private long mStepCountIncrement;
     private List<IFitnessObserver> mFitnessObservers;
 
     private final IBinder mBinder = new LocalService();
 
     public DummyFitnessService() {
         Log.d(TAG, "In constructor of DummyFitnessService");
+        mStepCountIncrement = WWRConstants.DUMMY_FITNESS_SERVICE_STEP_COUNT_INCREMENT;
         mFitnessObservers = new ArrayList<>();
     }
 
@@ -53,9 +55,8 @@ public class DummyFitnessService extends Service implements IFitnessService, IFi
                     // Increment steps
                     try {
                         wait(1000);
-                        mSteps += 10;
                         notifyObservers();
-                        Log.d(TAG, "Step count is now " + mSteps);
+                        Log.d(TAG, "Step count is now " + mStepCountIncrement);
                     }
                     catch (InterruptedException e) {
                         Log.d(TAG, e.getMessage());
@@ -127,7 +128,7 @@ public class DummyFitnessService extends Service implements IFitnessService, IFi
     @Override
     public void notifyObservers() {
         for (IFitnessObserver observer : mFitnessObservers) {
-            observer.update(mSteps);
+            observer.update(mStepCountIncrement);
         }
     }
 }

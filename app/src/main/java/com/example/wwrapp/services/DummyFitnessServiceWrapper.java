@@ -4,12 +4,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
+import com.example.wwrapp.utils.WWRConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,12 @@ public class DummyFitnessServiceWrapper implements IFitnessService, IFitnessObse
         mIsActive = true;
         mContext = context;
         mFitnessObservers = new ArrayList<>();
+
+        // Recover the steps from SharedPreferences
+        SharedPreferences stepsSharedPreferences =
+                context.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, Context.MODE_PRIVATE);
+        mSteps = stepsSharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);
+        Log.d(TAG, "Retrieved mSteps is " + mSteps);
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -98,7 +106,8 @@ public class DummyFitnessServiceWrapper implements IFitnessService, IFitnessObse
     @Override
     public void update(long steps) {
         Log.d(TAG, "In method update(), steps is = " + steps);
-        mSteps = steps;
+        // Add the steps from the service simulating the walking to the total
+        mSteps += steps;
         notifyObservers();
     }
 
