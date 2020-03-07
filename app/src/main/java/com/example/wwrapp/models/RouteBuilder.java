@@ -1,6 +1,7 @@
 package com.example.wwrapp.models;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Builder pattern for Route objects
@@ -60,4 +61,15 @@ public class RouteBuilder {
         route.setDuration(duration);
         return this;
     }
+
+    public RouteBuilder setOwnerEmail(String email) {
+        route.setOwnerEmail(email);
+        return this;
+    }
+
+    public RouteBuilder setWalkers(Map<String, Walk> walkers) {
+        route.setWalkers(walkers);
+        return this;
+    }
+
 }

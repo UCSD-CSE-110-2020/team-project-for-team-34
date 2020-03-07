@@ -76,7 +76,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
         assert inviter != null;
 
         IUser invitee = IUserFactory.createUser
-                (userType, mMemberName, mMemberEmail, WWRConstants.FIRESTORE_TEAM_INVITE_PENDING);
+                (userType, mMemberName, mMemberEmail);
 
         final String EMAIL = invitee.getEmail() + "suffix";
         assert EMAIL != null;
@@ -91,13 +91,12 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 
 
                 final IUser finalInvitee = IUserFactory.createUser
-                        (userType, mMemberName, mMemberEmail, WWRConstants.FIRESTORE_TEAM_INVITE_PENDING);
+                        (userType, mMemberName, mMemberEmail);
 
                 // Save member_name and member_email to database and go to team screen.
 
                 Log.d(TAG, "Current user is " + inviter.getName());
                 Log.d(TAG, "Current email is " + inviter.getEmail());
-                Log.d(TAG, "Current user invite status is " + inviter.getInviteStatus());
 
 
                 // Check if the inviter is already in a team
