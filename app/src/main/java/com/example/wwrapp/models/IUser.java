@@ -10,7 +10,6 @@ public interface IUser extends Serializable {
 
     public String getName();
     public String getEmail();
-
     public String getInviterEmail();
     public String getTeamName();
     public List<String> getInvitees();

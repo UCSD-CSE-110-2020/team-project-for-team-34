@@ -1,5 +1,10 @@
 package com.example.wwrapp.utils;
 
+import com.example.wwrapp.models.Route;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Contains constants for use throughout the project
  */
@@ -122,13 +127,9 @@ public final class WWRConstants {
     public static final String FIRESTORE_DOCUMENT_STARTING_POINT = "startingPoint";
 
     //DataBase collection Strings
-    public static String TEAM_COLLECTION_KEY = "teams";
-    public static String DEFAULT_DATABASE_VALUE = "";
-    public static String USER_EMAIL_KEY = "email";
-    public static String USER_NAME_KEY = "name";
-    public static String USER_ROUTES_OWNED_KEY = "routesOwned";
-    public static String USER_ROUTES_NOT_OWNED_KEY = "routesNotOwned";
-    public static String USER_TEAM_KEY = "team";
+    public static String TEAMS_COLLECTION_KEY = "teams";
+    public static String USERS_COLLECITON_KEY = "users";
+
     public static String USER_TEAM_PENDING_KEY = "teamPendingDemoTeam";
     public static String TEAM_NAME_KEY = "name";
     public static String TEAM_USERS_KEY = "users";
