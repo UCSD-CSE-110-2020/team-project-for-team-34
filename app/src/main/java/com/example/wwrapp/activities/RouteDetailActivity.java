@@ -184,7 +184,7 @@ public class RouteDetailActivity extends AppCompatActivity {
                 // Update the corresponding Route with the new Walk
                 Route route = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
-//                route.setDate(walk.getDate());
+//              route.setDate(walk.getDate());
                 route.setDuration(walk.getDuration());
                 route.setSteps(walk.getSteps());
                 route.setMiles(walk.getMiles());

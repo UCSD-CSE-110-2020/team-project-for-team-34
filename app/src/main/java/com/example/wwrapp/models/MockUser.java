@@ -84,6 +84,10 @@ public class MockUser implements IUser, Serializable {
     }
 
     @Override
+    public void updateRoute(Route newRoute) { return; }
+
+
+    @Override
     public void removeInvitee(String email) {
         return;
     }

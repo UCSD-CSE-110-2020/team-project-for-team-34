@@ -89,6 +89,17 @@ public class GoogleUser implements IUser, Serializable {
     }
 
     @Override
+    public void updateRoute(Route newRoute) {
+        ListIterator<Route> itr = mRoutes.listIterator();
+        while (itr.hasNext()) {
+            if( itr.next().getRouteName().equals(newRoute.getRouteName()) ) {
+                itr.set(newRoute);
+            }
+        }
+    }
+
+
+    @Override
     public void addRoutes(Route newRoutes) {
         mRoutes.add(newRoutes);
     }
@@ -97,7 +108,7 @@ public class GoogleUser implements IUser, Serializable {
     public void removeInvitee(String email) {
         ListIterator<String> itr = mInvitees.listIterator();
         while (itr.hasNext()) {
-            if( itr.next() == email ) {
+            if( itr.next().equals(email) ) {
                 itr.remove();
             }
         }

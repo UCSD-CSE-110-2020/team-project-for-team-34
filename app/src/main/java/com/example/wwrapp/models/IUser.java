@@ -20,7 +20,7 @@ public interface IUser extends Serializable {
     public void setInvitees(List<String> newInvitees);
     public void addInvitees(IUser user);
     public void setRoutes(List<Route> newRoutes);
+    public void updateRoute(Route newRoute);
     public void addRoutes(Route newRoutes);
     public void removeInvitee(String routeName);
-
 }
