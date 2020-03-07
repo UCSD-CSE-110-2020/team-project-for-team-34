@@ -47,6 +47,9 @@ public class UserQuery {
     }
 
     public static void overwriteUser(IUser iUser) {
+        if (!userExists()) {
+            return;
+        }
         mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(iUser.getEmail()).set(iUser);
     }
 
