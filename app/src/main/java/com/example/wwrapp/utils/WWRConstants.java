@@ -5,6 +5,10 @@ package com.example.wwrapp.utils;
  */
 public final class WWRConstants {
 
+    // TODO: Determine whether to use this version of the request code or the uncommented one
+//    public final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
+    public static final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 2;
+
     /**
      * Prevent external instantiation
      */
@@ -75,11 +79,15 @@ public final class WWRConstants {
     public static final String DATE_FORMATTER_PATTERN_SUMMARY = "MM-dd-yyyy";
 
     // Fitness Service constants
-    public static final String EXTRA_FITNESS_SERVICE_TYPE_KEY = "com.example.wwrapp.EXTRA_FITNESS_SERVICE_VERSION_KEY";
+    public static final String EXTRA_FITNESS_SERVICE_TYPE_KEY = "com.example.wwrapp.EXTRA_FITNESS_SERVICE_TYPE_KEY";
     public static final String GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY =
             "com.example.wwrapp.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY";
     public static final String DUMMY_FITNESS_SERVICE_FACTORY_KEY =
             "com.example.wwrapp.DUMMY_FITNESS_SERVICE_FACTORY_KEY";
+    public static final String DEFAULT_FITNESS_SERVICE_FACTORY_KEY = DUMMY_FITNESS_SERVICE_FACTORY_KEY;
+
+    // Time in ms to wait before pulling data from Fitness Service
+    public static final int WAIT_TIME = 1000;
 
     // User Factory keys/types
     public static final String GOOGLE_USER_FACTORY_KEY = "com.example.wwrapp.GOOGLE_USER_FACTORY_KEY";

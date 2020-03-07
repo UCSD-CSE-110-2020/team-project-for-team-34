@@ -61,7 +61,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     private int mSeconds;
 
     private LocalDateTime mDateTime;
-    private IFitnessService fitnessService;
+    private String mFitnessServiceKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -299,7 +299,6 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
         private void updateSteps() {
             WalkActivity walkActivity = walkActivityWeakReference.get();
-            HomeScreenActivity.fitnessService.updateStepCount();
             walkActivity.mCurrSteps = walkActivity.mStepsSharedPreference.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY,0);
             walkActivity.mStepsTaken = walkActivity.mCurrSteps - walkActivity.mStartSteps;
             Log.d(TAG, "start steps: " + walkActivity.mStartSteps);

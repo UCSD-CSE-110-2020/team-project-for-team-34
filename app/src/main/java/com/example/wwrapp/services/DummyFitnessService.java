@@ -1,4 +1,4 @@
-package com.example.wwrapp.fitness;
+package com.example.wwrapp.services;
 
 import android.app.Service;
 import android.content.Intent;
@@ -7,6 +7,10 @@ import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+
+import com.example.wwrapp.fitness.IFitnessObserver;
+import com.example.wwrapp.fitness.IFitnessService;
+import com.example.wwrapp.fitness.IFitnessSubject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +22,11 @@ import java.util.List;
 public class DummyFitnessService extends Service implements IFitnessService, IFitnessSubject {
     private static final String TAG = "DummyFitnessService";
 
-    private boolean mIsRunning = true;
+    // If the thread is running
+    // TODO: use atomic boolean
+    private boolean mIsRunning;
+
+    // Total step count
     private long mSteps;
     private List<IFitnessObserver> mFitnessObservers;
 
@@ -32,6 +40,7 @@ public class DummyFitnessService extends Service implements IFitnessService, IFi
 
     final class DummyThread implements Runnable {
         int startId;
+
 
         public DummyThread(int startId) {
             this.startId = startId;
@@ -75,6 +84,7 @@ public class DummyFitnessService extends Service implements IFitnessService, IFi
         Log.d(TAG, "In method onStartCommand()");
 
         // Start the step-tracking thread
+        mIsRunning = true;
         Thread thread = new Thread(new DummyThread(startId));
         thread.start();
 
@@ -84,6 +94,8 @@ public class DummyFitnessService extends Service implements IFitnessService, IFi
     @Override
     public void onDestroy() {
         Log.d(TAG, "In method onDestroy()");
+        // Tell the thread to stop
+        mIsRunning = false;
         super.onDestroy();
     }
 

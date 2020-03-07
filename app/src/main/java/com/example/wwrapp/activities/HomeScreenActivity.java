@@ -3,7 +3,6 @@ package com.example.wwrapp.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -15,15 +14,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.fitness.FitnessApplication;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
-import com.example.wwrapp.fitness.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
 import com.example.wwrapp.models.TeamInvitation;
+import com.example.wwrapp.services.DummyFitnessServiceWrapper;
+import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
 import com.example.wwrapp.utils.WWRConstants;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -40,7 +39,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,7 +50,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private static final String TAG = "HomeScreenActivity";
 
     // Numeric constants
-    private static final int SLEEP_TIME = 1000;
     private static final double TENTHS_PLACE_ROUNDING_FACTOR = 10.0;
     private static final int MOCK_ACTIVITY_REQUEST_CODE = 1;
 
@@ -84,9 +81,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     // Fitness service
     // TODO: Implement proper mocking of FitnessServices. Google Fit needs to be decoupled from
     // TODO: HomeScreenActivity
-    public static IFitnessService fitnessService;
     // TODO: Eliminate this FitnessAsyncTask once proper dependency injection has been applied.
-    private static FitnessAsyncTask fitnessRunner;
 
     public static GoogleSignInAccount account = null;
     private FirebaseFirestore mFirestore;
@@ -98,20 +93,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     // TODO: else set to false if you want to test the team screen
     public static boolean TESTING_USER_IS_BEING_INVITED;
 
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        Log.d(TAG, "handleSigninResult called");
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            // Signed in successfully, show authenticated UI.
-            Toast.makeText(this, "your email is " + account.getEmail(), Toast.LENGTH_SHORT).show();
-            HomeScreenActivity.account = account;
-            Log.d(TAG,"good");
-        } catch (ApiException e) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.d(TAG, "signInResult:failed code=" + e.getStatusCode());
-        }
-    }
+    private String mFitnessServiceKey;
+    private boolean isObserving;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,64 +103,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.e(TAG, "In method onCreate");
 
-//        IFitnessService dummyFS =  DummyFitnessApplication.getDummyFitnessServiceInstance();
-//        ((IFitnessSubject) dummyFS).registerObserver(this);
-//        ((DummyFitnessServiceWrapper) dummyFS).startDummyService();
-
-        IFitnessService googleFS =  FitnessApplication.getGoogleFitnessServiceInstance();
-        ((IFitnessSubject) googleFS).registerObserver(this);
-        ((GoogleFitnessServiceWrapper) googleFS).startGoogleService(this);
-
-        mStepsTextView = findViewById(R.id.homeSteps);
-        mMilesTextView = findViewById(R.id.homeMiles);
-        mLastWalkStepsTextView = findViewById(R.id.lastWalkSteps);
-        mLastWalkMilesTextView = findViewById(R.id.lastWalkDistance);
-        mLastWalkTimeTextView = findViewById(R.id.lastWalkTime);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        // Check for a saved height
-        if (!sIgnoreHeight) {
-            if (!checkHasHeight()) {
-                Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
-                startActivity(askHeight);
-            }
-        }
-
-        // Set up stored inches, steps, and miles
-        initSavedData();
-
-        // Update the UI
-        updateUi();
-
-        // Register the start walk button
-        findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Cancel the updating of the home screen before starting the Walk
-                startWalkActivity();
-            }
-        });
-
-        // Register the routes screen button
-        findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Cancel the updating of the home screen before starting the Routes screen
-                startRoutesActivity();
-            }
-        });
-
-        // Register the mock screen button
-        findViewById(R.id.mockButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(HomeScreenActivity.this, MockWalkActivity.class);
-                intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
-                startActivityForResult(intent, MOCK_ACTIVITY_REQUEST_CODE);
-            }
-        });
+        // Initialize the database
+        mFirestore = FirebaseFirestore.getInstance();
 
         // TODO: Implement real sign-in logic. Using a dummy user for now to make testing possible.
         IUser user = null;
@@ -187,7 +115,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             Log.d(TAG, "Creating Mock user");
             user = IUserFactory.createUser
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
-                            WWRConstants.MOCK_USER_NAME, WWRConstants. MOCK_USER_EMAIL,
+                            WWRConstants.MOCK_USER_NAME, WWRConstants.MOCK_USER_EMAIL,
                             WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
         } else {
             // TODO: Implement factory creation for Google user
@@ -220,142 +148,92 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             }
         });
 
-        // use this code to reset the last walk's stats
-        // TODO: Comment out in production.
-         SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-         SharedPreferences.Editor editor = spfs.edit();
-         editor.clear();
-         editor.apply();
-
-         // TODO: Apply Service class to Fitness Service
-        // Get fitness service, if one doesn't already exist
-        if (fitnessService == null) {
-            String fitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
-            // If the factory key is null, use the DummyFitnessService by default:
-            if (fitnessServiceKey == null) {
-                fitnessService = FitnessServiceFactory.createFitnessService(WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY, this);
-            } else {
-                fitnessService = FitnessServiceFactory.createFitnessService(fitnessServiceKey, this);
-            }
-
-            fitnessService.setup();
-            fitnessService.updateStepCount();
-
-            // TODO: Remove this coupling of the fitness AsyncTask
-            // Check if Google Fit is being used; only start this async task if Google Fit is used
-            if (WWRConstants.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY.equals(fitnessServiceKey)) {
-                // Start the Home screen steps/miles updating in the background
-                fitnessRunner = new FitnessAsyncTask(this);
-                if (sEnableFitnessRunner) {
-                    fitnessRunner.execute();
-                }
-            }
-        }
-
-
-         //Initialize DB
-         mFirestore = FirebaseFirestore.getInstance();
         // TODO: Implement signIn() once we know that Google Fit is working
-         // signIn();
-    }
+        // signIn();
 
-    private void signIn() {
-        FitnessOptions fitnessOptions = FitnessOptions.builder()
-                .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-                .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-                .build();
-        if(GoogleSignIn.getLastSignedInAccount(this) == null) {
-            Log.d(TAG, "first time login");
-            GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestEmail()
-                    .requestProfile()
-                    .addExtension(fitnessOptions)
-                    .build();
-            GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, options);
-            Intent signInIntent = googleSignInClient.getSignInIntent();
-            startActivityForResult(signInIntent, 420);
-            boolean isEmailLoaded = false;
-            while (!isEmailLoaded) {
-                Log.d(TAG, "Email not loaded");
-                isEmailLoaded = HomeScreenActivity.account.getEmail() != null;
+        // Check for a saved height. If there is not height, prompt the user to enter it.
+        if (!sIgnoreHeight) { // <-- this evaluates to false when testing to skip the prompt
+            if (!checkHasHeight()) {
+                Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
+                startActivity(askHeight);
             }
         }
-        else {
-            HomeScreenActivity.account = GoogleSignIn.getLastSignedInAccount(this);
-            Log.d(TAG, "Email from last log in is " + account.getEmail());
-        }
-        createUser();
 
-    }
+        // Determine what type of fitness service to use
+        mFitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
+        startObservingFitnessService(mFitnessServiceKey);
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "In method onActivityResult");
+        // Set up the main UI elements relating to walk stats
+        mStepsTextView = findViewById(R.id.homeSteps);
+        mMilesTextView = findViewById(R.id.homeMiles);
+        mLastWalkStepsTextView = findViewById(R.id.lastWalkSteps);
+        mLastWalkMilesTextView = findViewById(R.id.lastWalkDistance);
+        mLastWalkTimeTextView = findViewById(R.id.lastWalkTime);
 
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == 420) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            handleSignInResult(task);
-            return;
-        }
+        // Setup toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        // If mocking is requested
-        // If returning from the mock screen
-        if (requestCode == MOCK_ACTIVITY_REQUEST_CODE) {
-            if (IS_MOCKING) {
-                // Stop Google Fit
-                fitnessRunner.cancel(false);
-                // Start the mocking service
-                // TODO: Implement mocking service
+        // Register the start walk button
+        findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startWalkActivity();
             }
-        } else {
-            // If authentication was required during google fit setup, this will be called after the user authenticates
-            if (resultCode == Activity.RESULT_OK) {
-                if (requestCode == fitnessService.getRequestCode()) {
-                    Log.d(TAG, "requestCode is from GoogleFit");
-                    // Update the steps/miles if returning from a walk
-                    fitnessService.updateStepCount();
-                    setMiles(mDailyTotalSteps, mFeet, mInches);
-                    updateUi();
-                }
-            } else {
-                Log.e(TAG, "ERROR, google fit result code: " + resultCode);
+        });
+
+        // Register the routes screen button
+        findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRoutesActivity();
             }
-        }
-    }
+        });
 
-    private boolean userIsBeingInvited(String userEmail, FirebaseFirestore firestore) {
-        // Get the "invitations" collection
-        CollectionReference invitationsCol =
-                mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
+        // Register the mock screen button
+        findViewById(R.id.mockButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startMockActivity();
+            }
+        });
 
-        // Query for all invitations where the current user is the invitee:
-        invitationsCol.whereEqualTo(TeamInvitation.FIELD_INVITEE, userEmail).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@androidx.annotation.NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            mUserIsBeingInvited = (task.getResult().size() > 0);
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return mUserIsBeingInvited;
+        // Set up stored inches, steps, and miles
+        initSavedData();
+
+        // Update the UI
+        updateUi();
+
+
+        // use this code to reset the last walk's stats
+        // TODO: Comment out in production. If you don't, the last walk stats won't work.
+        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = spfs.edit();
+        editor.clear();
+        editor.apply();
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (IS_MOCKING) {
-            // Cancel Google Fit
-            if (fitnessRunner != null && !fitnessRunner.isCancelled()) {
-                fitnessRunner.cancel(false);
-            }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "In method onResume");
+        Log.d(TAG, "Mocking? " + IS_MOCKING);
+
+        // Re-register this activity as an observer if it has been un-registered.
+        if (!isObserving) {
+            // The current value of the key tells us which fitness service we last started.
+            startObservingFitnessService(mFitnessServiceKey);
         }
+
+        // TODO: Should these lines be in onResume or onCreate ?
+        initSavedData();
+        updateUi();
     }
 
     @Override
@@ -363,20 +241,16 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onPause();
         Log.d(TAG, "In method onPause");
 
-        if (fitnessRunner != null && !fitnessRunner.isCancelled()) {
-            fitnessRunner.cancel(false);
+        // Un-register this activity from the fitness service if it was registered
+        if (isObserving) {
+            // The current value of the key tells us which fitness service we last started.
+            stopObservingFitnessService(mFitnessServiceKey);
         }
-        if (IS_MOCKING) {
-            // TODO: Implement true mock
-        }
+
+        // Save whatever data the fitness service had provided up until now
         saveData();
-
-        // Remove this activity from listening to the fitness service
-        IFitnessService dummyFS =  FitnessApplication.getDummyFitnessServiceInstance();
-        ((IFitnessSubject) dummyFS).removeObserver(this);
-
-
     }
+
 
     @Override
     protected void onStop() {
@@ -389,78 +263,132 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onDestroy();
         Log.d(TAG, "In method onDestroy");
 
-        if (IS_MOCKING) {
-            // TODO: Implement true mock
-        }
+        // TODO: Determine if this call is needed (won't onPause be called before anyway?)
         saveData();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "In method onResume");
-        Log.d(TAG , "Mocking? " + IS_MOCKING);
+    private void startObservingFitnessService(String fitnessServiceKey) {
+        isObserving = true;
+        // Provide a default implementation if key is null
+        if (fitnessServiceKey == null) {
+            // If the factory key is null, use the DummyFitnessService by default:
+            IFitnessService dummyFS = FitnessServiceFactory.createFitnessService(WWRConstants.DEFAULT_FITNESS_SERVICE_FACTORY_KEY);
 
-        // TODO: Keep in mind that you may have to reinitialize the fitness service in onResume
+            // Down-cast the fitness service so we can add observers to it and start it.
+            ((IFitnessSubject) dummyFS).registerObserver(this);
+            ((DummyFitnessServiceWrapper) dummyFS).startDummyService();
 
-        initSavedData();
-        updateUi();
-    }
-
-    public boolean userExists() {
-        CollectionReference usersCollection = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
-        usersCollection
-                .whereEqualTo(WWRConstants.USER_EMAIL_KEY, HomeScreenActivity.account.getEmail())
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                            userExist();
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                        userDoesNotExist();
-                    }
-                });
-        return tempUserExists;
-    }
-    public void createUser() {
-        if(userExists()) { return; }
-        boolean isEmailLoaded = false;
-        while(!isEmailLoaded) {
-            Log.d(TAG, "Email not loaded");
-            isEmailLoaded = HomeScreenActivity.account.getDisplayName() != null;
-
+            // Provide a value for the key so that we know in onResume() that we've already started
+            // the service
+            mFitnessServiceKey = WWRConstants.DEFAULT_FITNESS_SERVICE_FACTORY_KEY;
+            return;
         }
-        Map<String, Object> user = new HashMap<>();
-        user.put(WWRConstants.USER_EMAIL_KEY, HomeScreenActivity.account.getEmail());
-        user.put(WWRConstants.USER_NAME_KEY , HomeScreenActivity.account.getDisplayName());
-        user.put(WWRConstants.USER_ROUTES_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
-        user.put(WWRConstants.USER_ROUTES_NOT_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
-        user.put(WWRConstants.USER_TEAM_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
-        mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(HomeScreenActivity.account.getEmail()).set(user);
+
+        switch (fitnessServiceKey) {
+            case WWRConstants.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY:
+                IFitnessService googleFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
+                ((IFitnessSubject) googleFitnessService).registerObserver(this);
+                ((GoogleFitnessServiceWrapper) googleFitnessService).startGoogleService(this);
+                break;
+            case WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY:
+                IFitnessService dummyFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
+                ((IFitnessSubject) dummyFitnessService).registerObserver(this);
+                ((DummyFitnessServiceWrapper) dummyFitnessService).startDummyService();
+                break;
+            default:
+                Log.w(TAG, "fitnessServiceKey not recognized: " + mFitnessServiceKey);
+        }
     }
 
-    private boolean checkHasHeight() {
-        SharedPreferences saveHeight =
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
-        int testVal = saveHeight.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, -1);
-        // If testVal == -1, then there was no height
-        return testVal != -1;
+    private void stopObservingFitnessService(String fitnessServiceKey) {
+        switch (fitnessServiceKey) {
+            case WWRConstants.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY:
+                Log.d(TAG, "Unregistering Google Fitness Service");
+                IFitnessService googleFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
+                ((IFitnessSubject) googleFitnessService).removeObserver(this);
+                break;
+            case WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY:
+                Log.d(TAG, "Unregistering Dummy Fitness Service");
+                IFitnessService dummyFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
+                ((IFitnessSubject) dummyFitnessService).removeObserver(this);
+                break;
+        }
+
+        isObserving = false;
     }
 
-    public void userExist() {
-        tempUserExists = true;
+    /**
+     * Starts the WalkActivity
+     */
+    private void startWalkActivity() {
+        Log.d(TAG, "In startWalkActivity()");
+        Intent intent = new Intent(HomeScreenActivity.this, WalkActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
+                WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+        startActivity(intent);
     }
-    public void userDoesNotExist() {
-        tempUserExists = false;
+
+    /**
+     * Starts the RoutesActivity
+     */
+    private void startRoutesActivity() {
+        Log.d(TAG, "In startRoutesActivity()");
+        Intent intent = new Intent(HomeScreenActivity.this, RoutesActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
+                WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+        startActivity(intent);
+    }
+
+    /**
+     * Starts the mocking activity
+     */
+    private void startMockActivity() {
+        Intent intent = new Intent(HomeScreenActivity.this, MockWalkActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+        startActivityForResult(intent, MOCK_ACTIVITY_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "In method onActivityResult");
+
+        switch (requestCode) {
+            // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+            case 420:
+                // The Task returned from this call is always completed, no need to attach
+                // a listener.
+                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+                handleSignInResult(task);
+                return;
+            case MOCK_ACTIVITY_REQUEST_CODE:
+                if (resultCode == Activity.RESULT_OK) {
+                    // TODO: Implement mock screen with the new Dummy Service
+                    // Stop Google Fit
+                    // Start the mocking service
+                }
+                break;
+
+            // If authentication was required during google fit setup, this will be called after the user authenticates
+            case WWRConstants.GOOGLE_FIT_PERMISSIONS_REQUEST_CODE:
+                if (resultCode == Activity.RESULT_OK) {
+                    Log.d(TAG, "requestCode is from GoogleFit");
+                    // TODO: Eliminate this code below if it's not really needed
+                    // Update the steps/miles if returning from a walk
+//                    setMiles(mDailyTotalSteps, mFeet, mInches);
+//                    updateUi();
+                } else {
+                    Log.e(TAG, "ERROR, google fit result code: " + resultCode);
+                }
+                break;
+        } // end switch
     }
 
 
+    /**
+     * Retrieves the user's stored height, daily steps and miles, and last walk stats and sets
+     * the corresponding instance variables with those values.
+     */
     public void initSavedData() {
         // Get the user's height
         SharedPreferences heightSharedPref =
@@ -483,6 +411,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         mLastWalkTime = sharedPreferences.getString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, HomeScreenActivity.NO_LAST_WALK_TIME_TEXT);
     }
 
+    /**
+     * Saves the user's daily steps and miles  and last walk stats to Shared Preferences.
+     */
     public void saveData() {
         // Save the daily steps
         SharedPreferences stepsSharedPreference =
@@ -501,6 +432,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         lastWalkEditor.apply();
     }
 
+    /**
+     * Sets the values of the UI elements corresponding to the user's daily steps and miles
+     * and last walk stats.
+     */
     public void updateUi() {
         mStepsTextView.setText(String.valueOf(mDailyTotalSteps));
         mMilesTextView.setText(String.valueOf(Math.round(mDailyTotalMiles * TENTHS_PLACE_ROUNDING_FACTOR) /
@@ -542,47 +477,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         mInches = inches;
     }
 
-
-    // Flag methods for testing
-
-    public static void setEnableFitnessRunner(boolean enableFitnessRunner) {
-        HomeScreenActivity.sEnableFitnessRunner = enableFitnessRunner;
-    }
-
-    public static void setIgnoreHeight(boolean ignoreHeight) {
-        HomeScreenActivity.sIgnoreHeight = ignoreHeight;
-    }
-
-    /**
-     * Starts the WalkActivity
-     */
-    private void startWalkActivity() {
-        if (fitnessRunner != null && !fitnessRunner.isCancelled()) {
-            Log.w(TAG, "Fitness runner to be canceled");
-            fitnessRunner.cancel(false);
-        }
-        Intent intent = new Intent(HomeScreenActivity.this, WalkActivity.class);
-        intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
-                WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
-        startActivity(intent);
-    }
-
-    /**
-     * Starts the RoutesActivity
-     */
-    private void startRoutesActivity() {
-        if (fitnessRunner != null && !fitnessRunner.isCancelled()) {
-            fitnessRunner.cancel(false);
-        }
-        Intent intent = new Intent(HomeScreenActivity.this, RoutesActivity.class);
-        intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
-                WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
-        startActivity(intent);
-    }
-
     @Override
     public void update(long steps) {
-        Log.d(TAG, "In method update");
+        Log.d(TAG, "In method update()");
         Log.d(TAG, "Steps is = " + steps);
         runOnUiThread(new Runnable() {
             @Override
@@ -596,43 +493,136 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         });
     }
 
-    /**
-     * Updates the steps/miles display on the Home screen
-     */
-    private static class FitnessAsyncTask extends AsyncTask<String, String, String> {
-        private String resp;
-        private WeakReference<HomeScreenActivity> homeScreenActivityWeakReference;
 
-        public FitnessAsyncTask(HomeScreenActivity context) {
-            homeScreenActivityWeakReference = new WeakReference<>(context);
-        }
+    // Flag methods for testing
 
-        @Override
-        protected String doInBackground(String... params) {
-            while (!isCancelled()) {
-                try {
-                    Thread.sleep(SLEEP_TIME);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    resp = e.getMessage();
-                }
-                // Check for updates to the step count
-                publishProgress();
+    public static void setEnableFitnessRunner(boolean enableFitnessRunner) {
+        HomeScreenActivity.sEnableFitnessRunner = enableFitnessRunner;
+    }
+
+    public static void setIgnoreHeight(boolean ignoreHeight) {
+        HomeScreenActivity.sIgnoreHeight = ignoreHeight;
+    }
+
+    private void signIn() {
+        FitnessOptions fitnessOptions = FitnessOptions.builder()
+                .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+                .build();
+        if (GoogleSignIn.getLastSignedInAccount(this) == null) {
+            Log.d(TAG, "first time login");
+            GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .requestProfile()
+                    .addExtension(fitnessOptions)
+                    .build();
+            GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, options);
+            Intent signInIntent = googleSignInClient.getSignInIntent();
+            startActivityForResult(signInIntent, 420);
+            boolean isEmailLoaded = false;
+            while (!isEmailLoaded) {
+                Log.d(TAG, "Email not loaded");
+                isEmailLoaded = HomeScreenActivity.account.getEmail() != null;
             }
-            return resp;
+        } else {
+            HomeScreenActivity.account = GoogleSignIn.getLastSignedInAccount(this);
+            Log.d(TAG, "Email from last log in is " + account.getEmail());
         }
+        createUser();
+    }
 
-        @Override
-        protected void onProgressUpdate(String... update) {
-            HomeScreenActivity homeScreenActivity = homeScreenActivityWeakReference.get();
-            // Ask the IFitnessService to update the step count, if applicable
-            homeScreenActivity.fitnessService.updateStepCount();
-            // Update the miles based on the newly set step count
-            homeScreenActivity.setMiles(homeScreenActivity.mDailyTotalSteps,
-                    homeScreenActivity.mFeet, homeScreenActivity.mInches);
-            // Update the Home screen
-            homeScreenActivity.updateUi();
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        Log.d(TAG, "handleSigninResult called");
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            // Signed in successfully, show authenticated UI.
+            Toast.makeText(this, "your email is " + account.getEmail(), Toast.LENGTH_SHORT).show();
+            HomeScreenActivity.account = account;
+            Log.d(TAG, "good");
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Log.d(TAG, "signInResult:failed code=" + e.getStatusCode());
         }
     }
-}
+
+    private boolean userIsBeingInvited(String userEmail, FirebaseFirestore firestore) {
+        // Get the "invitations" collection
+        CollectionReference invitationsCol =
+                mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
+
+        // Query for all invitations where the current user is the invitee:
+        invitationsCol.whereEqualTo(TeamInvitation.FIELD_INVITEE, userEmail).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@androidx.annotation.NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            mUserIsBeingInvited = (task.getResult().size() > 0);
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+        return mUserIsBeingInvited;
+    }
+
+    public boolean userExists() {
+        CollectionReference usersCollection = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
+        usersCollection
+                .whereEqualTo(WWRConstants.USER_EMAIL_KEY, HomeScreenActivity.account.getEmail())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                            userExist();
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                        userDoesNotExist();
+                    }
+                });
+        return tempUserExists;
+    }
+
+    public void createUser() {
+        if (userExists()) {
+            return;
+        }
+        boolean isEmailLoaded = false;
+        while (!isEmailLoaded) {
+            Log.d(TAG, "Email not loaded");
+            isEmailLoaded = HomeScreenActivity.account.getDisplayName() != null;
+
+        }
+        Map<String, Object> user = new HashMap<>();
+        user.put(WWRConstants.USER_EMAIL_KEY, HomeScreenActivity.account.getEmail());
+        user.put(WWRConstants.USER_NAME_KEY, HomeScreenActivity.account.getDisplayName());
+        user.put(WWRConstants.USER_ROUTES_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
+        user.put(WWRConstants.USER_ROUTES_NOT_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
+        user.put(WWRConstants.USER_TEAM_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
+        mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(HomeScreenActivity.account.getEmail()).set(user);
+    }
+
+    private boolean checkHasHeight() {
+        SharedPreferences saveHeight =
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
+        int testVal = saveHeight.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, -1);
+        // If testVal == -1, then there was no height
+        return testVal != -1;
+    }
+
+    public void userExist() {
+        tempUserExists = true;
+    }
+
+    public void userDoesNotExist() {
+        tempUserExists = false;
+    }
+
+
+} // end class
 

@@ -89,7 +89,6 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
                 mWalkTimer.cancel(false);
                 saveData();
                 returnToHomeActivity();
-                finish();
             }
         });
         mSetMsBtn.setOnClickListener(new View.OnClickListener() {
@@ -290,8 +289,8 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
 
     private void returnToHomeActivity() {
         Intent intent = new Intent(this, HomeScreenActivity.class);
-        intent.putExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY, WWRConstants.MOCK_FITNESS_SERVICE_VERSION);
+        intent.putExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY, WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY);
         setResult(RESULT_OK, intent);
-        HomeScreenActivity.IS_MOCKING = true;
+        finish();
     }
 }

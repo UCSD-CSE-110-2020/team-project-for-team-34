@@ -11,11 +11,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <service
-            android:name=".fitness.GoogleFitAdapterService"
+            android:name=".services.GoogleFitAdapterService"
             android:enabled="true"
             android:exported="true"></service>
         <service
-            android:name=".fitness.DummyFitnessService"
+            android:name=".services.DummyFitnessService"
             android:enabled="true"
             android:exported="true" />
         <service

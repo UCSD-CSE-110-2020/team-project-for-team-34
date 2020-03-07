@@ -1,4 +1,4 @@
-package com.example.wwrapp.fitness;
+package com.example.wwrapp.services;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -8,16 +8,26 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.example.wwrapp.fitness.IFitnessObserver;
+import com.example.wwrapp.fitness.IFitnessService;
+import com.example.wwrapp.fitness.IFitnessSubject;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class GoogleFitnessServiceWrapper implements IFitnessService, IFitnessSubject, IFitnessObserver {
     private static final String TAG = "GoogleWrapper";
+
+    // Whether this wrapper is active
+    private boolean mIsActive;
     private Context mContext;
+
+    // Step count
     private long mSteps;
     private List<IFitnessObserver> mFitnessObservers;
-    private GoogleFitAdapterService mFitnessService;
+
     private boolean mIsBound;
+    private GoogleFitAdapterService mFitnessService;
 
     private Activity mActivity;
 
@@ -116,5 +126,7 @@ public class GoogleFitnessServiceWrapper implements IFitnessService, IFitnessSub
         }
     }
 
-
+    public boolean isActive() {
+        return mIsActive;
+    }
 }

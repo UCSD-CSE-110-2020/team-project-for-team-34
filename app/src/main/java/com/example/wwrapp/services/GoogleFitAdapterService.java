@@ -1,4 +1,4 @@
-package com.example.wwrapp.fitness;
+package com.example.wwrapp.services;
 
 import android.app.Activity;
 import android.app.Service;
@@ -12,6 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.example.wwrapp.activities.HomeScreenActivity;
+import com.example.wwrapp.fitness.IFitnessObserver;
+import com.example.wwrapp.fitness.IFitnessService;
+import com.example.wwrapp.fitness.IFitnessSubject;
 import com.example.wwrapp.utils.WWRConstants;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -28,17 +31,20 @@ import java.util.List;
 
 public class GoogleFitAdapterService extends Service implements IFitnessService, IFitnessSubject {
     private static final String TAG = "GoogleFitAdapterService";
-    private final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
 
-    private boolean mIsRunning = true;
+
+    // Whether the inner thread is running
+    private boolean mIsRunning;
+
+    // Step count
     private long mSteps;
     private List<IFitnessObserver> mFitnessObservers;
+
     private final IBinder mBinder = new GoogleFitAdapterService.LocalService();
 
-    private int mStartId;
-
-    private Activity activity;
-    private GoogleSignInAccount account;
+    // Reference to the activity to request sign-in on
+    private Activity mActivity;
+    private GoogleSignInAccount mAccount;
 
 
     public GoogleFitAdapterService() {
@@ -47,7 +53,7 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
     }
 
     public void setActivity(Activity activity) {
-        this.activity = activity;
+        this.mActivity = activity;
     }
 
     final class GoogleThread implements Runnable {
@@ -63,10 +69,8 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
                 while (mIsRunning) {
                     // Increment steps
                     try {
-                        wait(1000);
-//                        mSteps += 10;
-                        notifyObservers();
-//                        Log.d(TAG, "Step count is now " + mSteps);
+                        wait(WWRConstants.WAIT_TIME);
+                        updateStepCount();
                     }
                     catch (InterruptedException e) {
                         Log.d(TAG, e.getMessage());
@@ -95,6 +99,7 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
         Log.d(TAG, "In method onStartCommand()");
 
         // Start the step-tracking thread
+        mIsRunning = true;
         Thread thread = new Thread(new GoogleThread(startId));
         thread.start();
 
@@ -104,6 +109,9 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
     @Override
     public void onDestroy() {
         Log.d(TAG, "In method onDestroy()");
+
+        // Tell the thread to stop running
+        mIsRunning = false;
         super.onDestroy();
     }
 
@@ -120,11 +128,11 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
                 .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .build();
-        account = GoogleSignIn.getAccountForExtension(activity,fitnessOptions);
+        mAccount = GoogleSignIn.getAccountForExtension(mActivity,fitnessOptions);
         if (!GoogleSignIn.hasPermissions(HomeScreenActivity.account, fitnessOptions)) {
             GoogleSignIn.requestPermissions(
-                    activity, // your activity
-                    GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
+                    mActivity, // your activity
+                    WWRConstants.GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
                     HomeScreenActivity.account,
                     fitnessOptions);
         } else {
@@ -134,11 +142,11 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
     }
 
     private void startRecording() {
-        if (account == null) {
+        if (mAccount == null) {
             return;
         }
 
-        Fitness.getRecordingClient(activity, account)
+        Fitness.getRecordingClient(mActivity, mAccount)
                 .subscribe(DataType.TYPE_STEP_COUNT_CUMULATIVE)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -157,11 +165,11 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
     @Override
     public void updateStepCount() {
         Log.d(TAG, "In method updateStepCount");
-        if (account == null) {
+        if (mAccount == null) {
             return;
         }
 
-        Fitness.getHistoryClient(activity, account)
+        Fitness.getHistoryClient(mActivity, mAccount)
                 .readDailyTotal(DataType.TYPE_STEP_COUNT_DELTA)
                 .addOnSuccessListener(
                         new OnSuccessListener<DataSet>() {
@@ -174,7 +182,7 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
                                                 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
                                 Log.d(TAG, "total is: " + total);
 
-                                SharedPreferences saveSteps = activity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
+                                SharedPreferences saveSteps = mActivity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
                                 SharedPreferences.Editor editor = saveSteps.edit();
 
                                 // This block is for testing Google Fit when one cannot physically move the phone.

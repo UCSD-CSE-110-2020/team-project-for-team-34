@@ -1,4 +1,4 @@
-package com.example.wwrapp.fitness;
+package com.example.wwrapp.services;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -7,19 +7,31 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.example.wwrapp.fitness.IFitnessObserver;
+import com.example.wwrapp.fitness.IFitnessService;
+import com.example.wwrapp.fitness.IFitnessSubject;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class DummyFitnessServiceWrapper implements IFitnessService,
-        IFitnessObserver, IFitnessSubject {
+public class DummyFitnessServiceWrapper implements IFitnessService, IFitnessObserver, IFitnessSubject {
     private static final String TAG = "DummyWrapper";
+
+    // Whether this wrapper is active
+    private boolean mIsActive;
     private Context mContext;
+
+    // Step count
     private long mSteps;
     private List<IFitnessObserver> mFitnessObservers;
+
     private DummyFitnessService mFitnessService;
+    // Whether this wrapper is bound to its service
     private boolean mIsBound;
 
+
     public DummyFitnessServiceWrapper(Context context) {
+        mIsActive = true;
         mContext = context;
         mFitnessObservers = new ArrayList<>();
     }
@@ -38,12 +50,15 @@ public class DummyFitnessServiceWrapper implements IFitnessService,
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(TAG, "In method onServiceDisconnected()");
+            mIsActive = false;
             mIsBound = false;
         }
     };
 
     public void startDummyService() {
         Log.d(TAG, "In method startDummyService()");
+
+        // Only start the service if binding hasn't already happened
         if (!mIsBound) {
             Log.d(TAG, "Binding service");
             Intent intent = new Intent(mContext, DummyFitnessService.class);
@@ -54,6 +69,8 @@ public class DummyFitnessServiceWrapper implements IFitnessService,
 
     public void stopDummyService() {
         Log.d(TAG, "In method stopDummyService()");
+
+        // Only stop the service if binding already happened
         if (mIsBound) {
             Log.d(TAG, "Unbinding service");
             Intent intent = new Intent(mContext, DummyFitnessService.class);
@@ -101,5 +118,9 @@ public class DummyFitnessServiceWrapper implements IFitnessService,
         for (IFitnessObserver observer : mFitnessObservers) {
             observer.update(mSteps);
         }
+    }
+
+    public boolean isActive() {
+        return mIsActive;
     }
 }
