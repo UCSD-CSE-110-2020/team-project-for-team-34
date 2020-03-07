@@ -1,15 +1,8 @@
 package com.example.wwrapp.models;
 
-import com.example.wwrapp.CustomQuery.UserQuery;
-import com.example.wwrapp.utils.WWRConstants;
-import com.firebase.ui.auth.data.model.User;
-import com.google.firebase.firestore.DocumentReference;
-
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class GoogleUser implements IUser, Serializable {
     public static final String FIELD_NAME = "name";
@@ -29,13 +22,6 @@ public class GoogleUser implements IUser, Serializable {
     private String mteamName;
     private List<String> mInvitees;
     private List<Route> mRoutes;
-//    Map<String, Object> user = new HashMap<>();
-//        user.put(WWRConstants.USER_EMAIL_KEY, iUser.getEmail());
-//        user.put(WWRConstants.USER_NAME_KEY, iUser.getName());
-//        user.put(WWRConstants.USER_INVITER_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
-//        user.put(WWRConstants.USER_TEAM_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
-//        user.put(WWRConstants.USER_INVITEES_KEY, WWRConstants.USER_DEFAULT_INVITEES_VALUES);
-//        user.put(WWRConstants.USER_ROUTES_KEY, WWRConstants.USER_DEFAULT_ROUTE_VALUE);
 
     public GoogleUser(String name, String email) {
         mName = name;
@@ -74,5 +60,35 @@ public class GoogleUser implements IUser, Serializable {
     @Override
     public List<Route> getRoutes() {
         return mRoutes;
+    }
+
+    @Override
+    public void setInviterEmail(String newInviter) {
+        mInviter = newInviter;
+    }
+
+    @Override
+    public void setTeamName(String newTeamName){
+        mteamName = newTeamName;
+    }
+
+    @Override
+    public void setInvitees(List<String> newInvitees) {
+        mInvitees = newInvitees;
+    }
+
+    @Override
+    public void addInvitees(List<String> newInvitees) {
+        mInvitees.addAll(newInvitees);
+    }
+
+    @Override
+    public void setRoutes(List<Route> newRoutes) {
+        mRoutes = newRoutes;
+    }
+
+    @Override
+    public void addRoutes(List<Route> newRoutes) {
+        mRoutes.addAll(newRoutes);
     }
 }

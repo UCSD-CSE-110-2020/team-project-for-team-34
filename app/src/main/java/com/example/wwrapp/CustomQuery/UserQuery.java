@@ -34,7 +34,7 @@ public class UserQuery {
         mFirestore = FirebaseFirestore.getInstance();
     }
 
-    public static void storeUser(IUser iUser) {
+    public static void firstTimeSaveUser(IUser iUser) {
         if (userExists()) {
             return;
         }
@@ -43,6 +43,10 @@ public class UserQuery {
             isEmailLoaded = HomeScreenActivity.account.getDisplayName() != null;
 
         }
+        mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(iUser.getEmail()).set(iUser);
+    }
+
+    public static void overwriteUser(IUser iUser) {
         mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(iUser.getEmail()).set(iUser);
     }
 
@@ -87,7 +91,7 @@ public class UserQuery {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         IUser user = document.toObject(IUser.class);
-                        updateUser(user);
+                        updateMUser(user);
                     } else {
                         Log.d(TAG, "Could not find user " + email);
                     }
@@ -98,7 +102,8 @@ public class UserQuery {
         });
         return mUser;
     }
-    public static void updateUser(IUser user) {
+
+    private static void updateMUser(IUser user) {
         mUser = user;
     }
 }

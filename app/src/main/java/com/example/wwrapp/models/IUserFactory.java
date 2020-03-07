@@ -16,7 +16,7 @@ public class IUserFactory {
                 break;
 
             case WWRConstants.GOOGLE_USER_FACTORY_KEY:
-                UserQuery.storeUser(new MockUser(name,email));
+                UserQuery.firstTimeSaveUser(new MockUser(name,email));
                 break;
 
         };
