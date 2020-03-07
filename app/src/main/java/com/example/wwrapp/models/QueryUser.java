@@ -1,4 +1,7 @@
 package com.example.wwrapp.models;
 
-public class QueryUser {
+import java.io.Serializable;
+
+public class QueryUserpublic implements IUser, Serializable {
+    {
 }
