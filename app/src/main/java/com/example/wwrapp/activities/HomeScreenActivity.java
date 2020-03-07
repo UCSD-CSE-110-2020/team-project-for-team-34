@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.wwrapp.CustomQuery.UserQuery;
 import com.example.wwrapp.R;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
@@ -86,7 +87,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     public static GoogleSignInAccount account = null;
     private FirebaseFirestore mFirestore;
 
-    private boolean tempUserExists;
     private boolean mUserIsBeingInvited;
 
     private IUser mUser;
@@ -554,7 +554,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             HomeScreenActivity.account = GoogleSignIn.getLastSignedInAccount(this);
             Log.d(TAG, "Email from last log in is " + account.getEmail());
         }
-        createUser();
+        GoogleSignInAccount copyAccount = HomeScreenActivity.account;
+        IUserFactory userFac = new IUserFactory();
+        IUser user = userFac.createUser(WWRConstants.GOOGLE_USER_FACTORY_KEY,
+                                                     copyAccount.getDisplayName(),
+                                                     copyAccount.getEmail());
     }
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
@@ -592,47 +596,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         return mUserIsBeingInvited;
     }
 
-    public boolean userExists() {
-        CollectionReference usersCollection = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
-        usersCollection
-                .whereEqualTo(WWRConstants.USER_EMAIL_KEY, HomeScreenActivity.account.getEmail())
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                            }
-                            userExist();
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                        userDoesNotExist();
-                    }
-                });
-        return tempUserExists;
-    }
-
-    public void createUser() {
-        if (userExists()) {
-            return;
-        }
-        boolean isEmailLoaded = false;
-        while (!isEmailLoaded) {
-            Log.d(TAG, "Email not loaded");
-            isEmailLoaded = HomeScreenActivity.account.getDisplayName() != null;
-
-        }
-        Map<String, Object> user = new HashMap<>();
-        user.put(WWRConstants.USER_EMAIL_KEY, HomeScreenActivity.account.getEmail());
-        user.put(WWRConstants.USER_NAME_KEY, HomeScreenActivity.account.getDisplayName());
-        user.put(WWRConstants.USER_ROUTES_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
-        user.put(WWRConstants.USER_ROUTES_NOT_OWNED_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
-        user.put(WWRConstants.USER_TEAM_KEY, WWRConstants.DEFAULT_DATABASE_VALUE);
-        mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(HomeScreenActivity.account.getEmail()).set(user);
-    }
-
     private boolean checkHasHeight() {
         SharedPreferences saveHeight =
                 getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE);
@@ -640,15 +603,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         // If testVal == -1, then there was no height
         return testVal != -1;
     }
-
-    public void userExist() {
-        tempUserExists = true;
-    }
-
-    public void userDoesNotExist() {
-        tempUserExists = false;
-    }
-
 
 } // end class
 
