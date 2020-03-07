@@ -3,6 +3,7 @@ package com.example.wwrapp.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 public class GoogleUser implements IUser, Serializable {
     public static final String FIELD_NAME = "name";
@@ -78,8 +79,8 @@ public class GoogleUser implements IUser, Serializable {
     }
 
     @Override
-    public void addInvitees(List<String> newInvitees) {
-        mInvitees.addAll(newInvitees);
+    public void addInvitees(IUser user) {
+        mInvitees.add(user.getEmail());
     }
 
     @Override
@@ -88,7 +89,17 @@ public class GoogleUser implements IUser, Serializable {
     }
 
     @Override
-    public void addRoutes(List<Route> newRoutes) {
-        mRoutes.addAll(newRoutes);
+    public void addRoutes(Route newRoutes) {
+        mRoutes.add(newRoutes);
+    }
+
+    @Override
+    public void removeInvitee(String email) {
+        ListIterator<String> itr = mInvitees.listIterator();
+        while (itr.hasNext()) {
+            if( itr.next() == email ) {
+                itr.remove();
+            }
+        }
     }
 }
