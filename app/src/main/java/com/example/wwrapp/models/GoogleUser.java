@@ -8,36 +8,29 @@ import java.util.List;
 import java.util.ListIterator;
 
 public class GoogleUser implements IUser, Serializable {
-    public static final String FIELD_NAME = "name";
-    public static final String FIELD_EMAIL = "email";
-    public static final String FIELD_INVITER = "inviter";
-    public static final String FIELD_TEAMNAME = "teamName";
-    public static final String FIELD_INVITEES = "invitees";
-    public static final String FIELD_ROUTES = "routes";
-    public static final String FIELD_STATUS = "status";
 
-    public static final List<String> INVITEES_DEFAULT = new ArrayList<>();
-    public static final List<Route> ROUTES_DEFAULT = new ArrayList<>();
-    public static final String STRING_DEFAULT = "";
+    private static final List<String> INVITEES_DEFAULT = new ArrayList<>();
+    private static final List<Route> ROUTES_DEFAULT = new ArrayList<>();
+    private static final String STRING_DEFAULT = "";
 
-    private String mName;
-    private String mEmail;
-    private String mInviter;
-    private String mteamName;
-    private List<String> mInvitees;
-    private List<Route> mRoutes;
+    private String name;
+    private String email;
+    private String inviter;
+    private String teamName;
+    private List<String> invitees;
+    private List<Route> routes;
     private String status;
 
     public GoogleUser() {}
 
     public GoogleUser(String name, String email) {
-        mName = name;
-        mEmail = email;
+        this.name = name;
+        this.email = email;
         status = WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED;
-        mInviter = STRING_DEFAULT;
-        mteamName = STRING_DEFAULT;
-        mInvitees = INVITEES_DEFAULT;
-        mRoutes = ROUTES_DEFAULT;
+        inviter = STRING_DEFAULT;
+        teamName = STRING_DEFAULT;
+        invitees = INVITEES_DEFAULT;
+        routes = ROUTES_DEFAULT;
     }
 
     @Override
@@ -52,62 +45,62 @@ public class GoogleUser implements IUser, Serializable {
 
     @Override
     public String getName() {
-        return mName;
+        return name;
     }
 
     @Override
     public String getEmail() {
-        return mEmail;
+        return email;
     }
 
     @Override
     public String getInviterEmail() {
-        return mInviter;
+        return inviter;
     }
 
     @Override
     public String getTeamName() {
-        return mteamName;
+        return teamName;
     }
 
     @Override
     public List<String> getInvitees() {
-        return mInvitees;
+        return invitees;
     }
 
     @Override
     public List<Route> getRoutes() {
-        return mRoutes;
+        return routes;
     }
 
     @Override
     public void setInviterEmail(String newInviter) {
-        mInviter = newInviter;
+        inviter = newInviter;
     }
 
     @Override
     public void setTeamName(String newTeamName){
-        mteamName = newTeamName;
+        teamName = newTeamName;
     }
 
     @Override
     public void setInvitees(List<String> newInvitees) {
-        mInvitees = newInvitees;
+        invitees = newInvitees;
     }
 
     @Override
     public void addInvitees(IUser user) {
-        mInvitees.add(user.getEmail());
+        invitees.add(user.getEmail());
     }
 
     @Override
     public void setRoutes(List<Route> newRoutes) {
-        mRoutes = newRoutes;
+        routes = newRoutes;
     }
 
     @Override
     public void updateRoute(Route newRoute) {
-        ListIterator<Route> itr = mRoutes.listIterator();
+        ListIterator<Route> itr = routes.listIterator();
         while (itr.hasNext()) {
             if( itr.next().getRouteName().equals(newRoute.getRouteName()) ) {
                 itr.set(newRoute);
@@ -115,14 +108,15 @@ public class GoogleUser implements IUser, Serializable {
         }
     }
 
+
     @Override
     public void addRoutes(Route newRoutes) {
-        mRoutes.add(newRoutes);
+        routes.add(newRoutes);
     }
 
     @Override
     public void removeInvitee(String email) {
-        ListIterator<String> itr = mInvitees.listIterator();
+        ListIterator<String> itr = invitees.listIterator();
         while (itr.hasNext()) {
             if( itr.next().equals(email) ) {
                 itr.remove();
@@ -134,7 +128,7 @@ public class GoogleUser implements IUser, Serializable {
     public boolean equals(Object o) {
         if( (o instanceof IUser) ) {
             IUser user = (IUser) o;
-            return mName.equals(user.getName());
+            return name.equals(user.getName());
         }
         else {
             return false;

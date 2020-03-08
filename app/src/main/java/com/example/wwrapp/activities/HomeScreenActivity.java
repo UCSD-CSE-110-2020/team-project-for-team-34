@@ -22,6 +22,7 @@ import com.example.wwrapp.models.City;
 import com.example.wwrapp.models.GoogleUser;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
+import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.TeamInvitation;
 import com.example.wwrapp.services.DummyFitnessServiceWrapper;
 import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
@@ -45,8 +46,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -127,21 +130,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                             WWRConstants.MOCK_USER_NAME, WWRConstants.MOCK_USER_EMAIL
                     );
             //Check if user exists
-
-            City city = new City("Los Angeles", "CA", "USA",
-                    false, 5000000L, Arrays.asList("west_coast", "sorcal"));
-            mFirestore.collection("cities").document("LA").set(city);
-            DocumentReference docRef = mFirestore.collection("cities").document("LA");
-            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    City city = documentSnapshot.toObject(City.class);
-                    Log.d(TAG, "CITY data: @" + city.getName());
-
-                }
-            });
-
-            DocumentReference findUser = mFirestore.collection(WWRConstants.USERS_COLLECITON_KEY).document(mUser.getEmail());
+            DocumentReference findUser = mFirestore.collection("cities").document(mUser.getEmail());
             findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -150,12 +139,12 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                         if (document.exists()) {
                             Log.d(TAG, "FOUND ONE");
                             GoogleUser user = document.toObject(GoogleUser.class);
-                            Log.d(TAG, "USER data: @" + user.getEmail());
+                            Log.d(TAG, "USER data: @" + user.getEmail() + " route data @ " + user.getRoutes().get(0).getRouteName());
                             mUser = user;
                         } else {
                             Log.d(TAG, "Creating User");
                             GoogleUser user = new GoogleUser(mUser.getName(),mUser.getEmail());
-                            mFirestore.collection(WWRConstants.USERS_COLLECITON_KEY).document(user.getEmail()).set(user);
+                            mFirestore.collection("cities").document(user.getEmail()).set(user);
                         }
                     } else {
                         Log.d(TAG, "get failed with ", task.getException());
