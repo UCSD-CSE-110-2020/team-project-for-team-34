@@ -7,7 +7,7 @@ import java.util.ListIterator;
 /**
  * A mock user for testing
  */
-public class MockUser implements IUser, Serializable {
+public class MockUser implements IUser{
 
     public static final String FIELD_NAME = "name";
     public static final String FIELD_EMAIL = "email";
@@ -84,8 +84,17 @@ public class MockUser implements IUser, Serializable {
     }
 
     @Override
+    public void updateRoute(Route newRoute) { return; }
+
+    @Override
     public void removeInvitee(String email) {
         return;
     }
+
+    @Override
+    public void setStatus(String status) { return; }
+
+    @Override
+    public String getStatus() {return null; }
 
 }

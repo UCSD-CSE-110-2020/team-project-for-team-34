@@ -13,12 +13,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.example.wwrapp.CustomQuery.UserQuery;
 import com.example.wwrapp.R;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
+import com.example.wwrapp.models.City;
+import com.example.wwrapp.models.GoogleUser;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
 import com.example.wwrapp.models.TeamInvitation;
@@ -26,6 +27,7 @@ import com.example.wwrapp.services.DummyFitnessServiceWrapper;
 import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
 import com.example.wwrapp.utils.WWRConstants;
+import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -34,12 +36,16 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,6 +92,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     public static GoogleSignInAccount account = null;
     private FirebaseFirestore mFirestore;
+    private static boolean mTempUserExists;
 
     private boolean mUserIsBeingInvited;
 
@@ -119,7 +126,43 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
                             WWRConstants.MOCK_USER_NAME, WWRConstants.MOCK_USER_EMAIL
                     );
-        } else {
+            //Check if user exists
+
+            City city = new City("Los Angeles", "CA", "USA",
+                    false, 5000000L, Arrays.asList("west_coast", "sorcal"));
+            mFirestore.collection("cities").document("LA").set(city);
+            DocumentReference docRef = mFirestore.collection("cities").document("LA");
+            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    City city = documentSnapshot.toObject(City.class);
+                    Log.d(TAG, "CITY data: @" + city.getName());
+
+                }
+            });
+
+            DocumentReference findUser = mFirestore.collection(WWRConstants.USERS_COLLECITON_KEY).document(mUser.getEmail());
+            findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            Log.d(TAG, "FOUND ONE");
+                            GoogleUser user = document.toObject(GoogleUser.class);
+                            Log.d(TAG, "USER data: @" + user.getEmail());
+                            mUser = user;
+                        } else {
+                            Log.d(TAG, "Creating User");
+                            GoogleUser user = new GoogleUser(mUser.getName(),mUser.getEmail());
+                            mFirestore.collection(WWRConstants.USERS_COLLECITON_KEY).document(user.getEmail()).set(user);
+                        }
+                    } else {
+                        Log.d(TAG, "get failed with ", task.getException());
+                    }
+                }
+            });
+            } else {
             // TODO: Implement factory creation for Google user
             Log.d(TAG, "Creating Google user");
         }
@@ -545,20 +588,36 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, options);
             Intent signInIntent = googleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, 420);
-            boolean isEmailLoaded = false;
-            while (!isEmailLoaded) {
-                Log.d(TAG, "Email not loaded");
-                isEmailLoaded = HomeScreenActivity.account.getEmail() != null;
-            }
         } else {
             HomeScreenActivity.account = GoogleSignIn.getLastSignedInAccount(this);
             Log.d(TAG, "Email from last log in is " + account.getEmail());
         }
-        GoogleSignInAccount copyAccount = HomeScreenActivity.account;
-        IUserFactory userFac = new IUserFactory();
-        IUser user = userFac.createUser(WWRConstants.GOOGLE_USER_FACTORY_KEY,
-                                                     copyAccount.getDisplayName(),
-                                                     copyAccount.getEmail());
+
+        DocumentReference findUser = mFirestore.collection(WWRConstants.USERS_COLLECITON_KEY).document(account.getEmail());
+        findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        // User exists so don't save it
+                        GoogleUser user = document.toObject(GoogleUser.class);
+                        Log.d(TAG, "User Exists@ " + user.getEmail());
+                        mUser = user;
+                        return;
+                    } else {
+                        Log.d(TAG, "User does not Exist");
+                        IUserFactory userFac = new IUserFactory();
+                        mUser = userFac.createUser(WWRConstants.GOOGLE_USER_FACTORY_KEY,
+                                account.getDisplayName(),
+                                account.getEmail());
+                        mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(mUser.getEmail()).set(mUser);
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
     }
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
@@ -603,6 +662,5 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         // If testVal == -1, then there was no height
         return testVal != -1;
     }
-
 } // end class
 

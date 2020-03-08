@@ -1,6 +1,5 @@
 package com.example.wwrapp.models;
 
-import com.example.wwrapp.CustomQuery.UserQuery;
 import com.example.wwrapp.utils.WWRConstants;
 
 /**
@@ -16,7 +15,7 @@ public class IUserFactory {
                 break;
 
             case WWRConstants.GOOGLE_USER_FACTORY_KEY:
-                UserQuery.firstTimeSaveUser(new MockUser(name,email));
+                user = new MockUser(name,email);
                 break;
 
         };

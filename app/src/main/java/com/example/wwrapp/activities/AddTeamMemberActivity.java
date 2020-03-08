@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,8 +25,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+
+import org.w3c.dom.Document;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +52,8 @@ public class AddTeamMemberActivity extends AppCompatActivity {
     private FirebaseFirestore mFirestore;
     private boolean mInviterIsOnTeam;
     private boolean mInviteeIsOnTeam;
+    private boolean inviteeExist;
+    private IUser invitee;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,15 +77,8 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String userType = intent.getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
-        IUser inviter = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-        assert userType != null;
-        assert inviter != null;
+        IUser user = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
-        IUser invitee = IUserFactory.createUser
-                (userType, mMemberName, mMemberEmail);
-
-        final String EMAIL = invitee.getEmail() + "suffix";
-        assert EMAIL != null;
 
         mConfirmBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,114 +89,165 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                 Log.d(TAG, "Member email on click is: " + mMemberEmail);
 
 
-                final IUser finalInvitee = IUserFactory.createUser
-                        (userType, mMemberName, mMemberEmail);
 
                 // Save member_name and member_email to database and go to team screen.
 
-                Log.d(TAG, "Current user is " + inviter.getName());
-                Log.d(TAG, "Current email is " + inviter.getEmail());
+                Log.d(TAG, "Current user is " + mMemberName);
+                Log.d(TAG, "Current email is " + mMemberEmail);
 
 
                 // Check if the inviter is already in a team
 //                setInviterIsOnTeam(inviter, mFirestore);
 
-                CollectionReference teamsCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
+                //CollectionReference userCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
                 Log.d(TAG, "Value of inviter on team before query is " + mInviterIsOnTeam);
 
-                teamsCol.whereEqualTo(MockUser.FIELD_EMAIL, inviter.getEmail()).get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+
+                // Try to find invitee
+                DocumentReference userRef = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(mMemberEmail);
+                userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                setInviteeExists();
+                                invitee = (IUser) (document.getData().get(mMemberEmail));
+                            } else {
+                                Log.d(TAG, "No such document");
+                                setInviteeNotExists();
+                                invitee = IUserFactory.createUser(userType, mMemberName, mMemberEmail);
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    }
+                });
+
+                // if invitee does not exist on firebase, add it to the collection.
+                mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(invitee.getEmail())
+                        .set(invitee)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    Log.d(TAG, "Query for inviter was successful");
-                                    // If the query returned anything, the user is on a team.
-                                    mInviterIsOnTeam = task.getResult().size() > 0;
-
-                                    // Add the inviter to the team, if they don't belong to the team already
-                                    if (!mInviterIsOnTeam) {
-
-                                        teamsCol.document(inviter.getEmail()).set(inviter).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d(TAG, "DocumentSnapshot for inviter successfully written!");
-
-
-                                                // Check if invitee is on team
-                                                teamsCol.whereEqualTo(MockUser.FIELD_EMAIL, finalInvitee.getEmail()).get()
-                                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                                if (task.isSuccessful()) {
-                                                                    Log.d(TAG, "Query for invitee was successful");
-                                                                    // If the query returned anything, the user is on a team.
-                                                                    mInviteeIsOnTeam = task.getResult().size() > 0;
-
-                                                                    if (!mInviteeIsOnTeam) {
-                                                                            teamsCol.document(finalInvitee.getEmail()).set(finalInvitee).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                                                @Override
-                                                                                public void onSuccess(Void aVoid) {
-                                                                                    Log.d(TAG, "DocumentSnapshot  for invitee successfully written!");
-
-
-                                                                                    // Create an invitation so that the inviter's name can be checked.
-                                                                                    TeamInvitation teamInvitation = new TeamInvitation(inviter.getEmail(),
-                                                                                            finalInvitee.getEmail(), WWRConstants.FIRESTORE_TEAM_INVITE_PENDING);
-                                                                                    CollectionReference teamInvitationsCol =
-                                                                                            mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
-                                                                                    teamInvitationsCol.add(teamInvitation)
-                                                                                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                                                                                @Override
-                                                                                                public void onSuccess(DocumentReference documentReference) {
-                                                                                                    Log.d(TAG, "DocumentSnapshot for teamInvitations written with ID: " + documentReference.getId());
-
-
-                                                                                                }
-                                                                                            })
-                                                                                            .addOnFailureListener(new OnFailureListener() {
-                                                                                                @Override
-                                                                                                public void onFailure(@NonNull Exception e) {
-                                                                                                    Log.w(TAG, "Error adding document", e);
-                                                                                                }
-                                                                                            });
-
-
-                                                                                }
-
-                                                                            })
-                                                                                    .addOnFailureListener(new OnFailureListener() {
-                                                                                @Override
-                                                                                public void onFailure(@NonNull Exception e) {
-                                                                                    Log.w(TAG, "Error writing document", e);
-                                                                                }
-                                                                            });
-                                                                    }
-
-                                                                } else {
-                                                                    Log.d(TAG, "Error getting documents: ", task.getException());
-                                                                }
-                                                            }
-                                                        });
-
-
-                                            }
-                                        })
-                                                .addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        Log.w(TAG, "Error writing document", e);
-                                                    }
-                                                });
-
-
-                                    }
-
-
-                                } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
-                                }
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "DocumentSnapshot successfully written!");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error writing document", e);
                             }
                         });
+
+
+
+                // if invitee and inviter are both on team, prevent them from inviting.
+                if(!invitee.getTeamName().isEmpty() && !user.getTeamName().isEmpty()) {
+                    Toast.makeText(AddTeamMemberActivity.this,
+                            "Enter a different email since" + invitee.getName() + " is already on a team",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    user.addInvitees(invitee);
+                    invitee.setInviterEmail(user.getEmail());
+                    invitee.setStatus(WWRConstants.FIRESTORE_TEAM_INVITE_PENDING);
+                }
+
+
+//                teamsCol.whereEqualTo(MockUser.FIELD_EMAIL, inviter.getEmail()).get()
+//                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                            @Override
+//                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                                if (task.isSuccessful()) {
+//                                    Log.d(TAG, "Query for inviter was successful");
+//                                    // If the query returned anything, the user is on a team.
+//                                    mInviterIsOnTeam = task.getResult().size() > 0;
+//
+//                                    // Add the inviter to the team, if they don't belong to the team already
+//                                    if (!mInviterIsOnTeam) {
+//
+//                                        teamsCol.document(inviter.getEmail()).set(inviter).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                                            @Override
+//                                            public void onSuccess(Void aVoid) {
+//                                                Log.d(TAG, "DocumentSnapshot for inviter successfully written!");
+//
+//
+//                                                // Check if invitee is on team
+//                                                teamsCol.whereEqualTo(MockUser.FIELD_EMAIL, finalInvitee.getEmail()).get()
+//                                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//                                                            @Override
+//                                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                                                                if (task.isSuccessful()) {
+//                                                                    Log.d(TAG, "Query for invitee was successful");
+//                                                                    // If the query returned anything, the user is on a team.
+//                                                                    mInviteeIsOnTeam = task.getResult().size() > 0;
+//
+//                                                                    if (!mInviteeIsOnTeam) {
+//                                                                            teamsCol.document(finalInvitee.getEmail()).set(finalInvitee).addOnSuccessListener(new OnSuccessListener<Void>() {
+//                                                                                @Override
+//                                                                                public void onSuccess(Void aVoid) {
+//                                                                                    Log.d(TAG, "DocumentSnapshot  for invitee successfully written!");
+//
+//
+//                                                                                    // Create an invitation so that the inviter's name can be checked.
+//                                                                                    TeamInvitation teamInvitation = new TeamInvitation(inviter.getEmail(),
+//                                                                                            finalInvitee.getEmail(), WWRConstants.FIRESTORE_TEAM_INVITE_PENDING);
+//                                                                                    CollectionReference teamInvitationsCol =
+//                                                                                            mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
+//                                                                                    teamInvitationsCol.add(teamInvitation)
+//                                                                                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+//                                                                                                @Override
+//                                                                                                public void onSuccess(DocumentReference documentReference) {
+//                                                                                                    Log.d(TAG, "DocumentSnapshot for teamInvitations written with ID: " + documentReference.getId());
+//
+//
+//                                                                                                }
+//                                                                                            })
+//                                                                                            .addOnFailureListener(new OnFailureListener() {
+//                                                                                                @Override
+//                                                                                                public void onFailure(@NonNull Exception e) {
+//                                                                                                    Log.w(TAG, "Error adding document", e);
+//                                                                                                }
+//                                                                                            });
+//
+//
+//                                                                                }
+//
+//                                                                            })
+//                                                                                    .addOnFailureListener(new OnFailureListener() {
+//                                                                                @Override
+//                                                                                public void onFailure(@NonNull Exception e) {
+//                                                                                    Log.w(TAG, "Error writing document", e);
+//                                                                                }
+//                                                                            });
+//                                                                    }
+//
+//                                                                } else {
+//                                                                    Log.d(TAG, "Error getting documents: ", task.getException());
+//                                                                }
+//                                                            }
+//                                                        });
+//
+//
+//                                            }
+//                                        })
+//                                                .addOnFailureListener(new OnFailureListener() {
+//                                                    @Override
+//                                                    public void onFailure(@NonNull Exception e) {
+//                                                        Log.w(TAG, "Error writing document", e);
+//                                                    }
+//                                                });
+//
+//
+//                                    }
+//
+//
+//                                } else {
+//                                    Log.d(TAG, "Error getting documents: ", task.getException());
+//                                }
+//                            }
+//                        });
 
 
 //                // Check if the invitee is already invited (i.e. already in a team)
@@ -243,7 +293,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 //
 
                 // Go to the Team screen
-                setResult(Activity.RESULT_OK);
+                //setResult(Activity.RESULT_OK);
                 finish();
             }
         });
@@ -252,11 +302,20 @@ public class AddTeamMemberActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // going back to previous screen
-                setResult(Activity.RESULT_CANCELED);
+                //setResult(Activity.RESULT_CANCELED);
                 finish();
             }
         });
     }
+
+    private void setInviteeExists(){
+        inviteeExist = true;
+    }
+    private void setInviteeNotExists(){
+        inviteeExist = false;
+    }
+
+
 
     /**
      * Sets the inviter's invite status to true if this user exists on a team, false otherwise
