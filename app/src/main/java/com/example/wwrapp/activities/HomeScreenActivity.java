@@ -290,19 +290,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         if (false) {
             mUser = null;
             //Check if user exists
-            City city = new City("Los Angeles", "CA", "USA",
-                    false, 5000000L, Arrays.asList("west_coast", "sorcal"));
-            mFirestore.collection("cities").document("LA").set(city);
-            DocumentReference docRef = mFirestore.collection("cities").document("LA");
-            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    City city = documentSnapshot.toObject(City.class);
-                    Log.d(TAG, "CITY data: @" + city.getName());
-
-                }
-            });
-
             DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(mUser.getEmail());
             findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override

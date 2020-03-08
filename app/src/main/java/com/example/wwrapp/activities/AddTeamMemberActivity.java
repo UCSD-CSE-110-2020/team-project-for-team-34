@@ -349,12 +349,11 @@ public class AddTeamMemberActivity extends AppCompatActivity {
         Log.d(TAG, "Value of invitee on team after query is " + mInviteeIsOnTeam);
     }
 
-    private void addUserToTeam(IUser user, String email, FirebaseFirestore firestore) {
+    private void addUserToTeam (IUser user, String email, FirebaseFirestore firestore) {
         Log.d(TAG, "in method addUserToTeam");
         Map<String, Object> map = new HashMap<>();
         map.put("FIELD", "VALUE");
         Log.d(TAG, "user email is " + email);
-
 
         if (true) {
             return;
@@ -365,8 +364,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "DocumentSnapshot successfully written!");
             }
-        })
-                .addOnFailureListener(new OnFailureListener() {
+        }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error writing document", e);
