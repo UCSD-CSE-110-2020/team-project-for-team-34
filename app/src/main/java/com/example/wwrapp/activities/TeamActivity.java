@@ -60,6 +60,7 @@ public class TeamActivity extends AppCompatActivity {
 
 
         mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        Log.d(TAG, "User is " + mUser.getEmail());
         if(!mUser.getInviterEmail().equals("")){
             Intent toInviteScreen = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
             toInviteScreen.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
@@ -69,9 +70,6 @@ public class TeamActivity extends AppCompatActivity {
 
         // Set up Firestore and query for the routes to display
         initFirestore();
-
-        // Set up recycler view for routes
-        initRecyclerView();
 
         // Enable Firestore logging
         FirebaseFirestore.setLoggingEnabled(true);
@@ -97,8 +95,8 @@ public class TeamActivity extends AppCompatActivity {
         mFirestore = FirebaseFirestore.getInstance();
 
         CollectionReference teamCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
-
-        if(mUser.getTeamName().isEmpty())
+        
+        if(mUser.getTeamName().equals(""))
         {
             Log.d(TAG, "user is not on a team");
             mQuery = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
@@ -109,7 +107,12 @@ public class TeamActivity extends AppCompatActivity {
         {
             Log.d(TAG, "user is on team: " + mUser.getTeamName());
             mQuery = teamCol.document(mUser.getTeamName()).collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH);
+            if(mQuery == null){
+                Log.d(TAG, "initFirestore: empty query");
+            }
         }
+
+        initRecyclerView();
 
         // Check if the user belongs to a team
         /*teamCol.whereEqualTo(MockUser.FIELD_EMAIL, mUser.getEmail()).get()
@@ -163,6 +166,7 @@ public class TeamActivity extends AppCompatActivity {
             mTeamRecycler.setHasFixedSize(true);
             mTeamRecycler.setLayoutManager(new LinearLayoutManager(this));
             mTeamRecycler.setAdapter(mTeamAdapter);
+            mTeamAdapter.startListening();
         }
     }
 

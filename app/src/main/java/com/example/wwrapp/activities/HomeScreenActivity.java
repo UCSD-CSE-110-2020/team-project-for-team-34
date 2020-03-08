@@ -194,6 +194,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private void ADD_USERS() {
         Log.d(TAG, "ADD_USERS: ");
         IUser user = new MockUser(FirestoreConstants.MOCK_USER_NAME, FirestoreConstants.MOCK_USER_EMAIL);
+        user.setTeamName("team");
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(user.getEmail()).set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -281,7 +282,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                             FirestoreConstants.MOCK_USER_NAME,
                             FirestoreConstants.MOCK_USER_EMAIL);
             // TODO: Remove later
-//            mUser.setTeamName("NOT EMPTY");
+            mUser.setTeamName("team");
         } else {
             // TODO: Create a Google or Firebase user
         }
@@ -341,6 +342,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     startActivity(intent);
                 } else {
                     // If the user is not being invited, take them to the Team screen.
+                    Log.d(TAG, "onClick: no invite");
                     Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
                     intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
                     startActivity(intent);
