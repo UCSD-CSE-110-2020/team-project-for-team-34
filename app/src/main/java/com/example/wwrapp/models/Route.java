@@ -46,6 +46,7 @@ public class Route implements Serializable {
      * Empty constructor required for Firestore
      */
     public Route() {
+        routeName = "testing";
     }
 
     /**

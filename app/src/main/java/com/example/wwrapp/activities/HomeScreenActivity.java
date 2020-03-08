@@ -22,8 +22,12 @@ import com.example.wwrapp.models.City;
 import com.example.wwrapp.models.GoogleUser;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
+<<<<<<< HEAD
 import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.Team;
+=======
+import com.example.wwrapp.models.Route;
+>>>>>>> c8d04eccc50de92571a4acc6b5636ac4778f870d
 import com.example.wwrapp.models.TeamInvitation;
 import com.example.wwrapp.models.TeamMember;
 import com.example.wwrapp.services.DummyFitnessServiceWrapper;
@@ -48,6 +52,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -273,6 +278,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             Log.d(TAG, "Creating Mock user");
             mUser = IUserFactory.createUser
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
+<<<<<<< HEAD
                             FirestoreConstants.MOCK_USER_NAME,
                             FirestoreConstants.MOCK_USER_EMAIL);
         } else {
@@ -317,6 +323,26 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                             }
                         } else {
                             Log.d(TAG, "get failed with ", task.getException());
+=======
+                            WWRConstants.MOCK_USER_NAME, WWRConstants.MOCK_USER_EMAIL
+                    );
+            //Check if user exists
+            DocumentReference findUser = mFirestore.collection("cities").document(mUser.getEmail());
+            findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            Log.d(TAG, "FOUND ONE");
+                            GoogleUser user = document.toObject(GoogleUser.class);
+                            Log.d(TAG, "USER data: @" + user.getEmail() + " route data @ " + user.getRoutes().get(0).getRouteName());
+                            mUser = user;
+                        } else {
+                            Log.d(TAG, "Creating User");
+                            GoogleUser user = new GoogleUser(mUser.getName(),mUser.getEmail());
+                            mFirestore.collection("cities").document(user.getEmail()).set(user);
+>>>>>>> c8d04eccc50de92571a4acc6b5636ac4778f870d
                         }
                     }
                 });
