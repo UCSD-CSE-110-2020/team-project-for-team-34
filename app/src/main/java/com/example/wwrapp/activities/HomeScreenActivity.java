@@ -277,6 +277,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
                             FirestoreConstants.MOCK_USER_NAME,
                             FirestoreConstants.MOCK_USER_EMAIL);
+            // TODO: Remove later
+//            mUser.setTeamName("NOT EMPTY");
         } else {
             // TODO: Create a Google or Firebase user
         }
