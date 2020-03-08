@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.adapters.TeammateRouteAdapter;
 import com.example.wwrapp.models.Route;
@@ -91,7 +92,7 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
         mFirestore = FirebaseFirestore.getInstance();
 
         if(testTeammateRoute){
-            CollectionReference teamRouteCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH);
+            CollectionReference teamRouteCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH);
             Route testRoute = new Route("testRoute", "Geisel", "0", 0, 0, null, false, "");
             teamRouteCol.document("ellen@gmail.com").set(testRoute);
         }

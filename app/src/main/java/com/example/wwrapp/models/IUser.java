@@ -12,7 +12,7 @@ public interface IUser extends Serializable {
     public String getEmail();
     public String getInviterEmail();
     public String getTeamName();
-    public List<String> getInvitees();
+
     public List<Route> getRoutes();
     public String getStatus();
 

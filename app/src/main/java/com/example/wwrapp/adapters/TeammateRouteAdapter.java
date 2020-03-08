@@ -60,46 +60,40 @@ public class TeammateRouteAdapter extends FirestoreRecyclerAdapter<Route, Teamma
             Log.d(TAG, "onBindViewHolder: ");
             holder.itemView.setVisibility(View.GONE);
             holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0,0));
-            return;
         }
-        holder.routeName.setText(model.getRouteName());
-        holder.routeStartingPoint.setText(model.getStartingPoint());
+        else {
+            holder.routeName.setText(model.getRouteName());
+            holder.routeStartingPoint.setText(model.getStartingPoint());
 
-        // Set date
-//        Date date = model.getDate();
-//        if (date == null) {
-//            // Convert LocalDateTime to Date
-//            date = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
-//        }
-        // TODO: Migrate from LocalDateTime
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_SUMMARY);
-//        String formattedDate = date.format(formatter);
-        holder.routeDate.setText("DATE in progress");
 
-        // Set steps and miles
-        holder.routeSteps.setText(String.valueOf(model.getSteps()));
-        holder.routeMiles.setText(String.valueOf(model.getMiles()));
+            // TODO: Migrate from LocalDateTime
+            holder.routeDate.setText("DATE in progress");
 
-        //TODO: add teammate name in route Model
-        holder.teammateName.setText("teammate name");
+            // Set steps and miles
+            holder.routeSteps.setText(String.valueOf(model.getSteps()));
+            holder.routeMiles.setText(String.valueOf(model.getMiles()));
 
-        // Set favorite
-        boolean isFavorite = model.isFavorite();
-        if (isFavorite) {
-            holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
-            holder.favoriteBtn.setChecked(true);
-        } else {
-            holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
-        }
-        holder.favoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
-                } else
-                    holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
+            //TODO: add teammate name in route Model
+            holder.teammateName.setText(model.getOwnerName());
+
+            // Set favorite
+            boolean isFavorite = model.isFavorite();
+            if (isFavorite) {
+                holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
+                holder.favoriteBtn.setChecked(true);
+            } else {
+                holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
             }
-        });
+            holder.favoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (isChecked) {
+                        holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
+                    } else
+                        holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
+                }
+            });
+        }
     }
 
     @NonNull

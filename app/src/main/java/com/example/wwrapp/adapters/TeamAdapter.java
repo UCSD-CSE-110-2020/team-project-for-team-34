@@ -1,5 +1,6 @@
 package com.example.wwrapp.adapters;
 
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,22 +13,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.MockUser;
+import com.example.wwrapp.models.TeamMember;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
 import java.util.List;
 
-public class TeamAdapter extends FirestoreRecyclerAdapter<IUser,TeamAdapter.TeamViewHolder> {
+public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember,TeamAdapter.TeamViewHolder> {
 
     private static final String TAG = "TeamListAdapter";
 
-    private List<String> mName;
     private LayoutInflater mInflater;
 
     private IUser mUser;
 
-    //TODO:implement actual user
-    public TeamAdapter(@NonNull FirestoreRecyclerOptions<IUser> options,IUser User) {
+    public TeamAdapter(@NonNull FirestoreRecyclerOptions<TeamMember> options,IUser User) {
         super(options);
         mUser = User;
     }
@@ -41,40 +41,35 @@ public class TeamAdapter extends FirestoreRecyclerAdapter<IUser,TeamAdapter.Team
         return new TeamViewHolder(itemView);
     }
 
-    //TODO:implement actual user
     @Override
-    public void onBindViewHolder(@NonNull TeamViewHolder holder, int position, @NonNull IUser model) {
+    public void onBindViewHolder(@NonNull TeamViewHolder holder, int position, @NonNull TeamMember model) {
         Log.d(TAG, "onBindViewHolder: called");
-        holder.teammateName.setText(model.getName());
+        if(model.getEmail().equals(mUser.getName()))
+        {
+            holder.itemView.setVisibility(View.GONE);
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0,0));
+        }
+        else {
+            holder.teammateName.setText(model.getName());
 
-        //TODO: Change Invite Status in IUSER to Boolean
-        /*boolean isTeammate = model.getInviteStatus();
-        if (isTeammate) {
-            holder.teammateName.setTextColor(Color.BLACK);
-        } else {
-            holder.teammateName.setTextColor(Color.GRAY);
-        }*/
-    }
-
-    @Override
-    public int getItemCount() {
-        if (mName != null) {
-            return mName.size();
-        } else {
-            return 0;
+            String status = model.getStatus();
+            if (status.equals("accepted")) {
+                holder.teammateName.setTextColor(Color.BLACK);
+            } else {
+                holder.teammateName.setTextColor(Color.GRAY);
+            }
         }
     }
 
-
     class TeamViewHolder extends RecyclerView.ViewHolder{
         TextView teammateName;
+        View itemView;
 
         //RelativeLayout parentLayout;
         public TeamViewHolder(@NonNull View itemView) {
             super(itemView);
             teammateName = itemView.findViewById(R.id.teammate_name);
-
+            this.itemView = itemView;
         }
-
     }
 }

@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.models.TeamMember;
+import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.adapters.TeamAdapter;
 import com.example.wwrapp.models.IUser;
@@ -48,6 +50,7 @@ public class TeamActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_team);
+        Log.d(TAG, "onCreate");
 
         // For testing InviteMember
         if(testInvite){
@@ -55,12 +58,14 @@ public class TeamActivity extends AppCompatActivity {
             startActivity(intent);
         }
 
+
         mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
         if(!mUser.getInviterEmail().equals("")){
             Intent toInviteScreen = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
             toInviteScreen.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
             startActivity(toInviteScreen);
         }
+
 
         // Set up Firestore and query for the routes to display
         initFirestore();
@@ -91,16 +96,19 @@ public class TeamActivity extends AppCompatActivity {
         // Get the database
         mFirestore = FirebaseFirestore.getInstance();
 
-        CollectionReference teamCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
+        CollectionReference teamCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
 
         if(mUser.getTeamName().isEmpty())
         {
             Log.d(TAG, "user is not on a team");
+            mQuery = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                    .document(mUser.getEmail()).collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH);
 
         }
         else
         {
-            teamCol.document(mUser.getTeamName());
+            Log.d(TAG, "user is on team: " + mUser.getTeamName());
+            mQuery = teamCol.document(mUser.getTeamName()).collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH);
         }
 
         // Check if the user belongs to a team
@@ -146,8 +154,8 @@ public class TeamActivity extends AppCompatActivity {
         } else {
             // Set up adapter
             //TODO:set up actual user model: resolved for now
-            FirestoreRecyclerOptions<IUser> options =
-                    new FirestoreRecyclerOptions.Builder<IUser>().setQuery(mQuery, IUser.class).build();
+            FirestoreRecyclerOptions<TeamMember> options =
+                    new FirestoreRecyclerOptions.Builder<TeamMember>().setQuery(mQuery, TeamMember.class).build();
             mTeamAdapter = new TeamAdapter(options,mUser);
 
             // Set up recycler view
