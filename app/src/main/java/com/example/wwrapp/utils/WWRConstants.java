@@ -34,6 +34,7 @@ public final class WWRConstants {
     public static final String EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID =
             "com.example.wwrapp.EXTRA_ROUTE_DETAIL_ACTIVITY";
     public static final String EXTRA_ROUTES_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_ROUTE_ACTIVITY";
+    public static final String EXTRA_SET_USER_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_SET_USER_ACTIVITY"
 
     // Keys
     public static final String EXTRA_WALK_OBJECT_KEY = "com.example.wwrapp.EXTRA_WALK_KEY";
@@ -47,6 +48,9 @@ public final class WWRConstants {
     public static final String EXTRA_USER_TYPE_KEY = "com.example.wwrapp.EXTRA_USER_TYPE_KEY";
 
 
+    //For mocking set user
+    public static final String EXTRA_USER_EMAIL_KEY = "com.example.wwrapp.EXTRA_USER_EMAIL_KEY";
+    public static final String EXTRA_USER_NAME_KEY = "com.example.wwrapp.EXTRA_USER_NAME_KEY";
 
     // Firestore Keys
     public static final String EXTRA_ROUTE_ID_KEY = "com.example.wwrapp.EXTRA_ROUTE_ID_KEY";

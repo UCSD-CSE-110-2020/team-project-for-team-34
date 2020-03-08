@@ -59,6 +59,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     // Numeric constants
     private static final double TENTHS_PLACE_ROUNDING_FACTOR = 10.0;
     private static final int MOCK_ACTIVITY_REQUEST_CODE = 1;
+    private static final int SET_USER_ACTIVITY_REQUEST_CODE = 3;
 
     // String constants
     public static final String NO_LAST_WALK_TIME_TEXT = "No last walk time available";
@@ -243,6 +244,13 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             }
         });
 
+        // Register the set user screen button
+        findViewById(R.id.set_user_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSetUserActivity();
+            }
+        });
         // Save the values of stored height, steps and miles, and last walk stats to their
         // respective member variables
         initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
@@ -398,6 +406,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         startActivityForResult(intent, MOCK_ACTIVITY_REQUEST_CODE);
     }
 
+    private void startSetUserActivity() {
+        Intent intent = new Intent(HomeScreenActivity.this, SetUserActivity.class);
+        startActivityForResult(intent, SET_USER_ACTIVITY_REQUEST_CODE);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -418,7 +431,17 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     // Start the mocking service
                 }
                 break;
-
+            case SET_USER_ACTIVITY_REQUEST_CODE:
+                // The task returned from set user activity
+                if (resultCode == Activity.RESULT_OK) {
+                    //change the user
+                    String userEmail = getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_EMAIL_KEY).toString();
+                    DocumentReference findUser = mFirestore.collection(WWRConstants.USERS_COLLECITON_KEY).document(userEmail);
+                    mUser = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                            .get();
+                }
+                break;
             // If authentication was required during google fit setup, this will be called after the user authenticates
             case WWRConstants.GOOGLE_FIT_PERMISSIONS_REQUEST_CODE:
                 if (resultCode == Activity.RESULT_OK) {
