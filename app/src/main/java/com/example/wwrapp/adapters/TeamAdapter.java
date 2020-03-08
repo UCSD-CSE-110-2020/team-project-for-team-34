@@ -44,14 +44,13 @@ public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember,TeamAdapter
     @Override
     public void onBindViewHolder(@NonNull TeamViewHolder holder, int position, @NonNull TeamMember model) {
         Log.d(TAG, "onBindViewHolder: called");
-        if(model.getEmail().equals(mUser.getName()))
+        if(model.getEmail().equals(mUser.getEmail()))
         {
             holder.itemView.setVisibility(View.GONE);
             holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0,0));
         }
         else {
             holder.teammateName.setText(model.getName());
-
             String status = model.getStatus();
             if (status.equals("accepted")) {
                 holder.teammateName.setTextColor(Color.BLACK);

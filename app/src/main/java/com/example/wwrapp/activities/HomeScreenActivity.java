@@ -213,7 +213,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     // Example of creating team and email-status pair
     private void CREATE_TEAM() {
-        TeamMember teamMember = new TeamMember(FirestoreConstants.MOCK_USER_EMAIL, FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
+        TeamMember teamMember = new TeamMember(FirestoreConstants.MOCK_USER_EMAIL, FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED, FirestoreConstants.MOCK_USER_NAME);
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
