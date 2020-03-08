@@ -160,4 +160,7 @@ public final class WWRConstants {
     public static final boolean PRODUCTION_VERSION = false;
 
     public static final long DUMMY_FITNESS_SERVICE_STEP_COUNT_INCREMENT = 10;
+
+
+    public static final String TEAM_NAME = "wwrTeam";
 }

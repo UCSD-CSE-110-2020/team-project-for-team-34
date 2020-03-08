@@ -556,7 +556,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         }
         GoogleSignInAccount copyAccount = HomeScreenActivity.account;
         IUserFactory userFac = new IUserFactory();
-        IUser user = userFac.createUser(WWRConstants.GOOGLE_USER_FACTORY_KEY,
+        mUser = userFac.createUser(WWRConstants.GOOGLE_USER_FACTORY_KEY,
                                                      copyAccount.getDisplayName(),
                                                      copyAccount.getEmail());
     }
