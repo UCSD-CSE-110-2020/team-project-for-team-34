@@ -10,22 +10,26 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.MockUser;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
 import java.util.List;
 
-public class TeamAdapter extends FirestoreRecyclerAdapter<MockUser,TeamAdapter.TeamViewHolder> {
+public class TeamAdapter extends FirestoreRecyclerAdapter<IUser,TeamAdapter.TeamViewHolder> {
 
     private static final String TAG = "TeamListAdapter";
 
     private List<String> mName;
     private LayoutInflater mInflater;
 
+    private IUser mUser;
+
     //TODO:implement actual user
-    public TeamAdapter(@NonNull FirestoreRecyclerOptions<MockUser> options) {
+    public TeamAdapter(@NonNull FirestoreRecyclerOptions<IUser> options,IUser User) {
         super(options);
+        mUser = User;
     }
 
     @NonNull
@@ -39,7 +43,7 @@ public class TeamAdapter extends FirestoreRecyclerAdapter<MockUser,TeamAdapter.T
 
     //TODO:implement actual user
     @Override
-    public void onBindViewHolder(@NonNull TeamViewHolder holder, int position, @NonNull MockUser model) {
+    public void onBindViewHolder(@NonNull TeamViewHolder holder, int position, @NonNull IUser model) {
         Log.d(TAG, "onBindViewHolder: called");
         holder.teammateName.setText(model.getName());
 
