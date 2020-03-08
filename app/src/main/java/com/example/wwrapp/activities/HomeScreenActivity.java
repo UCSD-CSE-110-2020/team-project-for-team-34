@@ -277,8 +277,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             Log.d(TAG, "Creating Mock user");
             mUser = IUserFactory.createUser
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
-                            "Byron Test",
-                            "Byron Test Email");
+                            FirestoreConstants.MOCK_USER_NAME,
+                            FirestoreConstants.MOCK_USER_EMAIL);
             // TODO: Remove later
 //            mUser.setTeamName("NOT EMPTY");
         } else {
