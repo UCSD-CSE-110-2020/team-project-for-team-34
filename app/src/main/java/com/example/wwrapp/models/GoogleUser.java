@@ -98,7 +98,6 @@ public class GoogleUser implements IUser, Serializable {
         }
     }
 
-
     @Override
     public void addRoutes(Route newRoutes) {
         mRoutes.add(newRoutes);

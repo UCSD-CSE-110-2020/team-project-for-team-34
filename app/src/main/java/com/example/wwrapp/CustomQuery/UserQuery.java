@@ -35,7 +35,7 @@ public class UserQuery {
     }
 
     public static void firstTimeSaveUser(IUser iUser) {
-        if (userExists()) {
+        if (userExists(iUser)) {
             return;
         }
         boolean isEmailLoaded = false;
@@ -47,14 +47,14 @@ public class UserQuery {
     }
 
     public static void overwriteUser(IUser iUser) {
-        if (!userExists()) {
+        if (!userExists(iUser)) {
             return;
         }
         mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(iUser.getEmail()).set(iUser);
     }
 
-    private static boolean userExists() {
-        DocumentReference findUser = mFirestore.collection(WWRConstants.USERS_COLLECITON_KEY).document(HomeScreenActivity.account.getEmail());
+    public static boolean userExists(IUser user) {
+        DocumentReference findUser = mFirestore.collection(WWRConstants.USERS_COLLECITON_KEY).document(user.getEmail());
         findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
