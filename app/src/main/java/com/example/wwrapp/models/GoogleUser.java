@@ -1,5 +1,7 @@
 package com.example.wwrapp.models;
 
+import com.example.wwrapp.utils.WWRConstants;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,7 @@ public class GoogleUser implements IUser, Serializable {
     public static final String FIELD_TEAMNAME = "teamName";
     public static final String FIELD_INVITEES = "invitees";
     public static final String FIELD_ROUTES = "routes";
+    public static final String FIELD_STATUS = "status";
 
     public static final List<String> INVITEES_DEFAULT = new ArrayList<>();
     public static final List<Route> ROUTES_DEFAULT = new ArrayList<>();
@@ -23,14 +26,26 @@ public class GoogleUser implements IUser, Serializable {
     private String mteamName;
     private List<String> mInvitees;
     private List<Route> mRoutes;
+    private String status;
 
     public GoogleUser(String name, String email) {
         mName = name;
         mEmail = email;
+        status = WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED;
         mInviter = STRING_DEFAULT;
         mteamName = STRING_DEFAULT;
         mInvitees = INVITEES_DEFAULT;
         mRoutes = ROUTES_DEFAULT;
+    }
+
+    @Override
+    public String getStatus(){
+        return status;
+    }
+
+    @Override
+    public void setStatus(String status){
+        this.status = status;
     }
 
     @Override

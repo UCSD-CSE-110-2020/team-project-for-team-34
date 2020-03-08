@@ -14,6 +14,7 @@ public interface IUser extends Serializable {
     public String getTeamName();
     public List<String> getInvitees();
     public List<Route> getRoutes();
+    public String getStatus();
 
     public void setInviterEmail(String newInviter);
     public void setTeamName(String newTeamName);
@@ -23,4 +24,5 @@ public interface IUser extends Serializable {
     public void updateRoute(Route newRoute);
     public void addRoutes(Route newRoutes);
     public void removeInvitee(String routeName);
+    public void setStatus(String status);
 }

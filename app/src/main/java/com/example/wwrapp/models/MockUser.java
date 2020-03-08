@@ -1,5 +1,7 @@
 package com.example.wwrapp.models;
 
+import com.example.wwrapp.utils.WWRConstants;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.ListIterator;
@@ -12,7 +14,9 @@ public class MockUser implements IUser, Serializable {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_INVITE_STATUS = "inviteStatus";
+    public static final String FIELD_STATUS = "status";
 
+    private String status;
     private String name;
     private String email;
     private String teamName;
@@ -21,6 +25,17 @@ public class MockUser implements IUser, Serializable {
         this.name = name;
         this.email = email;
         this.teamName = "team";
+        this.status = WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED;
+    }
+
+    @Override
+    public String getStatus(){
+        return status;
+    }
+
+    @Override
+    public void setStatus(String status){
+        this.status = status;
     }
 
     @Override

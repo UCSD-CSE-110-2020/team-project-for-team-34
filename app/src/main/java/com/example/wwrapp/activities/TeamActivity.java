@@ -54,6 +54,13 @@ public class TeamActivity extends AppCompatActivity {
             startActivity(intent);
         }
 
+        IUser user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        if(!user.getInviterEmail().equals("")){
+            Intent toInviteScreen = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
+            toInviteScreen.putExtra(WWRConstants.EXTRA_USER_KEY, user);
+            startActivity(toInviteScreen);
+        }
+
         // Set up Firestore and query for the routes to display
         initFirestore();
 
@@ -70,9 +77,10 @@ public class TeamActivity extends AppCompatActivity {
                 Intent intent = new Intent(TeamActivity.this, AddTeamMemberActivity.class);
                 final IUser user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
                 intent.putExtra(WWRConstants.EXTRA_USER_KEY, user);
-                intent.putExtra(WWRConstants.EXTRA_USER_TYPE_KEY, WWRConstants.MOCK_USER_FACTORY_KEY);
-                intent.putExtra("TEST", "TEST_DOC_NAME");
-                startActivityForResult(intent, ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE);
+                startActivity(intent);
+//                intent.putExtra(WWRConstants.EXTRA_USER_TYPE_KEY, WWRConstants.MOCK_USER_FACTORY_KEY);
+//                intent.putExtra("TEST", "TEST_DOC_NAME");
+//                startActivityForResult(intent, ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE);
             }
         });
 
