@@ -91,7 +91,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                 mInviteeEmail = mInviteeEmailEditText.getText().toString();
                 Log.d(TAG, "Invitee name on click is: " + mInviteeName);
                 Log.d(TAG, "Invitee email on click is: " + mInviteeEmail);
-                TeamMember teamMember = new TeamMember(mInviteeEmail, FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING);
+                TeamMember teamMember = new TeamMember(mInviteeEmail, FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING, mInviteeName);
 
                 // Save member_name and member_email to database and go to team screen.
 
@@ -426,7 +426,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
             } else {
                 // If invitee is already on a team and inviter is not on team
                 TeamMember inviterTeamMember =
-                        new TeamMember(mInviter.getEmail(), FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING);
+                        new TeamMember(mInviter.getEmail(), FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING, mInviter.getName());
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                         .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                         .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
