@@ -291,7 +291,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            Log.d(TAG, "FOUND ONE");
                             GoogleUser user = document.toObject(GoogleUser.class);
                             Log.d(TAG, "USER data: @" + user.getEmail());
                             mUser = user;
