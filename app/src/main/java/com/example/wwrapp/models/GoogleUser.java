@@ -28,6 +28,8 @@ public class GoogleUser implements IUser, Serializable {
     private List<Route> mRoutes;
     private String status;
 
+    public GoogleUser() {}
+
     public GoogleUser(String name, String email) {
         mName = name;
         mEmail = email;
@@ -127,4 +129,16 @@ public class GoogleUser implements IUser, Serializable {
             }
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if( (o instanceof IUser) ) {
+            IUser user = (IUser) o;
+            return mName.equals(user.getName());
+        }
+        else {
+            return false;
+        }
+    }
 }
+
