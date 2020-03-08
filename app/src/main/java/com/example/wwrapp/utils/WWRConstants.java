@@ -1,10 +1,5 @@
 package com.example.wwrapp.utils;
 
-import com.example.wwrapp.models.Route;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Contains constants for use throughout the project
  */
@@ -34,7 +29,7 @@ public final class WWRConstants {
     public static final String EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID =
             "com.example.wwrapp.EXTRA_ROUTE_DETAIL_ACTIVITY";
     public static final String EXTRA_ROUTES_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_ROUTE_ACTIVITY";
-    public static final String EXTRA_SET_USER_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_SET_USER_ACTIVITY"
+    public static final String EXTRA_SET_USER_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_SET_USER_ACTIVITY";
 
     // Keys
     public static final String EXTRA_WALK_OBJECT_KEY = "com.example.wwrapp.EXTRA_WALK_KEY";
@@ -91,12 +86,15 @@ public final class WWRConstants {
     public static final String EXTRA_FITNESS_SERVICE_TYPE_KEY = "com.example.wwrapp.EXTRA_FITNESS_SERVICE_TYPE_KEY";
     public static final String GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY =
             "com.example.wwrapp.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY";
+
     public static final String DUMMY_FITNESS_SERVICE_FACTORY_KEY =
             "com.example.wwrapp.DUMMY_FITNESS_SERVICE_FACTORY_KEY";
+    public static final long DUMMY_FITNESS_SERVICE_STEP_COUNT_INCREMENT = 10;
+
     public static final String DEFAULT_FITNESS_SERVICE_FACTORY_KEY = DUMMY_FITNESS_SERVICE_FACTORY_KEY;
 
     // Time in ms to wait before pulling data from Fitness Service
-    public static final int WAIT_TIME = 1000;
+    public static final long WAIT_TIME = 1000;
 
     // User Factory keys/types
     public static final String GOOGLE_USER_FACTORY_KEY = "com.example.wwrapp.GOOGLE_USER_FACTORY_KEY";
@@ -106,65 +104,4 @@ public final class WWRConstants {
     public static final String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
     public static final long NO_MOCK_TIME = -1;
 
-    // Attributes of a mock user
-    public static final String MOCK_USER_NAME = "Ariana";
-    public static final String MOCK_USER_EMAIL = "ariana@gmail.com";
-
-
-    // Firestore collection constants
-    public static final String FIRESTORE_COLLECTION_USER_PATH = "users";
-    public static final String FIRESTORE_COLLECTION_MY_ROUTES_PATH = "myRoutes";
-
-    public static final String FIRESTORE_COLLECTION_TEAMS_PATH = "teams";
-    public static final String FIRESTORE_COLLECTION_INVITATIONS_PATH = "invitations";
-    public static final String FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH = "teammateRoutes";
-
-
-
-
-    // For testing only
-    public static final String FIRESTORE_DOCUMENT_DUMMY_USER_PATH = "dummyUser";
-
-
-    // Firestore document constants
-    public static final String FIRESTORE_DOCUMENT_ROUTE_NAME = "routeName";
-    public static final String FIRESTORE_DOCUMENT_STARTING_POINT = "startingPoint";
-
-    //DataBase collection Strings
-    public static String TEAMS_COLLECTION_KEY = "teams";
-    public static String USERS_COLLECITON_KEY = "users";
-
-    public static String USER_TEAM_PENDING_KEY = "teamPendingDemoTeam";
-    public static String TEAM_NAME_KEY = "name";
-    public static String TEAM_USERS_KEY = "users";
-    public static String ROUTE_STARTING_POINT_KEY = "startingPoint";
-    public static String ROUTE_STEPS_KEY = "steps";
-    public static String ROUTE_MILES_KEY = "miles";
-    public static String ROUTE_DATE_KEY = "date";
-    public static String ROUTE_TAGS_KEY = "tag";
-    public static String TAG_NAME_KEY = "name";
-    public static String TAG_LOOP_KEY = "loop";
-    public static String TAG_OUTANDBACK_KEY = "outAndBack";
-    public static String TAG_FLAT_KEY = "flat";
-    public static String TAG_HILLY_KEY = "hilly";
-    public static String TAG_STREETS_KEY = "streets";
-    public static String TAG_TRAIL_KEY = "trail";
-    public static String TAG_EVEN_KEY = "even";
-    public static String TAG_UNEVEN_KEY = "uneven";
-    public static String TAG_EASY_KEY = "easy";
-    public static String TAG_MODERATE_KEY = "moderate";
-    public static String TAG_DIFFICULT_KEY = "difficult";
-    public static String TAG_FAVORITE_KEY = "favorite";
-
-    // Firestore user invite status constants
-    public static final String FIRESTORE_TEAM_INVITE_ACCEPTED = "accepted";
-    public static final String FIRESTORE_TEAM_INVITE_DECLINED = "declined";
-    public static final String FIRESTORE_TEAM_INVITE_PENDING = "pending";
-
-    public static final boolean PRODUCTION_VERSION = false;
-
-    public static final long DUMMY_FITNESS_SERVICE_STEP_COUNT_INCREMENT = 10;
-
-
-    public static final String TEAM_NAME = "wwrTeam";
 }

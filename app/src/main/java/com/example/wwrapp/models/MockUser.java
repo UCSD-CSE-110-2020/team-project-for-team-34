@@ -1,26 +1,53 @@
 package com.example.wwrapp.models;
 
-import java.io.Serializable;
+import com.example.wwrapp.utils.FirestoreConstants;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * A mock user for testing
  */
-public class MockUser implements IUser{
+public class MockUser implements IUser {
 
     public static final String FIELD_NAME = "name";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_INVITE_STATUS = "inviteStatus";
 
+    private static final List<String> INVITEES_DEFAULT = new ArrayList<>();
+    private static final List<Route> ROUTES_DEFAULT = new ArrayList<>();
+    private static final String STRING_DEFAULT = "";
+
     private String name;
     private String email;
+    private String inviter;
     private String teamName;
+    private List<String> invitees;
+    private List<Route> routes;
+    private String status;
+
+    public MockUser() {
+    }
 
     public MockUser(String name, String email) {
+
         this.name = name;
         this.email = email;
-        this.teamName = "team";
+        status = FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED;
+        inviter = STRING_DEFAULT;
+        teamName = STRING_DEFAULT;
+        invitees = INVITEES_DEFAULT;
+        routes = ROUTES_DEFAULT;
+    }
+
+    @Override
+    public String getStatus() {
+        return status;
+    }
+
+    @Override
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override
@@ -35,7 +62,7 @@ public class MockUser implements IUser{
 
     @Override
     public String getInviterEmail() {
-        return null;
+        return inviter;
     }
 
     @Override
@@ -44,57 +71,39 @@ public class MockUser implements IUser{
     }
 
     @Override
-    public List<String> getInvitees() {
-        return null;
-    }
 
-    @Override
     public List<Route> getRoutes() {
-        return null;
+        return routes;
     }
 
     @Override
     public void setInviterEmail(String newInviter) {
-        return;
+        inviter = newInviter;
     }
 
     @Override
-    public void setTeamName(String newTeamName){
-        return;
-    }
-
-    @Override
-    public void setInvitees(List<String> newInvitees) {
-        return;
+    public void setTeamName(String newTeamName) {
+        teamName = newTeamName;
     }
 
     @Override
     public void addInvitees(IUser user) {
-        return;
+        invitees.add(user.getEmail());
     }
 
     @Override
     public void setRoutes(List<Route> newRoutes) {
-        return;
+        routes = newRoutes;
     }
 
+
     @Override
-    public void addRoutes(Route route) {
-        return;
+    public boolean equals(Object o) {
+        if ((o instanceof IUser)) {
+            IUser user = (IUser) o;
+            return name.equals(user.getName());
+        } else {
+            return false;
+        }
     }
-
-    @Override
-    public void updateRoute(Route newRoute) { return; }
-
-    @Override
-    public void removeInvitee(String email) {
-        return;
-    }
-
-    @Override
-    public void setStatus(String status) { return; }
-
-    @Override
-    public String getStatus() {return null; }
-
 }

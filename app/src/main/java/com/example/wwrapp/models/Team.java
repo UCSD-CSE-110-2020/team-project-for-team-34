@@ -1,34 +1,33 @@
 package com.example.wwrapp.models;
 
-import java.lang.reflect.Member;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Team {
-    private String mTeamName;
-    private Map<IUser, Boolean> mMembers = new HashMap<>();
+
+    public static final String FIELD_EMAIL_MAP = "members";
+
+    private String teamName;
+
+    private Map<String, Boolean> members;
+
+    public Team() {
+    }
+
+    public Team(Map<String, Boolean> emailMap) {
+        this.members = emailMap;
+    }
 
     public String getTeamName() {
-        return mTeamName;
+        return teamName;
     }
 
-    public Boolean getMemberStatus(IUser user) {
-        return mMembers.get(user);
-    }
 
     public void setTeamName(String newTeamName) {
-        mTeamName = newTeamName;
+        teamName = newTeamName;
     }
 
-    public void addMember(IUser user, Boolean status) {
-        mMembers.put(user, status);
-    }
 
-    public void updateMemberStatus(IUser user, Boolean status) {
-        mMembers.put(user, status);
-    }
-
-    public Boolean isMember(IUser user) {
-        return mMembers.containsKey(user);
+    public Map<String, Boolean> getMembers() {
+        return members;
     }
 }

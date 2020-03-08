@@ -35,7 +35,7 @@ public class SetUserActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Cancel button pressed");
-                Intent intent = new Intent(SetUserActivity.this, HomeScreenActivity.class);
+//                Intent intent = new Intent(SetUserActivity.this, HomeScreenActivity.class);
 
                 finish();
             }

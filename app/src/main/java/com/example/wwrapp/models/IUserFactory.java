@@ -11,11 +11,11 @@ public class IUserFactory {
         IUser user = null;
         switch(type) {
             case WWRConstants.MOCK_USER_FACTORY_KEY:
-                user = new MockUser(name, email);
+                user = new GoogleUser(name, email);
                 break;
 
             case WWRConstants.GOOGLE_USER_FACTORY_KEY:
-                user = new MockUser(name,email);
+                user = new GoogleUser(name,email);
                 break;
 
         };

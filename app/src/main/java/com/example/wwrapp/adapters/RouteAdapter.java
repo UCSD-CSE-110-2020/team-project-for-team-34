@@ -14,9 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.Route;
+import com.example.wwrapp.utils.WWRConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
  * Adapter for the Route Recycler View
@@ -81,6 +84,7 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
                     holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
                 } else
                     holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
+
             }
         });
     }

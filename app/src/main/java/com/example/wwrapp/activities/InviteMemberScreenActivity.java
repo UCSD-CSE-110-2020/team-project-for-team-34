@@ -1,6 +1,5 @@
 package com.example.wwrapp.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,20 +10,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.models.IUser;
-import com.example.wwrapp.models.MockUser;
-import com.example.wwrapp.models.TeamInvitation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,7 +54,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
         String inviterEmail = user.getInviterEmail();
         // find inviter object in database
-        DocumentReference userRef = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(inviterEmail);
+        DocumentReference userRef = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(inviterEmail);
         userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -118,8 +113,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                         Map<String, Boolean> newTeamMap = new HashMap<>();
                         newTeamMap.put(user.getEmail(), true);
                         newTeamMap.put(inviter.getEmail(), true);
-                        mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                                .document(WWRConstants.TEAM_NAME)
+                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_NAME)
                                 .set(newTeamMap).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
@@ -132,10 +127,10 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                                         Log.w(TAG, "Error writing document", e);
                                     }
                                 });
-                        user.setTeamName(WWRConstants.TEAM_NAME);
-                        inviter.setTeamName(WWRConstants.TEAM_NAME);
+                        user.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_NAME);
+                        inviter.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_NAME);
                     } else if(user.getTeamName().isEmpty() && !inviter.getTeamName().isEmpty()){
-                        inviter.setStatus(WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
+                        inviter.setStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
 
                     }
 
