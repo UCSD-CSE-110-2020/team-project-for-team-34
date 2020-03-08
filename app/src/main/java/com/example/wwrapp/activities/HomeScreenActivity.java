@@ -52,7 +52,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * Home screen for the app
  */
@@ -267,7 +266,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         mFirestore = FirebaseFirestore.getInstance();
 //        ADD_TEAM_MEMBERS();
 //        QUERY_TEAM();
-//        signIn();
+          signIn();
 //        ADD_USERS();
 //        CREATE_INVITEE();
 
@@ -278,8 +277,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             Log.d(TAG, "Creating Mock user");
             mUser = IUserFactory.createUser
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
-                            FirestoreConstants.MOCK_USER_NAME,
-                            FirestoreConstants.MOCK_USER_EMAIL);
+                            "Byron Test",
+                            "Byron Test Email");
             // TODO: Remove later
 //            mUser.setTeamName("NOT EMPTY");
         } else {
@@ -290,8 +289,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         // Code here
 
         // TODO: Implement real sign-in logic. Using a dummy user for now to make testing possible.
-        if (false) {
-            mUser = null;
+        if (true) {
             //Check if user exists
             DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(mUser.getEmail());
             findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -312,14 +310,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     } else {
                         Log.d(TAG, "get failed with ", task.getException());
                     }
-
-
                 }
-
-
             });
         }
-
 
         // TODO: Update this with actual sign-in logic later
         // Register the team screen button
@@ -745,10 +738,13 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             startActivityForResult(signInIntent, 420);
         } else {
             HomeScreenActivity.account = GoogleSignIn.getLastSignedInAccount(this);
+            saveUser();
             Log.d(TAG, "Email from last log in is " + account.getEmail());
         }
+    }
 
-        DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(account.getEmail());
+    private void saveUser() {
+        DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(HomeScreenActivity.account.getEmail());
         findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -782,6 +778,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             // Signed in successfully, show authenticated UI.
             Toast.makeText(this, "your email is " + account.getEmail(), Toast.LENGTH_SHORT).show();
             HomeScreenActivity.account = account;
+            saveUser();
             Log.d(TAG, "good");
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
