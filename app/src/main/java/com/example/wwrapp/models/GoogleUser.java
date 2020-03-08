@@ -1,12 +1,10 @@
 package com.example.wwrapp.models;
 
 import com.example.wwrapp.utils.FirestoreConstants;
-import com.example.wwrapp.utils.WWRConstants;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 public class GoogleUser implements IUser, Serializable {
 
@@ -82,11 +80,6 @@ public class GoogleUser implements IUser, Serializable {
     }
 
     @Override
-    public void setInvitees(List<String> newInvitees) {
-        invitees = newInvitees;
-    }
-
-    @Override
     public void addInvitees(IUser user) {
         invitees.add(user.getEmail());
     }
@@ -96,31 +89,6 @@ public class GoogleUser implements IUser, Serializable {
         routes = newRoutes;
     }
 
-    @Override
-    public void updateRoute(Route newRoute) {
-        ListIterator<Route> itr = routes.listIterator();
-        while (itr.hasNext()) {
-            if( itr.next().getRouteName().equals(newRoute.getRouteName()) ) {
-                itr.set(newRoute);
-            }
-        }
-    }
-
-
-    @Override
-    public void addRoutes(Route newRoutes) {
-        routes.add(newRoutes);
-    }
-
-    @Override
-    public void removeInvitee(String email) {
-        ListIterator<String> itr = invitees.listIterator();
-        while (itr.hasNext()) {
-            if( itr.next().equals(email) ) {
-                itr.remove();
-            }
-        }
-    }
 
     @Override
     public boolean equals(Object o) {

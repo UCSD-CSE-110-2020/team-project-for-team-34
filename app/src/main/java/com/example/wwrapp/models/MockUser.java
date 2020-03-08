@@ -56,12 +56,7 @@ public class MockUser implements IUser{
         return;
     }
 
-    
-    public void setInvitees(List<String> newInvitees) {
-        return;
-    }
 
-    
     public void addInvitees(IUser user) {
         return;
     }
@@ -71,20 +66,7 @@ public class MockUser implements IUser{
         return;
     }
 
-    
-    public void addRoutes(Route route) {
-        return;
-    }
 
-    
-    public void updateRoute(Route newRoute) { return; }
-
-    
-    public void removeInvitee(String email) {
-        return;
-    }
-
-    
     public void setStatus(String status) { return; }
 
     
