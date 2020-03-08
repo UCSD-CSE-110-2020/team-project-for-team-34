@@ -149,4 +149,6 @@ public final class WWRConstants {
     public static final String FIRESTORE_TEAM_INVITE_PENDING = "pending";
 
     public static final boolean PRODUCTION_VERSION = false;
+
+    public static final String TEAM_NAME = "wwrTeam";
 }

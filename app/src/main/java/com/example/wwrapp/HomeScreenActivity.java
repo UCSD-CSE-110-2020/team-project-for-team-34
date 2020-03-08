@@ -28,11 +28,15 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.example.wwrapp.models.GoogleUser;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -84,6 +88,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     public static GoogleSignInAccount account = null;
     private FirebaseFirestore mFirestore;
+    private IUser mUser;
+    private CollectionReference userCol;
+    private GoogleSignInClient mGoogleSignInClient;
+    private final int RC_SIGN_IN = 10;
+
 
     private boolean tempUserExists;
     private boolean mUserIsBeingInvited;
@@ -92,20 +101,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     // TODO: else set to false if you want to test the team screen
     public static boolean TESTING_USER_IS_BEING_INVITED;
 
-    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
-        Log.d(TAG, "handleSigninResult called");
-        try {
-            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            // Signed in successfully, show authenticated UI.
-            Toast.makeText(this, "your email is " + account.getEmail(), Toast.LENGTH_SHORT).show();
-            HomeScreenActivity.account = account;
-            Log.d(TAG,"good");
-        } catch (ApiException e) {
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.d(TAG, "signInResult:failed code=" + e.getStatusCode());
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +130,18 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
         // Update the UI
         updateUi();
+
+        // initalized firebase
+        mFirestore = FirebaseFirestore.getInstance();
+        userCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
+
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestId() // need requestIdToken() in order to work.
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        signIn();
 
         // Register the start walk button
         findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
@@ -171,10 +178,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         if (userType == null) {
             // Default to the mock user
             Log.d(TAG, "Creating Mock user");
-            user = IUserFactory.createUser
+            mUser = IUserFactory.createUser
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
-                            WWRConstants.MOCK_USER_NAME, WWRConstants. MOCK_USER_EMAIL,
-                            WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
+                            WWRConstants.MOCK_USER_NAME, WWRConstants. MOCK_USER_EMAIL);
         } else {
             // TODO: Implement factory creation for Google user
             Log.d(TAG, "Creating Google user");
@@ -182,7 +188,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
         // TODO: Update this with actual sign-in logic later
         // Register the team screen button
-        IUser finalUser = user;
+        // IUser finalUser = user;
         findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -191,16 +197,16 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
                 // TODO: Temporary fix for User
                 // Check if the user is being invited by anyone:
-                boolean userIsBeingInvited = userIsBeingInvited(finalUser.getEmail(), mFirestore);
+                boolean userIsBeingInvited = userIsBeingInvited(mUser.getEmail(), mFirestore);
                 if (TESTING_USER_IS_BEING_INVITED) {
                     // If the user is being invited, prompt them to decide on the invites.
                     Intent intent = new Intent(HomeScreenActivity.this, InviteMemberScreenActivity.class);
-                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
+                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
                     startActivity(intent);
                 } else {
                     // If the user is not being invited, take them to the Team screen.
                     Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
-                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
+                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
                     startActivity(intent);
                 }
             }
@@ -245,31 +251,33 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     }
 
     private void signIn() {
-        FitnessOptions fitnessOptions = FitnessOptions.builder()
-                .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-                .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
-                .build();
-        if(GoogleSignIn.getLastSignedInAccount(this) == null) {
-            Log.d(TAG, "first time login");
-            GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestEmail()
-                    .requestProfile()
-                    .addExtension(fitnessOptions)
-                    .build();
-            GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, options);
-            Intent signInIntent = googleSignInClient.getSignInIntent();
-            startActivityForResult(signInIntent, 420);
-            boolean isEmailLoaded = false;
-            while (!isEmailLoaded) {
-                Log.d(TAG, "Email not loaded");
-                isEmailLoaded = HomeScreenActivity.account.getEmail() != null;
-            }
-        }
-        else {
-            HomeScreenActivity.account = GoogleSignIn.getLastSignedInAccount(this);
-            Log.d(TAG, "Email from last log in is " + account.getEmail());
-        }
-        createUser();
+//        FitnessOptions fitnessOptions = FitnessOptions.builder()
+//                .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+//                .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
+//                .build();
+//        if(GoogleSignIn.getLastSignedInAccount(this) == null) {
+//            Log.d(TAG, "first time login");
+//            GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                    .requestEmail()
+//                    .requestProfile()
+//                    .addExtension(fitnessOptions)
+//                    .build();
+//            GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, options);
+//            Intent signInIntent = googleSignInClient.getSignInIntent();
+//            startActivityForResult(signInIntent, 420);
+//            boolean isEmailLoaded = false;
+//            while (!isEmailLoaded) {
+//                Log.d(TAG, "Email not loaded");
+//                isEmailLoaded = HomeScreenActivity.account.getEmail() != null;
+//            }
+//        }
+//        else {
+//            HomeScreenActivity.account = GoogleSignIn.getLastSignedInAccount(this);
+//            Log.d(TAG, "Email from last log in is " + account.getEmail());
+//        }
+//        createUser();
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
 
     }
 
@@ -279,12 +287,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         Log.d(TAG, "In method onActivityResult");
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == 420) {
+        if (requestCode == RC_SIGN_IN) {
             // The Task returned from this call is always completed, no need to attach
             // a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
-            return;
         }
 
         // If mocking is requested
@@ -309,6 +316,53 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             } else {
                 Log.e(TAG, "ERROR, google fit result code: " + resultCode);
             }
+        }
+    }
+
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
+        Log.d(TAG, "handleSigninResult called");
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+
+            // Signed in successfully, show authenticated UI.
+            updateAuthUI(account);
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
+            updateAuthUI(null);
+        }
+    }
+
+    private void updateAuthUI(GoogleSignInAccount account){
+        if(account == null){
+            Toast.makeText(this, "Sign in failed for some reason", Toast.LENGTH_SHORT).show();
+        } else {
+            String name = account.getDisplayName();
+            String email = account.getEmail();
+            Toast.makeText(this, "Sign in succeed as " + name + " with email " + email, Toast.LENGTH_SHORT).show();
+
+            // If user is new, put it on firebase else get it from firebase
+            DocumentReference userRef = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(email);
+            userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            mUser = (IUser)(document.toObject(GoogleUser.class));
+                            Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        } else {
+                            mUser = IUserFactory.createUser(WWRConstants.GOOGLE_USER_FACTORY_KEY, name, email);
+                            mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(email).set(mUser);
+                            Log.d(TAG, "No such document");
+                        }
+                    } else {
+                        Log.d(TAG, "get failed with ", task.getException());
+                    }
+                }
+            });
+
         }
     }
 

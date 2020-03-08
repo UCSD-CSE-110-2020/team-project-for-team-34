@@ -37,6 +37,7 @@ public class TeamActivity extends AppCompatActivity {
     private FirebaseFirestore mFirestore;
     private Query mQuery;
     private boolean mUserIsOnTeam;
+    private IUser mUser;
 
     // For testing InviteMemberScreen
     private static boolean testInvite = false;
@@ -52,11 +53,23 @@ public class TeamActivity extends AppCompatActivity {
             startActivity(intent);
         }
 
+        // get user and check if he/she has inviter
+        mUser = (IUser)(getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        if(!mUser.getInviterEmail().isEmpty()){
+            Intent toInvitation = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
+            toInvitation.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+            startActivity(toInvitation);
+        }
+
+
         // Set up Firestore and query for the routes to display
         initFirestore();
 
         // Set up recycler view for routes
         initRecyclerView();
+
+
+
 
         // Enable Firestore logging
         FirebaseFirestore.setLoggingEnabled(true);
@@ -66,11 +79,12 @@ public class TeamActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(TeamActivity.this, AddTeamMemberActivity.class);
-                final IUser user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-                intent.putExtra(WWRConstants.EXTRA_USER_KEY, user);
-                intent.putExtra(WWRConstants.EXTRA_USER_TYPE_KEY, WWRConstants.MOCK_USER_FACTORY_KEY);
-                intent.putExtra("TEST", "TEST_DOC_NAME");
-                startActivityForResult(intent, ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE);
+                //final IUser user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+                intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                startActivity(intent);
+//                intent.putExtra(WWRConstants.EXTRA_USER_TYPE_KEY, WWRConstants.MOCK_USER_FACTORY_KEY);
+//                intent.putExtra("TEST", "TEST_DOC_NAME");
+//                startActivityForResult(intent, ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE);
             }
         });
 
