@@ -1,8 +1,6 @@
 package com.example.wwrapp.models;
 
-import java.io.Serializable;
 import java.util.List;
-import java.util.ListIterator;
 
 /**
  * A mock user for testing
@@ -41,11 +39,6 @@ public class MockUser implements IUser{
     @Override
     public String getTeamName() {
         return teamName;
-    }
-
-    @Override
-    public List<String> getInvitees() {
-        return null;
     }
 
     @Override

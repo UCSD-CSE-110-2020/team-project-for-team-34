@@ -1,6 +1,5 @@
 package com.example.wwrapp.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,11 +13,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
 import com.example.wwrapp.models.MockUser;
-import com.example.wwrapp.models.TeamInvitation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -28,8 +27,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
-
-import org.w3c.dom.Document;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -104,7 +101,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 
 
                 // Try to find invitee
-                DocumentReference userRef = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(mMemberEmail);
+                DocumentReference userRef = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(mMemberEmail);
                 userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -126,7 +123,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                 });
 
                 // if invitee does not exist on firebase, add it to the collection.
-                mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH).document(invitee.getEmail())
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(invitee.getEmail())
                         .set(invitee)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -151,7 +148,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                 } else {
                     user.addInvitees(invitee);
                     invitee.setInviterEmail(user.getEmail());
-                    invitee.setStatus(WWRConstants.FIRESTORE_TEAM_INVITE_PENDING);
+                    invitee.setStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING);
                 }
 
 
@@ -324,7 +321,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
      * @param firestore
      */
     private void setInviterIsOnTeam(IUser user, FirebaseFirestore firestore) {
-        CollectionReference teamsCol = firestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
+        CollectionReference teamsCol = firestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
 
         Log.d(TAG, "Value of inviter on team before query is " + mInviterIsOnTeam);
         teamsCol.whereEqualTo(MockUser.FIELD_EMAIL, user.getEmail()).get()
@@ -352,7 +349,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
      * @param firestore
      */
     private void setInviteeIsOnTeam(IUser user, FirebaseFirestore firestore) {
-        CollectionReference teamsCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
+        CollectionReference teamsCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
 
         Log.d(TAG, "Value of invitee on team before query is " + mInviteeIsOnTeam);
         teamsCol.whereEqualTo(MockUser.FIELD_EMAIL, user.getEmail()).get()
@@ -383,7 +380,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
         if (true) {
             return;
         }
-        CollectionReference teamCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
+        CollectionReference teamCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
         teamCol.document(user.getEmail()).set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {

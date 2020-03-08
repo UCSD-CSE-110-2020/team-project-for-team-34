@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.adapters.RouteAdapter;
 import com.example.wwrapp.models.Route;
@@ -144,9 +145,9 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                 // TODO: Update the route based on the user's identity.
                 // TODO: Currently this code assumes the presence of a dummy user
                 // Traverse the data hierarchy
-                CollectionReference usersCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
-                DocumentReference userDoc = usersCol.document(WWRConstants.FIRESTORE_DOCUMENT_DUMMY_USER_PATH);
-                CollectionReference myRoutesCol = userDoc.collection(WWRConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH);
+                CollectionReference usersCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH);
+                DocumentReference userDoc = usersCol.document(FirestoreConstants.FIRESTORE_DOCUMENT_DUMMY_USER_PATH);
+                CollectionReference myRoutesCol = userDoc.collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH);
 
                 // Add the route to the user's routes
                 myRoutesCol.add(route).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -182,9 +183,9 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
         // TODO: Query based on the user's ID
         // TODO: The current code uses a dummy user.
         // Traverse the data hierarchy to get the user's routes
-        CollectionReference usersCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
-        DocumentReference userDoc = usersCol.document(WWRConstants.FIRESTORE_DOCUMENT_DUMMY_USER_PATH);
-        CollectionReference myRoutes = userDoc.collection(WWRConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH);
+        CollectionReference usersCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH);
+        DocumentReference userDoc = usersCol.document(FirestoreConstants.FIRESTORE_DOCUMENT_DUMMY_USER_PATH);
+        CollectionReference myRoutes = userDoc.collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH);
 
         // Query for the user's routes
         mQuery = myRoutes.orderBy(Route.FIELD_NAME, Query.Direction.DESCENDING);
@@ -268,9 +269,9 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                     Log.d(TAG, route.toString());
 
                     // Traverse the data hierarchy
-                    CollectionReference userRef = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
-                    DocumentReference userDoc = userRef.document(WWRConstants.FIRESTORE_DOCUMENT_DUMMY_USER_PATH);
-                    CollectionReference myRoutesCol = userDoc.collection(WWRConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH);
+                    CollectionReference userRef = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH);
+                    DocumentReference userDoc = userRef.document(FirestoreConstants.FIRESTORE_DOCUMENT_DUMMY_USER_PATH);
+                    CollectionReference myRoutesCol = userDoc.collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH);
 
                     // TODO: Find a simpler way to get the reference to the document to be updated
                     String path = data.getStringExtra(WWRConstants.EXTRA_ROUTE_PATH_KEY);
@@ -309,9 +310,9 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                 // TODO: Get the document corresponding to this user and add the Route.
                 // TODO: Currently, there is only a dummy user
                 // Traverse the data hierarchy
-                CollectionReference userCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_USER_PATH);
-                DocumentReference userDoc = userCol.document(WWRConstants.FIRESTORE_DOCUMENT_DUMMY_USER_PATH);
-                CollectionReference myRoutesCol = userDoc.collection(WWRConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH);
+                CollectionReference userCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH);
+                DocumentReference userDoc = userCol.document(FirestoreConstants.FIRESTORE_DOCUMENT_DUMMY_USER_PATH);
+                CollectionReference myRoutesCol = userDoc.collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH);
 
                 // Add the route to the collection as a document
                 // TODO: Make sure that auto-generated Route ID's make sense.

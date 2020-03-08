@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.adapters.TeamAdapter;
 import com.example.wwrapp.models.IUser;
@@ -47,6 +48,7 @@ public class TeamActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_team);
+        Log.d(TAG, "onCreate");
 
         // For testing InviteMember
         if(testInvite){
@@ -55,11 +57,17 @@ public class TeamActivity extends AppCompatActivity {
         }
 
         IUser user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-        if(!user.getInviterEmail().equals("")){
-            Intent toInviteScreen = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
-            toInviteScreen.putExtra(WWRConstants.EXTRA_USER_KEY, user);
-            startActivity(toInviteScreen);
+        assert user != null;
+        Log.i(TAG, "User is : " + user.getEmail());
+
+        if (false) {
+            if(!user.getInviterEmail().equals("")){
+                Intent toInviteScreen = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
+                toInviteScreen.putExtra(WWRConstants.EXTRA_USER_KEY, user);
+                startActivity(toInviteScreen);
+            }
         }
+
 
         // Set up Firestore and query for the routes to display
         initFirestore();
@@ -93,7 +101,7 @@ public class TeamActivity extends AppCompatActivity {
         // Get this app's user
         final IUser user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
-        CollectionReference teamCol = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
+        CollectionReference teamCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
 
         // Check if the user belongs to a team
         teamCol.whereEqualTo(MockUser.FIELD_EMAIL, user.getEmail()).get()

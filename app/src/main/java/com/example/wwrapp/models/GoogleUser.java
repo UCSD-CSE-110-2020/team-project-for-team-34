@@ -1,6 +1,6 @@
 package com.example.wwrapp.models;
 
-import com.example.wwrapp.utils.WWRConstants;
+import com.example.wwrapp.utils.FirestoreConstants;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class GoogleUser implements IUser, Serializable {
     public GoogleUser(String name, String email) {
         mName = name;
         mEmail = email;
-        status = WWRConstants.FIRESTORE_TEAM_INVITE_ACCEPTED;
+        status = FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED;
         mInviter = STRING_DEFAULT;
         mteamName = STRING_DEFAULT;
         mInvitees = INVITEES_DEFAULT;
@@ -68,11 +68,6 @@ public class GoogleUser implements IUser, Serializable {
     @Override
     public String getTeamName() {
         return mteamName;
-    }
-
-    @Override
-    public List<String> getInvitees() {
-        return mInvitees;
     }
 
     @Override
