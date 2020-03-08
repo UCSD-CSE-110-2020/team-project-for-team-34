@@ -21,6 +21,7 @@ public class Route implements Serializable {
     public static final String FIELD_TAGS = "tags";
     public static final String FIELD_NOTES = "notes";
     public static final String FIELD_OWNER_EMAIL = "ownerEmail";
+    public static final String FIELD_OWNER_NAME = "ownerName";
     public static final String FIELD_WALKERS = "walkers";
 
 
@@ -39,6 +40,7 @@ public class Route implements Serializable {
 
     // Further information for a Route
     private String ownerEmail;
+    private String ownerName;
     private Map<String, Walk> walkers;
 
 
@@ -143,6 +145,14 @@ public class Route implements Serializable {
 
     public void setOwnerEmail(String ownerEmail) {
         this.ownerEmail = ownerEmail;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
     }
 
     public Map<String, Walk> getWalkers() {
