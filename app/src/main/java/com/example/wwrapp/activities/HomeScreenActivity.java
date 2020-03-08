@@ -283,13 +283,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 //            mUser.setTeamName("NOT EMPTY");
         } else {
             // TODO: Create a Google or Firebase user
-        }
-
-        // TODO: Check if the user exists already in the database
-        // Code here
-
-        // TODO: Implement real sign-in logic. Using a dummy user for now to make testing possible.
-        if (true) {
             //Check if user exists
             DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(mUser.getEmail());
             findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -313,6 +306,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 }
             });
         }
+
+        // TODO: Check if the user exists already in the database
+        // Code here
 
         // TODO: Update this with actual sign-in logic later
         // Register the team screen button
