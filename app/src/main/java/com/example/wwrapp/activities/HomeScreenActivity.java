@@ -18,7 +18,6 @@ import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
-import com.example.wwrapp.models.City;
 import com.example.wwrapp.models.GoogleUser;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
@@ -213,7 +212,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     // Example of creating team and email-status pair
     private void CREATE_TEAM() {
-        TeamMember teamMember = new TeamMember(FirestoreConstants.MOCK_USER_EMAIL, FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED, FirestoreConstants.MOCK_USER_NAME);
+        TeamMember teamMember = new TeamMember(FirestoreConstants.MOCK_USER_EMAIL,
+                FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED,
+                FirestoreConstants.MOCK_USER_NAME);
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
@@ -234,7 +235,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     private void CREATE_INVITEE() {
         Log.d(TAG, "CREATE_INVITEE: ");
-        TeamMember teamMember = new TeamMember(FirestoreConstants.SECOND_MOCK_USER_EMAIL, FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
+        TeamMember teamMember = new TeamMember(FirestoreConstants.SECOND_MOCK_USER_EMAIL,
+                FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED
+                , FirestoreConstants.MOCK_USER_NAME);
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(FirestoreConstants.MOCK_USER_EMAIL)
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH)
@@ -277,6 +280,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
                             FirestoreConstants.MOCK_USER_NAME,
                             FirestoreConstants.MOCK_USER_EMAIL);
+            // TODO: Remove later
+//            mUser.setTeamName("NOT EMPTY");
         } else {
             // TODO: Create a Google or Firebase user
         }
@@ -288,19 +293,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         if (false) {
             mUser = null;
             //Check if user exists
-            City city = new City("Los Angeles", "CA", "USA",
-                    false, 5000000L, Arrays.asList("west_coast", "sorcal"));
-            mFirestore.collection("cities").document("LA").set(city);
-            DocumentReference docRef = mFirestore.collection("cities").document("LA");
-            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    City city = documentSnapshot.toObject(City.class);
-                    Log.d(TAG, "CITY data: @" + city.getName());
-
-                }
-            });
-
             DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(mUser.getEmail());
             findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override

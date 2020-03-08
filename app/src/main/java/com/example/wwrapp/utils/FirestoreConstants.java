@@ -31,8 +31,8 @@ public class FirestoreConstants {
     public static final String FIRESTORE_DOCUMENT_TEAM_NAME = "wwrTeam";
 
     // Attributes of a mock user
-    public static final String MOCK_USER_NAME = "mockName";
-    public static final String MOCK_USER_EMAIL = "mockEmail";
+    public static final String MOCK_USER_NAME = "NOT A NAME";
+    public static final String MOCK_USER_EMAIL = "NOT AN EMAIL";
 
     public static final String SECOND_MOCK_USER_NAME = "secondMockName";
     public static final String SECOND_MOCK_USER_EMAIL = "secondMockEmail";
