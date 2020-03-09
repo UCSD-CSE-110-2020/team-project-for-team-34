@@ -1,7 +1,5 @@
 package com.example.wwrapp.utils;
 
-import androidx.annotation.NonNull;
-
 /**
  * Extracts a user's initials from their name field, which is a single String
  */
@@ -13,11 +11,11 @@ public class InitialsExtracter {
     private InitialsExtracter() {
     }
 
-    public static String getFirstInitial(@NonNull String name) {
+    public static String getFirstInitial(String name) {
         return String.valueOf(name.charAt(0));
     }
 
-    public static String getSecondInitial(@NonNull String name) {
+    public static String getSecondInitial(String name) {
         String secondInitial = null;
 
         int indexOfSpace = name.indexOf(SPACE_STR);
@@ -29,5 +27,14 @@ public class InitialsExtracter {
             secondInitial = String.valueOf(name.charAt(0));;
         }
         return secondInitial;
+    }
+
+    /**
+     * Returns true if only one initial can be extracted from the given name, false otherwise
+     * @param name
+     * @return true if only one initial can be extracted from the given name
+     */
+    public static boolean hasOnlyOneInitial(String name) {
+        return name.contains(SPACE_STR);
     }
 }

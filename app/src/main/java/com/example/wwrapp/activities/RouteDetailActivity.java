@@ -18,11 +18,11 @@ import androidx.core.content.ContextCompat;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.Route;
+import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.WWRConstants;
-import com.example.wwrapp.models.Route;
-import com.example.wwrapp.models.Walk;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -248,6 +248,9 @@ public class RouteDetailActivity extends AppCompatActivity {
                 route.setSteps(walk.getSteps());
                 route.setMiles(walk.getMiles());
                 route.setDateOfLastWalk(walk.getDate());
+
+                // Update the walkers for the route
+                route.addWalker(mUser.getEmail(), walk);
 
                 // Return data to the routes activity
                 returnToRoutesActivity(route);

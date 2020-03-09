@@ -288,7 +288,8 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                             .document(routeDocName).update(
                             Route.FIELD_STEPS, route.getSteps(),
                             Route.FIELD_MILES, route.getMiles(),
-                            Route.FIELD_DATE, route.getDateOfLastWalk()
+                            Route.FIELD_DATE, route.getDateOfLastWalk(),
+                            Route.FIELD_WALKERS, route.getWalkers()
                     ).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
@@ -310,7 +311,9 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                             .update(
                                     Route.FIELD_STEPS, route.getSteps(),
                                     Route.FIELD_MILES, route.getMiles(),
-                                    Route.FIELD_DATE, route.getDateOfLastWalk())
+                                    Route.FIELD_DATE, route.getDateOfLastWalk(),
+                                    Route.FIELD_WALKERS, route.getWalkers()
+                            )
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {

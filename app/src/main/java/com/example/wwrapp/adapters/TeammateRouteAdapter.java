@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.Route;
+import com.example.wwrapp.utils.InitialsExtracter;
+import com.example.wwrapp.utils.WWRConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -35,8 +37,7 @@ public class TeammateRouteAdapter extends FirestoreRecyclerAdapter<Route, Teamma
     private IUser mUser;
 
     /**
-     * Create a new RecyclerView adapter that listens to a Firestore Query.  See {@link
-     * FirestoreRecyclerOptions} for configuration options.
+     * Create a new RecyclerView adapter that listens to a Firestore Query.
      *
      * @param options
      */
@@ -68,14 +69,30 @@ public class TeammateRouteAdapter extends FirestoreRecyclerAdapter<Route, Teamma
             holder.routeDate.setText(model.getDateOfLastWalk());
 
             // Set steps and miles
+            // TODO: Substitute your own data if available
             holder.routeSteps.setText(String.valueOf(model.getSteps()));
             holder.routeMiles.setText(String.valueOf(model.getMiles()));
 
             // TODO: Set the icon of the user with initials
-            // Set the owner's name
-            holder.teammateName.setText(model.getOwnerName());
+            String ownerName = model.getOwnerName();
+            String firstInitial = null;
+            String secondInitial = null;
+            if (InitialsExtracter.hasOnlyOneInitial(ownerName)) {
+                firstInitial = InitialsExtracter.getFirstInitial(ownerName);
+                secondInitial = WWRConstants.EMPTY_STR;
+            } else {
+                firstInitial = InitialsExtracter.getFirstInitial(ownerName);
+                secondInitial = InitialsExtracter.getSecondInitial(ownerName);
+            }
+            String iconName = firstInitial + secondInitial;
 
-            // Set favorite
+            // Set the owner's name
+            holder.teammateName.setText(iconName);
+
+            // TODO: Display check icon if you have walked this route before
+
+            // Set favorite icon
+            // TODO: Substitution of favorite: see your personal rating if you have one, else see owner's
             boolean isFavorite = model.isFavorite();
             if (isFavorite) {
                 holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
@@ -83,13 +100,18 @@ public class TeammateRouteAdapter extends FirestoreRecyclerAdapter<Route, Teamma
             } else {
                 holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
             }
+
+            // Listen for favorite changes
             holder.favoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
                         holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
+                        // TODO: Update favorite status (refer to RoutesActivity)
                     } else
                         holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
+                    // TODO: Update un-favorite status
+
                 }
             });
         }

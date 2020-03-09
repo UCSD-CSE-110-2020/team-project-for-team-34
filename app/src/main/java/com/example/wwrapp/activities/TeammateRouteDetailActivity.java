@@ -24,6 +24,7 @@ import java.util.List;
 
 /**
  * Detailed information page for a Route
+ * TODO: Using RouteDetailActivity as a reference, correct this class
  */
 public class TeammateRouteDetailActivity extends AppCompatActivity {
     private static final String TAG = "RouteDetailActivity";

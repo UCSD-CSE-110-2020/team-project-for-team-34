@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.Route;
+import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -25,6 +26,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Adapter for the Route Recycler View
@@ -58,6 +60,14 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
     protected void onBindViewHolder(@NonNull RouteViewHolder holder, int position, @NonNull Route model) {
         // Bind data to the view
         Log.d(TAG, "in onBindViewHolder");
+
+        // TODO: Implement check-icon for previously walked routes
+        Map<String, Walk> walkers = model.getWalkers();
+        if (walkers.get(mUser.getEmail()) != null) {
+            // If the current user has walked this route, display the check icon
+        } else {
+            // Gray out the check icon/don't display
+        }
 
         // Set name and starting point
         holder.routeName.setText(model.getRouteName());

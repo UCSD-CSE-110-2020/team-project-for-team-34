@@ -5,6 +5,8 @@ import com.example.wwrapp.utils.InitialsExtracter;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 
 /**
  * Tests for extracting initials from a string
@@ -27,5 +29,17 @@ public class InitialsExtracterUnitTest {
         String expectedSecondInitial = "F";
         assertEquals(expectedFirstInitial, InitialsExtracter.getFirstInitial(name));
         assertEquals(expectedSecondInitial, InitialsExtracter.getSecondInitial(name));
+    }
+
+    @Test
+    public void testNameFieldHasOnlyOneInitial() {
+        String name = "FirstNameLastName";
+        assertTrue(InitialsExtracter.hasOnlyOneInitial(name));
+    }
+
+    @Test
+    public void testNameFieldHasTwoInitials() {
+        String name = "FirstName LastName";
+        assertFalse(InitialsExtracter.hasOnlyOneInitial(name));
     }
 }
