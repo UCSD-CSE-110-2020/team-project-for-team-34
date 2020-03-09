@@ -396,7 +396,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                     }
                 });
 
-        mFirestore.collection(FirestoreConstants.TEAMS_COLLECTION_KEY)
+        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
                 .document(mUser.getEmail())

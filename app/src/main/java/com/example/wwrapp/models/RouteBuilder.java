@@ -1,5 +1,7 @@
 package com.example.wwrapp.models;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,10 +10,23 @@ import java.util.Map;
  */
 public class RouteBuilder {
     private Route route; // route to build
+    private Map<String, Walk> walkers;
+    private List<String> favoriters;
+    private List<String> tags;
+
+    private static final String DEFAULT_STRING_FIELD_VALUE = "";
 
     public RouteBuilder() {
         // Initialize an empty route: fields will be added later
         route = new Route();
+
+        walkers = new HashMap<>();
+        favoriters = new ArrayList<>();
+        tags = new ArrayList<>();
+
+        route.setWalkers(walkers);
+        route.setFavoriters(favoriters);
+        route.setTags(tags);
     }
 
     /**
@@ -19,6 +34,20 @@ public class RouteBuilder {
      * @return the built Route
      */
     public Route getRoute() {
+        // Provide default values for un-set fields
+        // Fields like route name don't have default values
+        if (route.getStartingPoint() == null) {
+            route.setStartingPoint(DEFAULT_STRING_FIELD_VALUE);
+        }
+
+        if (route.getNotes() == null) {
+            route.setNotes(DEFAULT_STRING_FIELD_VALUE);
+        }
+
+        if (route.getDurationOfLastWalk() == null) {
+            route.setDurationOfLastWalk(DEFAULT_STRING_FIELD_VALUE);
+        }
+
         return route;
     }
 

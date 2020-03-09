@@ -221,7 +221,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                         });
 
                 // Update invitee (on team already) email
-                mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY)
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                         .document(mInviteeEmail).update(MockUser.FIELD_INVITER_NAME, mInviter.getName(),
                         MockUser.FIELD_INVITER_EMAIL, mInviter.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -281,7 +281,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                         });
 
                 // Set the inviter email
-                mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY)
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                         .document(mInviteeEmail).update(MockUser.FIELD_INVITER_NAME,
                         mInviter.getName(),
                         MockUser.FIELD_INVITER_EMAIL, mInviter.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {

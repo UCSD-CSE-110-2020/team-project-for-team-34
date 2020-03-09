@@ -13,16 +13,13 @@ import java.util.Map;
 public class Route implements Serializable {
 
     public static final String FIELD_NAME = "routeName";
-    public static final String FIELD_STARTING_POINT = "startingPoint";
-    public static final String FIELD_DATE = "date";
+    public static final String FIELD_DATE = "dateOfLastWalk";
     public static final String FIELD_STEPS = "steps";
     public static final String FIELD_MILES = "miles";
     public static final String FIELD_FAVORITE = "favorite";
-    public static final String FIELD_TAGS = "tags";
-    public static final String FIELD_NOTES = "notes";
-    public static final String FIELD_OWNER_EMAIL = "ownerEmail";
-    public static final String FIELD_OWNER_NAME = "ownerName";
+
     public static final String FIELD_WALKERS = "walkers";
+    public static final String FIELD_FAVORITERS = "favoriters";
 
 
     // Basic information that a Route should store
@@ -41,7 +38,7 @@ public class Route implements Serializable {
     private String ownerName;
     private String ownerEmail;
     private Map<String, Walk> walkers; // maps emails of users to their walk stats for this Route
-    private List<String> favoriters; // a list of people who have favorited this Route
+    private List<String> favoriters; // a set of people's emails who have favorited this Route
 
     // Not required, but informative
     private String durationOfLastWalk;
@@ -150,12 +147,24 @@ public class Route implements Serializable {
         this.walkers = walkers;
     }
 
+    public void addWalker(String email, Walk walk) {
+        walkers.put(email, walk);
+    }
+
     public List<String> getFavoriters() {
         return favoriters;
     }
 
     public void setFavoriters(List<String> favoriters) {
         this.favoriters = favoriters;
+    }
+
+    public void addFavoriter(String email) {
+        favoriters.add(email);
+    }
+
+    public void removeFavoriter(String email) {
+        favoriters.remove(email);
     }
 
     // Extra getters/setters

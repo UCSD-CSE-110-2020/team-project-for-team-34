@@ -11,15 +11,21 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.utils.FirestoreConstants;
+import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -30,14 +36,17 @@ public class RouteDetailActivity extends AppCompatActivity {
     private static final String TAG = "RouteDetailActivity";
     private static final int START_EXISTING_WALK_REQUEST_CODE = 1;
 
-    ToggleButton mFavoriteBtn;
+    private ToggleButton mFavoriteBtn;
 
+    private FirebaseFirestore mFirestore;
     private IUser mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route_detail);
+
+        mFirestore = FirebaseFirestore.getInstance();
 
         // Get this user
         mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
@@ -64,23 +73,15 @@ public class RouteDetailActivity extends AppCompatActivity {
             }
         });
 
-
+        // Set up the display
         TextView routeNameText = findViewById(R.id.route_detail_name);
         routeNameText.setText(route.getRouteName());
 
         TextView startingPointText = findViewById(R.id.starting_point_text_view);
         startingPointText.setText(route.getStartingPoint());
 
-//        Date routeDate = route.getDate();
-//        if (routeDate == null) {
-//            // Convert LocalDateTime to Date
-//            routeDate = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
-//        }
-        //TODO: Migrate from LocalDateTime
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
-//        String formattedDate = routeDate.format(formatter);
         TextView routeDateText = findViewById(R.id.route_detail_date);
-        routeDateText.setText("DATE in progress");
+        routeDateText.setText(route.getDateOfLastWalk());
 
         double miles = route.getMiles();
         TextView routeMilesText = findViewById(R.id.miles_text_view);
@@ -93,6 +94,7 @@ public class RouteDetailActivity extends AppCompatActivity {
         TextView noteText = findViewById(R.id.notes_text_view);
         noteText.setText(route.getNotes());
 
+        // Display the tags
         List<String> tags = route.getTags();
         if (tags != null) {
             int i = 1;
@@ -138,12 +140,58 @@ public class RouteDetailActivity extends AppCompatActivity {
         mFavoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.d(TAG, "Clicked the favorite button");
                 if (isChecked) {
                     mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(current, R.drawable.ic_star_on));
-                } else
+                } else {
                     mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(current, R.drawable.ic_star_off));
+                }
+
+                // Update the route's favorite status on Firestore
+                String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mUser.getEmail(), route.getRouteName());
+
+                // Update the user's personal route
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                        .document(mUser.getEmail())
+                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                        .document(routeDocName)
+                        .update(Route.FIELD_FAVORITE, isChecked)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d(TAG, "Successfully updated route favorite in personal collection");
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error writing favorite to personal collection", e);
+                            }
+                        });
+
+                // Update the route favorite on the team screen, if the user is on a team
+                if (!mUser.getTeamName().isEmpty()) {
+                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH)
+                            .document(routeDocName)
+                            .update(Route.FIELD_FAVORITE, isChecked)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "Successfully updated route favorite in team collection");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error writing favorite to team collection", e);
+                                }
+                            });
+                }
             }
         });
+
     }
 
     /**
@@ -166,14 +214,19 @@ public class RouteDetailActivity extends AppCompatActivity {
     private void returnToRoutesActivity(Route route) {
         Intent returnIntent = new Intent();
         returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+
         // Return the Firestore info that was passed into this activity
         Intent incomingIntent = getIntent();
-
         returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_PATH_KEY, incomingIntent.getStringExtra(WWRConstants.EXTRA_ROUTE_PATH_KEY));
         returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_ID_KEY, incomingIntent.getStringExtra(WWRConstants.EXTRA_ROUTE_ID_KEY));
 
-        // Pass this Intent back
-        setResult(Activity.RESULT_OK, returnIntent);
+        // If the walk ended abnormally
+        if (route == null) {
+            setResult(Activity.RESULT_CANCELED, returnIntent);
+        } else {
+            // if the walk ended normally
+            setResult(Activity.RESULT_OK, returnIntent);
+        }
         // Go back to the Routes screen, bypassing the RouteDetail
         finish();
     }
@@ -192,11 +245,9 @@ public class RouteDetailActivity extends AppCompatActivity {
                 // Update the corresponding Route with the new Walk
                 Route route = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
-//              route.setDate(walk.getDate());
                 route.setSteps(walk.getSteps());
                 route.setMiles(walk.getMiles());
-
-                // Log.d(TAG, "Route object in RouteDetailActivity is\n" + route.toString());
+                route.setDateOfLastWalk(walk.getDate());
 
                 // Return data to the routes activity
                 returnToRoutesActivity(route);
@@ -212,5 +263,4 @@ public class RouteDetailActivity extends AppCompatActivity {
             Log.d(TAG, "Request code " + requestCode + " is unhandled");
         }
     }
-
 }

@@ -202,6 +202,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         // Convert LocalDateTime to String
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);
         String formattedDate = mDateTime.format(dateTimeFormatter);
+        Log.d(TAG, "formatted date is " + formattedDate);
 
         // Create the walk
         WalkBuilder walkBuilder = new WalkBuilder();
@@ -229,15 +230,15 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         // Check which activity started this current one:
         Intent incomingIntent = getIntent();
         String callerId = incomingIntent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
-        // If the Home screen started this activity
-        if (callerId.equals(WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID)) {
-            startEnterWalkInformationActivity();
-        } else if (callerId.equals(WWRConstants.EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID)) {
-            returnToRouteDetailActivity();
-        } else {
-            Log.d(TAG, "The activity that started WalkActivity is not meant to start it");
-        }
 
+        switch(callerId) {
+            case WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID:
+                startEnterWalkInformationActivity();
+                break;
+            case WWRConstants.EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID:
+                returnToRouteDetailActivity();
+                break;
+        }
         // Close up this activity
         finish();
     }

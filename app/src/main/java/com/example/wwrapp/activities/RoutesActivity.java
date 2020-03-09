@@ -19,6 +19,7 @@ import com.example.wwrapp.adapters.RouteAdapter;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.utils.FirestoreConstants;
+import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.WWRConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -204,7 +205,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
             // Set up adapter
             FirestoreRecyclerOptions<Route> options =
                     new FirestoreRecyclerOptions.Builder<Route>().setQuery(mQuery, Route.class).build();
-            mRouteAdapter = new RouteAdapter(options);
+            mRouteAdapter = new RouteAdapter(options, mUser);
 
             // Set up recycler view
             mRoutesRecycler = findViewById(R.id.recycler_view_route);
@@ -262,27 +263,22 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
         Log.d(TAG, "Request code is: " + requestCode);
         Log.d(TAG, "Result code is: " + resultCode);
 
-        // Check that this is the RouteDetailActivity calling back
-        if (requestCode == START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE) {
-            Log.d(TAG, "Returned from walk existing route");
 
-            // If the RouteDetailActivity finished normally
-            if (resultCode == Activity.RESULT_OK) {
-                // Get the potentially updated Route object
-                Route route = (Route) (data.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
+        switch (requestCode) {
+            case START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE:
+                Log.d(TAG, "Returned from walk existing route");
 
-                // If the route object is null, then no updates should be made
-                if (route == null) {
-                    Log.d(TAG, "Route object returned in onActivityResult is null");
-                } else {
-                    // TODO: Update a re-walk and find user based on email/key
-                    // Otherwise, update the appropriate route object
+                // If the RouteDetailActivity finished normally
+                if (resultCode == Activity.RESULT_OK) {
+                    // Get the updated Route object
+                    Route route = (Route) (data.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
+                    assert route != null;
+
                     Log.d(TAG, route.toString());
 
-                    // TODO: Find a simpler way to get the reference to the document to be updated
+                    // Get the name of the route document so we can update it
                     String path = data.getStringExtra(WWRConstants.EXTRA_ROUTE_PATH_KEY);
-                    int indexOfLastSlash = path.lastIndexOf("/");
-                    String routeDocName = path.substring(indexOfLastSlash + 1);
+                    String routeDocName = RouteDocumentNameUtils.getRouteDocumentNameFromPath(path);
                     Log.d(TAG, "Name of route doc is " + routeDocName);
 
                     // Perform the update
@@ -291,7 +287,8 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
                             .document(routeDocName).update(
                             Route.FIELD_STEPS, route.getSteps(),
-                            Route.FIELD_MILES, route.getMiles()
+                            Route.FIELD_MILES, route.getMiles(),
+                            Route.FIELD_DATE, route.getDateOfLastWalk()
                     ).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
@@ -312,7 +309,59 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                             .document(routeDocName)
                             .update(
                                     Route.FIELD_STEPS, route.getSteps(),
-                                    Route.FIELD_MILES, route.getMiles())
+                                    Route.FIELD_MILES, route.getMiles(),
+                                    Route.FIELD_DATE, route.getDateOfLastWalk())
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "Successfully updated route " + routeDocName + " for team!");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error writing route", e);
+                                }
+                            });
+
+
+                } else {
+                    // If the RouteDetailActivity did not finish normally, do nothing
+                    Log.d(TAG, "RouteDetailActivity finished abnormally with result code " + resultCode);
+                }
+                break;
+            case START_ADD_NEW_ROUTE_ACTIVITY_REQUEST_CODE:
+                if (resultCode == Activity.RESULT_OK) {
+                    // Add the new route
+                    Log.d(TAG, "Returned from AddNewRouteActivity");
+                    Route route = (Route) (data.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
+                    assert route != null;
+
+                    // Add the route based on the user's identity.
+                    String routeDocName = mUser.getEmail() + route.getRouteName();
+                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                            .document(mUser.getEmail())
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                            .document(routeDocName)
+                            .set(route).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d(TAG, "Successfully added route " + routeDocName + " for user!");
+                        }
+                    })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error writing route", e);
+                                }
+                            });
+
+                    // If the user is on a team, also add the route to the team
+                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH)
+                            .document(routeDocName)
+                            .set(route)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
@@ -326,63 +375,11 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                                 }
                             });
 
-
+                } else {
+                    Log.d(TAG, "Activity result ( " + resultCode + ") not OK from add new route");
                 }
-            } else {
-                // If the RouteDetailActivity did not finish normally, do nothing
-                Log.d(TAG, "RouteDetailActivity finished abnormally");
-            }
-        } else if (requestCode == START_ADD_NEW_ROUTE_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                // Add the new route
-                Log.d(TAG, "Returned from AddNewRouteActivity");
-                Route route = (Route) (data.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
-
-                // Add the route based on the user's identity.
-                String routeDocName = mUser.getEmail() + route.getRouteName();
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                        .document(mUser.getEmail())
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
-                        .document(routeDocName)
-                        .set(route).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Successfully added route " + routeDocName + " for user!");
-                    }
-                })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error writing route", e);
-                            }
-                        });
-
-                // If the user is on a team, also add the route to the team
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH)
-                        .document(routeDocName)
-                        .set(route)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d(TAG, "Successfully added route " + routeDocName + " for team!");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error writing route", e);
-                            }
-                        });
-
-            } else {
-                Log.d(TAG, "Activity result not OK from add new route");
-            }
-
-        } else {
-            Log.d(TAG, "Result of RouteDetailActivity is (not OK): " + resultCode);
-        }
+                break;
+        } // end switch
     }
 
     public void generateFakeRoute() {

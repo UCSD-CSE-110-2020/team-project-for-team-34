@@ -23,7 +23,6 @@ import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
 import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.Team;
-import com.example.wwrapp.models.TeamInvitation;
 import com.example.wwrapp.models.TeamMember;
 import com.example.wwrapp.services.DummyFitnessServiceWrapper;
 import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
@@ -41,11 +40,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -308,7 +305,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                                 } else {
                                     Log.d(TAG, "Creating Mock User");
                                     IUser user = new MockUser(mUser.getName(), mUser.getEmail());
-                                    mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(user.getEmail()).set(user);
+                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
                                 }
                             } else {
                                 Log.d(TAG, "get failed with ", task.getException());
@@ -323,7 +320,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             signIn();
             // TODO: Create a Google or Firebase user
             //Check if user exists
-            DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(mUser.getEmail());
+            DocumentReference findUser = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(mUser.getEmail());
             findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -336,7 +333,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                         } else {
                             Log.d(TAG, "Creating User");
                             GoogleUser user = new GoogleUser(mUser.getName(), mUser.getEmail());
-                            mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(user.getEmail()).set(user);
+                            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
                         }
                     } else {
                         Log.d(TAG, "get failed with ", task.getException());
@@ -649,7 +646,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     //change the user
                     String userEmail = data.getSerializableExtra(WWRConstants.EXTRA_USER_EMAIL_KEY).toString();
                     String userName = data.getSerializableExtra(WWRConstants.EXTRA_USER_NAME_KEY).toString();
-                    DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(userEmail);
+                    DocumentReference findUser = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(userEmail);
                     findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -662,7 +659,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                                 } else {
                                     Log.d(TAG, "Creating User");
                                     GoogleUser user = new GoogleUser(userName, userEmail);
-                                    mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(user.getEmail()).set(user);
+                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
                                 }
                             } else {
                                 Log.d(TAG, "get failed with ", task.getException());
@@ -851,7 +848,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     }
 
     private void saveUser() {
-        DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(HomeScreenActivity.account.getEmail());
+        DocumentReference findUser = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(HomeScreenActivity.account.getEmail());
         findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -892,26 +889,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Log.d(TAG, "signInResult:failed code=" + e.getStatusCode());
         }
-    }
-
-    private boolean userIsBeingInvited(String userEmail, FirebaseFirestore firestore) {
-        // Get the "invitations" collection
-        CollectionReference invitationsCol =
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_INVITATIONS_PATH);
-
-        // Query for all invitations where the current user is the invitee:
-        invitationsCol.whereEqualTo(TeamInvitation.FIELD_INVITEE, userEmail).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@androidx.annotation.NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            mUserIsBeingInvited = (task.getResult().size() > 0);
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return mUserIsBeingInvited;
     }
 
     private boolean checkHasHeight() {
