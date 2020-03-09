@@ -62,6 +62,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     // Numeric constants
     private static final double TENTHS_PLACE_ROUNDING_FACTOR = 10.0;
     private static final int MOCK_ACTIVITY_REQUEST_CODE = 1;
+    private static final int TEAM_ACTIVITY_REQUEST_CODE = 3;
+
 
     // String constants
     public static final String NO_LAST_WALK_TIME_TEXT = "No last walk time available";
@@ -263,8 +265,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
 
+
         // Initialize the database
         mFirestore = FirebaseFirestore.getInstance();
+
+
 //        ADD_TEAM_MEMBERS();
 //        QUERY_TEAM();
 //        signIn();
@@ -280,6 +285,42 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     (WWRConstants.MOCK_USER_FACTORY_KEY,
                             FirestoreConstants.MOCK_USER_NAME,
                             FirestoreConstants.MOCK_USER_EMAIL);
+
+            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                    .document(mUser.getEmail())
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    Log.d(TAG, "Setting inviter name and email");
+                                    Log.d(TAG, "inviter name = " + document.getString(MockUser.FIELD_INVITER_NAME));
+                                    Log.d(TAG, "inviter email = " + document.getString(MockUser.FIELD_INVITER_EMAIL));
+                                    Log.d(TAG, "user team = " + document.getString(MockUser.FIELD_TEAM_NAME));
+
+
+                                    mUser.setInviterName(document.getString(MockUser.FIELD_INVITER_NAME));
+                                    mUser.setInviterEmail(document.getString(MockUser.FIELD_INVITER_EMAIL));
+                                    mUser.setTeamName(document.getString(MockUser.FIELD_TEAM_NAME));
+
+                                } else {
+                                    Log.d(TAG, "Creating Mock User");
+                                    IUser user = new MockUser(mUser.getName(), mUser.getEmail());
+                                    mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(user.getEmail()).set(user);
+                                }
+                            } else {
+                                Log.d(TAG, "get failed with ", task.getException());
+                            }
+
+
+                        }
+
+
+                    });
+
+
             // TODO: Remove later
 //            mUser.setTeamName("NOT EMPTY");
         } else {
@@ -328,23 +369,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "user email is " + finalUser.getEmail());
-                // TODO: Revisit this line once Google User has been fixed
-//                DocumentReference docRef = db.collection(WWRConstants.USER_COLLECTION_KEY).document(account.getEmail());
 
-                // TODO: Temporary fix for User
-                // Check if the user is being invited by anyone:
-                boolean userIsBeingInvited = userIsBeingInvited(finalUser.getEmail(), mFirestore);
-                if (TESTING_USER_IS_BEING_INVITED) {
-                    // If the user is being invited, prompt them to decide on the invites.
-                    Intent intent = new Intent(HomeScreenActivity.this, InviteMemberScreenActivity.class);
-                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
-                    startActivity(intent);
-                } else {
-                    // If the user is not being invited, take them to the Team screen.
-                    Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
-                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
-                    startActivity(intent);
-                }
+                Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
+                intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
+                startActivityForResult(intent, TEAM_ACTIVITY_REQUEST_CODE);
             }
         });
 
@@ -435,7 +463,38 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
                 getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
         updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
-        Log.d(TAG, "onCreate daily steps = " + mDailyTotalSteps);
+        Log.d(TAG, " daily steps = " + mDailyTotalSteps);
+
+        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                .document(mUser.getEmail())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, "Setting inviter name and email");
+                                Log.d(TAG, "inviter name = " + document.getString(MockUser.FIELD_INVITER_NAME));
+                                Log.d(TAG, "inviter email = " + document.getString(MockUser.FIELD_INVITER_EMAIL));
+
+
+                                mUser.setInviterName(document.getString(MockUser.FIELD_INVITER_NAME));
+                                mUser.setInviterEmail(document.getString(MockUser.FIELD_INVITER_EMAIL));
+
+                            } else {
+                                Log.d( TAG, "Document does not exist");
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    }
+
+
+                });
+
+
+
     }
 
     @Override
@@ -568,6 +627,19 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     // TODO: Implement mock screen with the new Dummy Service
                     // Stop Google Fit
                     // Start the mocking service
+                }
+                break;
+
+            case TEAM_ACTIVITY_REQUEST_CODE:
+                Log.d(TAG, "request code is " + requestCode);
+                if (resultCode == Activity.RESULT_OK) {
+                    Log.d(TAG, "Result is OK");
+                    mUser.setInviterEmail(MockUser.STRING_DEFAULT);
+                    mUser.setInviterName(MockUser.STRING_DEFAULT);
+                } else if (resultCode == Activity.RESULT_CANCELED) {
+                    Log.d(TAG, "Result is " + resultCode);
+                    mUser.setInviterEmail(MockUser.STRING_DEFAULT);
+                    mUser.setInviterName(MockUser.STRING_DEFAULT);
                 }
                 break;
 

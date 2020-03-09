@@ -39,6 +39,11 @@ public class GoogleUser implements IUser, Serializable {
     }
 
     @Override
+    public void setInviterName(String inviterName) {
+
+    }
+
+    @Override
     public void setStatus(String status){
         this.status = status;
     }
@@ -51,6 +56,11 @@ public class GoogleUser implements IUser, Serializable {
     @Override
     public String getEmail() {
         return email;
+    }
+
+    @Override
+    public String getInviterName() {
+        return null;
     }
 
     @Override

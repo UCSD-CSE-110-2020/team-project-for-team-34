@@ -14,13 +14,20 @@ public class MockUser implements IUser {
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_INVITE_STATUS = "inviteStatus";
 
+    public static final String FIELD_INVITER_NAME = "inviterName";
+    public static final String FIELD_INVITER_EMAIL = "inviterEmail";
+    public static final String FIELD_TEAM_NAME = "teamName";
+
+
+
     private static final List<String> INVITEES_DEFAULT = new ArrayList<>();
     private static final List<Route> ROUTES_DEFAULT = new ArrayList<>();
-    private static final String STRING_DEFAULT = "";
+    public static final String STRING_DEFAULT = "";
 
     private String name;
     private String email;
-    private String inviter;
+    private String inviterName;
+    private String inviterEmail;
     private String teamName;
     private List<String> invitees;
     private List<Route> routes;
@@ -34,7 +41,8 @@ public class MockUser implements IUser {
         this.name = name;
         this.email = email;
         status = FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED;
-        inviter = STRING_DEFAULT;
+        inviterName = STRING_DEFAULT;
+        inviterEmail = STRING_DEFAULT;
         teamName = STRING_DEFAULT;
         invitees = INVITEES_DEFAULT;
         routes = ROUTES_DEFAULT;
@@ -43,6 +51,11 @@ public class MockUser implements IUser {
     @Override
     public String getStatus() {
         return status;
+    }
+
+    @Override
+    public void setInviterName(String inviterName) {
+        this.inviterName = inviterName;
     }
 
     @Override
@@ -61,8 +74,13 @@ public class MockUser implements IUser {
     }
 
     @Override
+    public String getInviterName() {
+        return inviterName;
+    }
+
+    @Override
     public String getInviterEmail() {
-        return inviter;
+        return inviterEmail;
     }
 
     @Override
@@ -78,7 +96,7 @@ public class MockUser implements IUser {
 
     @Override
     public void setInviterEmail(String newInviter) {
-        inviter = newInviter;
+        inviterEmail = newInviter;
     }
 
     @Override

@@ -11,7 +11,7 @@ public class IUserFactory {
         IUser user = null;
         switch(type) {
             case WWRConstants.MOCK_USER_FACTORY_KEY:
-                user = new GoogleUser(name, email);
+                user = new MockUser(name, email);
                 break;
 
             case WWRConstants.GOOGLE_USER_FACTORY_KEY:

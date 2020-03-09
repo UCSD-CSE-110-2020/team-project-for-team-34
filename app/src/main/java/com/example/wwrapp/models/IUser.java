@@ -10,12 +10,15 @@ public interface IUser extends Serializable {
 
     public String getName();
     public String getEmail();
+    public String getInviterName();
     public String getInviterEmail();
+
     public String getTeamName();
 
     public List<Route> getRoutes();
     public String getStatus();
 
+    public void setInviterName(String inviterName);
     public void setInviterEmail(String newInviter);
     public void setTeamName(String newTeamName);
 
