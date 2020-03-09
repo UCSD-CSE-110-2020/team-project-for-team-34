@@ -1,7 +1,6 @@
 package com.example.wwrapp.models;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Represents a walk walked by the user
@@ -9,14 +8,10 @@ import java.util.Date;
 public class Walk implements Serializable {
     private long steps;
     private double miles;
-    private Date date;
+    private String date;
     private String duration;
 
-    public Walk(long steps, double miles, Date data, String duration) {
-        this.steps = steps;
-        this.miles = miles;
-        this.date = data;
-        this.duration = duration;
+    public Walk() {
     }
 
     public long getSteps() {
@@ -35,11 +30,11 @@ public class Walk implements Serializable {
         this.miles = miles;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 

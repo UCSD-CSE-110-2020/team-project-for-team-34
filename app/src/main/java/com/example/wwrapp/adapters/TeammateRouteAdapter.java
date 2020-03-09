@@ -9,7 +9,6 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.view.menu.MenuView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -53,27 +52,27 @@ public class TeammateRouteAdapter extends FirestoreRecyclerAdapter<Route, Teamma
         Log.d(TAG, "in onBindViewHolder");
 
         // Set name and starting point
-        Log.d(TAG, model.getOwnerEmail());
-        Log.d(TAG, mUser.getEmail());
-        if(model.getOwnerEmail().equals(mUser.getEmail()))
-        {
+        Log.d(TAG, "Owner email is: " + model.getOwnerEmail());
+        Log.d(TAG, "Owner name is: " + model.getOwnerName());
+        Log.d(TAG, "Route model name is " + model.getRouteName());
+        Log.d(TAG, "Current user email is " + mUser.getEmail());
+        if (model.getOwnerEmail().equals(mUser.getEmail())) {
             Log.d(TAG, "onBindViewHolder: ");
             holder.itemView.setVisibility(View.GONE);
-            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0,0));
-        }
-        else {
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
+        } else {
             holder.routeName.setText(model.getRouteName());
             holder.routeStartingPoint.setText(model.getStartingPoint());
 
 
-            // TODO: Migrate from LocalDateTime
-            holder.routeDate.setText("DATE in progress");
+            holder.routeDate.setText(model.getDateOfLastWalk());
 
             // Set steps and miles
             holder.routeSteps.setText(String.valueOf(model.getSteps()));
             holder.routeMiles.setText(String.valueOf(model.getMiles()));
 
-            //TODO: add teammate name in route Model
+            // TODO: Set the icon of the user with initials
+            // Set the owner's name
             holder.teammateName.setText(model.getOwnerName());
 
             // Set favorite

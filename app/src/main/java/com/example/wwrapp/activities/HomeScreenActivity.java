@@ -18,7 +18,6 @@ import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
-import com.example.wwrapp.models.City;
 import com.example.wwrapp.models.GoogleUser;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
@@ -31,7 +30,6 @@ import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
 import com.example.wwrapp.utils.WWRConstants;
-import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -47,7 +45,6 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Arrays;
@@ -322,10 +319,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
 
                     });
-
-
-            // TODO: Remove later
-            mUser.setTeamName("team");
         } else {
             signIn();
             // TODO: Create a Google or Firebase user
@@ -586,6 +579,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         Intent intent = new Intent(HomeScreenActivity.this, WalkActivity.class);
         intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
                 WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+        intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
         startActivity(intent);
     }
 

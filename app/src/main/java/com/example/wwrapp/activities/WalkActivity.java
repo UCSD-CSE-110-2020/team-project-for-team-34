@@ -13,19 +13,22 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.fitness.FitnessApplication;
-import com.example.wwrapp.fitness.IFitnessSubject;
-import com.example.wwrapp.utils.StepsAndMilesConverter;
-import com.example.wwrapp.utils.WWRConstants;
+import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
+import com.example.wwrapp.fitness.IFitnessSubject;
+import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
+import com.example.wwrapp.models.WalkBuilder;
+import com.example.wwrapp.services.DummyFitnessServiceWrapper;
+import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
+import com.example.wwrapp.utils.StepsAndMilesConverter;
+import com.example.wwrapp.utils.WWRConstants;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Represents a walking session.
@@ -60,7 +63,10 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     private int mMinutes;
     private int mSeconds;
 
+    private boolean mIsObserving;
+
     private LocalDateTime mDateTime;
+    private IUser mUser;
     private String mFitnessServiceKey;
 
     @Override
@@ -69,9 +75,12 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walk);
 
-        // TODO: Integrate Service-based fitness service
-        IFitnessService dummyFS =  FitnessApplication.getDummyFitnessServiceInstance();
-        ((IFitnessSubject) dummyFS).registerObserver(this);
+        // Get the user
+        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        // Get the service type
+        mFitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
+
+        startObservingFitnessService(mFitnessServiceKey);
 
         mDateTime = LocalDateTime.now();
         mStepsSharedPreference = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
@@ -115,11 +124,25 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (!mIsObserving) {
+            startObservingFitnessService(mFitnessServiceKey);
+        }
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause called");
         if (!mWalkTimer.isCancelled()) {
             mWalkTimer.cancel(false);
+        }
+
+        // Stop observing the fitness service
+        if (mIsObserving) {
+            stopObservingFitnessService(mFitnessServiceKey);
         }
     }
 
@@ -138,17 +161,27 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     private void startEnterWalkInformationActivity() {
         Log.d(TAG, "startEnterWalkInformationActivity called");
         // Pass the Walk data onto the next Activity
-        Intent intent = new Intent(this, EnterWalkInformationActivity.class);
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
 
-        // Convert LocalDateTime to Date
-        Date date = Date.from(mDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        // Convert LocalDateTime to String
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);
+        String formattedDate = mDateTime.format(dateTimeFormatter);
 
-        Walk walk = new Walk(mStepsTaken, mMiles, date, duration);
-        intent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
+        Log.d(TAG, "Original Walk date  = " + formattedDate);
+
+        // Create a Walk
+        WalkBuilder walkBuilder = new WalkBuilder();
+        Walk walk = walkBuilder.setSteps(mStepsTaken)
+                .setMiles(mMiles)
+                .setDate(formattedDate)
+                .setDuration(duration)
+                .getWalk();
+
+        // Pass Walk and user as extras
+        Intent intent = new Intent(this, EnterWalkInformationActivity.class);
         intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_WALK_ACTIVITY_CALLER_ID);
-
-        Log.d(TAG, walk.toString());
+        intent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
+        intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
 
         startActivity(intent);
     }
@@ -158,20 +191,32 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
      */
     private void returnToRouteDetailActivity() {
         Log.d(TAG, "returnToRouteDetail called");
-        Intent returnIntent = new Intent();
-        // Store the new Walk as an extra
-        String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
 
         // Create a new Walk
         // TODO: Test that a walk is updated with a dummy number of steps.
         // TODO: Remove the dummy steps in production.
-        mStepsTaken = 100;
-        // Convert LocalDateTime to Date
-        Date date = Date.from(mDateTime.atZone(ZoneId.systemDefault()).toInstant());
-        Walk walk = new Walk(mStepsTaken, mMiles, date, duration);
+//        mStepsTaken = 100;
+
+        String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
+
+        // Convert LocalDateTime to String
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);
+        String formattedDate = mDateTime.format(dateTimeFormatter);
+
+        // Create the walk
+        WalkBuilder walkBuilder = new WalkBuilder();
+        Walk walk = walkBuilder.setSteps(mStepsTaken)
+                .setMiles(mMiles)
+                .setDate(formattedDate)
+                .setDuration(duration)
+                .getWalk();
+
 
         Log.d(TAG, "Walk object returned to RouteDetail is\n" + walk.toString());
+
+        Intent returnIntent = new Intent();
         returnIntent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
+        // TODO: Need to pass user back here?
         // Pass this Intent back
         setResult(Activity.RESULT_OK, returnIntent);
     }
@@ -319,6 +364,57 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
     public static void setIgnoreTimer(boolean ignoreTimer){
         WalkActivity.ignoreTimer = ignoreTimer;
+    }
+
+    private void startObservingFitnessService(String fitnessServiceKey) {
+        mIsObserving = true;
+        // Provide a default implementation if key is null
+        if (fitnessServiceKey == null) {
+            // If the factory key is null, use the DummyFitnessService by default:
+            IFitnessService dummyFS = FitnessServiceFactory.createFitnessService(WWRConstants.DEFAULT_FITNESS_SERVICE_FACTORY_KEY);
+
+            // Down-cast the fitness service so we can add observers to it and start it.
+            ((IFitnessSubject) dummyFS).registerObserver(this);
+            ((DummyFitnessServiceWrapper) dummyFS).startDummyService();
+
+            // Provide a value for the key so that we know in onResume() that we've already started
+            // the service
+            mFitnessServiceKey = WWRConstants.DEFAULT_FITNESS_SERVICE_FACTORY_KEY;
+            return;
+        }
+
+        switch (fitnessServiceKey) {
+            case WWRConstants.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY:
+                IFitnessService googleFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
+                ((IFitnessSubject) googleFitnessService).registerObserver(this);
+                ((GoogleFitnessServiceWrapper) googleFitnessService).startGoogleService(this);
+                break;
+            case WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY:
+                IFitnessService dummyFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
+                ((IFitnessSubject) dummyFitnessService).registerObserver(this);
+                ((DummyFitnessServiceWrapper) dummyFitnessService).startDummyService();
+                break;
+            default:
+                Log.w(TAG, "fitnessServiceKey not recognized: " + mFitnessServiceKey);
+        }
+    }
+
+    private void stopObservingFitnessService(String fitnessServiceKey) {
+        mIsObserving = false;
+
+        switch (fitnessServiceKey) {
+            case WWRConstants.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY:
+                Log.d(TAG, "Unregistering Google Fitness Service");
+                IFitnessService googleFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
+                ((IFitnessSubject) googleFitnessService).removeObserver(this);
+                break;
+            case WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY:
+                Log.d(TAG, "Unregistering Dummy Fitness Service");
+                IFitnessService dummyFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
+                ((IFitnessSubject) dummyFitnessService).removeObserver(this);
+                break;
+        }
+
     }
 
 

@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.utils.WWRConstants;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
@@ -31,10 +32,15 @@ public class RouteDetailActivity extends AppCompatActivity {
 
     ToggleButton mFavoriteBtn;
 
+    private IUser mUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route_detail);
+
+        // Get this user
+        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
         // Get the clicked on route
         Route route = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
@@ -149,6 +155,8 @@ public class RouteDetailActivity extends AppCompatActivity {
                 WWRConstants.EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID);
         // Put a route extra so the Walk activity can display its title
         intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+        intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+
         startActivityForResult(intent, START_EXISTING_WALK_REQUEST_CODE);
     }
 
@@ -185,7 +193,6 @@ public class RouteDetailActivity extends AppCompatActivity {
                 Route route = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
 //              route.setDate(walk.getDate());
-                route.setDuration(walk.getDuration());
                 route.setSteps(walk.getSteps());
                 route.setMiles(walk.getMiles());
 

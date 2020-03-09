@@ -189,7 +189,7 @@ public class TeammateRouteDetailActivity extends AppCompatActivity {
                 Route route = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
 //                route.setDate(walk.getDate());
-                route.setDuration(walk.getDuration());
+                route.setDurationOfLastWalk(walk.getDuration());
                 route.setSteps(walk.getSteps());
                 route.setMiles(walk.getMiles());
 

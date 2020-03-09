@@ -24,19 +24,19 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * TODO: Case when inviter sent out invitations and gets merged onto invitee's team
  */
 public class AddTeamMemberActivity extends AppCompatActivity {
     private static final String TAG = "AddTeamMemberActivity";
+
+    private static final String INVALID_NAME_OR_EMAIL_SUBMISSION_TOAST = "Please enter a name and an email";
+    private static final String BOTH_INVITER_AND_INVITEE_ON_TEAM_TOAST =
+            "Both the inviter and invitee are already on the same team";
+
 
     private Button mConfirmBtn;
     private Button mCancelBtn;
@@ -48,9 +48,6 @@ public class AddTeamMemberActivity extends AppCompatActivity {
     private String mInviteeEmail;
 
     private FirebaseFirestore mFirestore;
-    private boolean mInviterIsOnTeam;
-    private boolean mInviteeIsOnTeam;
-    private boolean inviteeExist;
 
     private IUser mInviter;
     private IUser mInvitee;
@@ -76,6 +73,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
         // Get database instance
         mFirestore = FirebaseFirestore.getInstance();
 
+        // Retrieve this user
         Intent intent = getIntent();
         String userType = intent.getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
         assert userType != null;
@@ -89,6 +87,15 @@ public class AddTeamMemberActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mInviteeName = mInviteeNameEditText.getText().toString();
                 mInviteeEmail = mInviteeEmailEditText.getText().toString();
+
+                // If either of the name or email is blank, don't allow this invite to send
+                if (mInviteeName.isEmpty() || mInviteeEmail.isEmpty()) {
+                    Toast.makeText(AddTeamMemberActivity.this,
+                            INVALID_NAME_OR_EMAIL_SUBMISSION_TOAST, Toast.LENGTH_SHORT)
+                            .show();
+                    return;
+                }
+
                 Log.d(TAG, "Invitee name on click is: " + mInviteeName);
                 Log.d(TAG, "Invitee email on click is: " + mInviteeEmail);
                 TeamMember teamMember = new TeamMember(mInviteeEmail, FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING, mInviteeName);
@@ -139,94 +146,6 @@ public class AddTeamMemberActivity extends AppCompatActivity {
         });
     }
 
-    private void setInviteeExists() {
-        inviteeExist = true;
-    }
-
-    private void setInviteeNotExists() {
-        inviteeExist = false;
-    }
-
-
-    /**
-     * Sets the inviter's invite status to true if this user exists on a team, false otherwise
-     *
-     * @param user
-     * @param firestore
-     */
-    private void setInviterIsOnTeam(IUser user, FirebaseFirestore firestore) {
-        CollectionReference teamsCol = firestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
-
-        Log.d(TAG, "Value of inviter on team before query is " + mInviterIsOnTeam);
-        teamsCol.whereEqualTo(MockUser.FIELD_EMAIL, user.getEmail()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "Query for inviter was successful");
-                            // If the query returned anything, the user is on a team.
-                            if (task.getResult().size() > 0) {
-                                mInviterIsOnTeam = true;
-                            }
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        Log.d(TAG, "Value of inviter on team after query is " + mInviterIsOnTeam);
-    }
-
-    /**
-     * Sets the invitee's invite status to true if this user exists on a team, false otherwise
-     *
-     * @param user
-     * @param firestore
-     */
-    private void setInviteeIsOnTeam(IUser user, FirebaseFirestore firestore) {
-        CollectionReference teamsCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
-
-        Log.d(TAG, "Value of invitee on team before query is " + mInviteeIsOnTeam);
-        teamsCol.whereEqualTo(MockUser.FIELD_EMAIL, user.getEmail()).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "Query for invitee was successful");
-                            // If the query returned anything, the user is on a team.
-                            if (task.getResult().size() > 0) {
-                                mInviteeIsOnTeam = true;
-                            }
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        Log.d(TAG, "Value of invitee on team after query is " + mInviteeIsOnTeam);
-    }
-
-    private void addUserToTeam(IUser user, String email, FirebaseFirestore firestore) {
-        Log.d(TAG, "in method addUserToTeam");
-        Map<String, Object> map = new HashMap<>();
-        map.put("FIELD", "VALUE");
-        Log.d(TAG, "user email is " + email);
-
-        if (true) {
-            return;
-        }
-        CollectionReference teamCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH);
-        teamCol.document(user.getEmail()).set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "DocumentSnapshot successfully written!");
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.w(TAG, "Error writing document", e);
-            }
-        });
-    }
-
     /**
      * Adds invitee to Firestore and sets inviterEmail and status
      */
@@ -258,9 +177,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
         Log.d(TAG, "onInviterIsNotOnTeam: ");
         // If Inviter is not on a team
         if (mInviter.getTeamName().isEmpty()) {
-            Log.d(TAG, "Inviter is on team: ");
-
-
+            Log.d(TAG, "Inviter is not on team: ");
             // If invitee is not already on a team and inviter is not on a team
             if (mInvitee.getTeamName().isEmpty()) {
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
@@ -318,7 +235,25 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                                 Log.w(TAG, "Error writing document", e);
                             }
                         });
-            }
+
+                // Add the invitee to the inviter's pending invitees
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                        .document(mInviter.getEmail())
+                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH)
+                        .document(mInvitee.getEmail())
+                        .set(inviteeTeamMember).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.e(TAG, "Invitee added to inviter's invitees collection!");
+                    }
+                })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@android.support.annotation.NonNull Exception e) {
+                                Log.e(TAG, "Error writing invitee to inviter's collection", e);
+                            }
+                        });
+            } // end case : invitee is already on a team and inviter is not on team
         } else {
             Log.d(TAG, "Inviter is on team: ");
             Log.d(TAG, "invitee is not on team: ");
@@ -365,7 +300,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                 // If both inviter and invitee are on team
                 Log.d(TAG, "Both the inviter and invitee are on a team: ");
                 Toast.makeText(AddTeamMemberActivity.this,
-                        "Both the inviter and invitee are on a team, try a different email", Toast.LENGTH_SHORT)
+                        BOTH_INVITER_AND_INVITEE_ON_TEAM_TOAST, Toast.LENGTH_LONG)
                         .show();
             }
         }

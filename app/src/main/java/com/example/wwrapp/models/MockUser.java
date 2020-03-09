@@ -13,7 +13,6 @@ public class MockUser implements IUser {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_EMAIL = "email";
     public static final String FIELD_INVITE_STATUS = "inviteStatus";
-
     public static final String FIELD_INVITER_NAME = "inviterName";
     public static final String FIELD_INVITER_EMAIL = "inviterEmail";
     public static final String FIELD_TEAM_NAME = "teamName";

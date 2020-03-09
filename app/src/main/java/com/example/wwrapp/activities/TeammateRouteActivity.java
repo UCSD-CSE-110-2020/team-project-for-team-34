@@ -38,7 +38,7 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
 
     private FirebaseFirestore mFirestore;
     private Query mQuery;
-    private IUser mCurrentUser;
+    private IUser mUser;
     private boolean mUserBelongsToTeam;
     private static boolean mEmpty;
 
@@ -52,17 +52,15 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
 
         Log.d(TAG, "in onCreate");
 
-        mCurrentUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        // Get the user
+        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
-        if(IS_TESTING_EMPTY) {
+        if (IS_TESTING_EMPTY) {
             mEmpty = true;
             return;
         }
         // Set up Firestore and query for the routes to display
         initFirestore();
-
-        // Set up recycler view for routes
-        //initRecyclerView();
 
         FirebaseFirestore.setLoggingEnabled(true);
     }
@@ -91,49 +89,33 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
     private void initFirestore() {
         mFirestore = FirebaseFirestore.getInstance();
 
-        if(testTeammateRoute){
+        if (testTeammateRoute) {
             CollectionReference teamRouteCol = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH);
-            Route testRoute = new Route("testRoute", "Geisel", "0", 0, 0, null, false, "");
+            Route testRoute = new Route();
             teamRouteCol.document("ellen@gmail.com").set(testRoute);
         }
 
-        if(!mCurrentUser.getTeamName().equals(""))
-        {
-            Log.d(TAG, "initFirestore: "+ mCurrentUser.getEmail());
-            mQuery = mFirestore.collection("teams").document("team").collection("teamRoutes").orderBy(Route.FIELD_NAME,Query.Direction.ASCENDING);
+        if (!mUser.getTeamName().isEmpty()) {
+            Log.d(TAG, "initFirestore: " + mUser.getEmail());
+            mQuery = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                    .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                    .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH)
+                    .orderBy(Route.FIELD_NAME, Query.Direction.ASCENDING);
             initRecyclerView();
+        } else {
+            Log.d(TAG, "User doesn't have a team.");
         }
-
-
-        /*mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMS_PATH).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            if (task.getResult().size() > 0) {
-                                mUserBelongsToTeam = true;
-                            }
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-
-        // TODO: Query only for the routes that don't belong to this user
-        if (mUserBelongsToTeam) {
-            mQuery = mFirestore.collection(WWRConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH).orderBy(Route.FIELD_NAME, Query.Direction.DESCENDING);
-        }*/
     }
 
     public static boolean isEmpty() {
         return mEmpty;
     }
+
     private void checkIfEmpty() {
-        if(mQuery == null) {
+        if (mQuery == null) {
             Log.d(TAG, "checkIfEmpty: Query is empty");
             mEmpty = true;
-        }
-        else {
+        } else {
             mQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -154,10 +136,9 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
     private void hideOrShowEmptyString() {
         mEmptyStringView = findViewById(R.id.emptyStringView);
 
-        if(mEmpty) {
+        if (mEmpty) {
             mEmptyStringView.setVisibility(View.VISIBLE);
-        }
-        else {
+        } else {
             mEmptyStringView.setVisibility(View.GONE);
         }
     }
@@ -168,15 +149,11 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
         hideOrShowEmptyString();
         if (mQuery == null) {
             Log.w(TAG, "No query!!!");
-        }
-        else if (mEmpty){
-            Log.w(TAG, "Query is empty");
-        }
-        else {
+        } else {
             // Set up adapter
             FirestoreRecyclerOptions<Route> options =
                     new FirestoreRecyclerOptions.Builder<Route>().setQuery(mQuery, Route.class).build();
-            mTeammateRouteAdapter = new TeammateRouteAdapter(options, mCurrentUser);
+            mTeammateRouteAdapter = new TeammateRouteAdapter(options, mUser);
 
             // Set up recycler view
             mTeammateRoutesRecycler = findViewById(R.id.recycler_teammate_view_route);
@@ -207,7 +184,7 @@ public class TeammateRouteActivity extends AppCompatActivity implements Teammate
         startActivityForResult(intent, START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE);
     }
 
-    public static void setTestTeammateRoute(boolean testTeamRoute){
+    public static void setTestTeammateRoute(boolean testTeamRoute) {
         testTeammateRoute = testTeamRoute;
     }
 }

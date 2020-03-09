@@ -5,6 +5,9 @@ package com.example.wwrapp.utils;
  */
 public final class WWRConstants {
 
+    public static final String EMPTY_STR = "";
+    public static final String DATE_FOR_UNWALKED_ROUTE = "Created on ";
+
     // TODO: Determine whether to use this version of the request code or the uncommented one
 //    public final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
     public static final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 10;

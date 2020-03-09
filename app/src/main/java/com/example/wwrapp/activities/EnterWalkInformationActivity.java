@@ -14,14 +14,18 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.utils.WWRConstants;
+import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.RouteBuilder;
 import com.example.wwrapp.models.Walk;
+import com.example.wwrapp.utils.WWRConstants;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Launched after the user ends a walk initiated from the Home screen; prompts user to enter
@@ -54,10 +58,15 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
     private RadioButton mRouteDifficultyRadioBtn;
     private RadioButton mRouteFavoriteRadioBtn;
 
+    private IUser mUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_walk_information);
+
+        // Get the user
+        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
         // Create the list of tags
         mTags = new ArrayList<>();
@@ -189,33 +198,6 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         finish();
     }
 
-    private void returnToRoutesActivity() {
-        Log.d(TAG, "In method returnToRoutesActivity");
-        Intent returnIntent = new Intent();
-        // Create a new route, but without any walk stats
-        RouteBuilder routeBuilder = new RouteBuilder();
-        Route route = routeBuilder.setRouteName(mRouteName)
-                .setStartingPoint(mStartingPoint)
-                .setSteps(0)
-                .setMiles(0.0)
-                .setNotes(mNotes)
-                .setTags(mTags)
-                .setFavorite(mFavorite)
-                .setDuration(null)
-                .getRoute();
-
-        returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
-        returnIntent.putExtra(WWRConstants.EXTRA_MANUALLY_CREATED_ROUTE_KEY, true);
-        returnIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
-                WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
-
-        // returnIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        // Pass this Intent back
-        setResult(Activity.RESULT_OK, returnIntent);
-        finish();
-    }
-
-
     /**
      * Takes the user to the Routes screen after they've entered information for the walk
      */
@@ -229,34 +211,48 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         Route route;
 
         switch (callerID) {
+            // If launched by the WalkActivity
             case WWRConstants.EXTRA_WALK_ACTIVITY_CALLER_ID:
                 // Retrieve the Walk stats
                 Walk walk = (Walk) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
-                long walkSteps = walk.getSteps();
-                double walkMiles = walk.getMiles();
-                Date walkDate = walk.getDate();
-                String duration = walk.getDuration();
-
                 Log.d(TAG, walk.toString());
 
-                // Bundle up data to pass to the Routes activity
-                outgoingIntent = new Intent(EnterWalkInformationActivity.this, RoutesActivity.class);
+                // Retrieve stats from the walk
+                long walkSteps = walk.getSteps();
+                double walkMiles = walk.getMiles();
+                String walkDate = walk.getDate();
+                Log.d(TAG, "Walk date = " + walkDate);
+                String duration = walk.getDuration();
 
                 // Construct the Route
+                Map<String, Walk> walkers = new HashMap<>();
+                walkers.put(mUser.getEmail(), walk);
+
                 RouteBuilder routeBuilder = new RouteBuilder();
                 route = routeBuilder.setRouteName(mRouteName)
                         .setStartingPoint(mStartingPoint)
                         .setSteps(walkSteps)
                         .setMiles(walkMiles)
+                        .setDateOfLastWalk(walkDate)
                         .setTags(mTags)
                         .setNotes(mNotes)
                         .setFavorite(mFavorite)
-                        .setDuration(duration)
+                        .setDurationOfLastWalk(duration)
+                        .setOwnerName(mUser.getName())
+                        .setOwnerEmail(mUser.getEmail())
+                        .setWalkers(walkers)
                         .getRoute();
 
+                Log.d(TAG, "Route date is " + route.getDateOfLastWalk());
 
+                // Bundle up data to pass to the Routes activity
+                outgoingIntent = new Intent(EnterWalkInformationActivity.this, RoutesActivity.class);
                 outgoingIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
                 outgoingIntent.putExtra(WWRConstants.EXTRA_MANUALLY_CREATED_ROUTE_KEY, false);
+
+                // New: pass the user object
+                outgoingIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+
                 // Let the RoutesActivity know who launched it
                 outgoingIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
                         WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
@@ -269,9 +265,41 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
             default:
                 Log.d(TAG, "Caller is unhandled: " + callerID);
         }
-
-
     }
+
+    private void returnToRoutesActivity() {
+        Log.d(TAG, "In method returnToRoutesActivity");
+        Intent returnIntent = new Intent();
+
+        // Create a new route, but without any walk stats
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);
+        String formattedDate = WWRConstants.DATE_FOR_UNWALKED_ROUTE + LocalDateTime.now().format(dateTimeFormatter);
+
+        RouteBuilder routeBuilder = new RouteBuilder();
+        Route route = routeBuilder.setRouteName(mRouteName)
+                .setStartingPoint(mStartingPoint)
+                .setSteps(0)
+                .setMiles(0.0)
+                .setDateOfLastWalk(formattedDate)
+                .setNotes(mNotes)
+                .setTags(mTags)
+                .setFavorite(mFavorite)
+                .setDurationOfLastWalk(WWRConstants.EMPTY_STR)
+                .setOwnerName(mUser.getName())
+                .setOwnerEmail(mUser.getEmail())
+                .getRoute();
+
+        returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+        returnIntent.putExtra(WWRConstants.EXTRA_MANUALLY_CREATED_ROUTE_KEY, true);
+        returnIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
+                WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID);
+
+        // returnIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        // Pass this Intent back
+        setResult(Activity.RESULT_OK, returnIntent);
+        finish();
+    }
+
 
     /**
      * Returns the user to the Home screen if they don't want to enter route information

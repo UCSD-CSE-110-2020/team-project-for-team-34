@@ -25,14 +25,11 @@ public class FirestoreConstants {
 
     // Firestore user invite status constants
     public static final String FIRESTORE_TEAM_INVITE_ACCEPTED = "accepted";
-    public static final String FIRESTORE_TEAM_INVITE_DECLINED = "declined";
     public static final String FIRESTORE_TEAM_INVITE_PENDING = "pending";
 
-    public static final String FIRESTORE_DOCUMENT_TEAM_NAME = "wwrTeam";
-
     // Attributes of a mock user
-    public static final String MOCK_USER_NAME = "GG";
-    public static final String MOCK_USER_EMAIL = "GG@";
+    public static final String MOCK_USER_NAME = "CC";
+    public static final String MOCK_USER_EMAIL = "CC@";
 
     public static final String SECOND_MOCK_USER_NAME = "secondMockName";
     public static final String SECOND_MOCK_USER_EMAIL = "secondMockEmail";

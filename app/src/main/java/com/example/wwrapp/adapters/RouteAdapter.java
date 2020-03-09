@@ -14,12 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.Route;
-import com.example.wwrapp.utils.WWRConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
  * Adapter for the Route Recycler View
@@ -54,16 +51,7 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
         holder.routeName.setText(model.getRouteName());
         holder.routeStartingPoint.setText(model.getStartingPoint());
 
-        // Set date
-//        Date date = model.getDate();
-//        if (date == null) {
-//            // Convert LocalDateTime to Date
-//            date = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
-//        }
-        // TODO: Migrate from LocalDateTime
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_SUMMARY);
-//        String formattedDate = date.format(formatter);
-        holder.routeDate.setText("DATE in progress");
+        holder.routeDate.setText(model.getDateOfLastWalk());
 
         // Set steps and miles
         holder.routeSteps.setText(String.valueOf(model.getSteps()));

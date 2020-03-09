@@ -45,6 +45,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         // Get the database instance
         mFirestore = FirebaseFirestore.getInstance();
 
+        // Set up display
         mMemberText = findViewById(R.id.team_member_name_text_view);
         mAcceptBtn = findViewById(R.id.invite_accept_button);
         mDeclineBtn = findViewById(R.id.invite_decline_button);
@@ -53,11 +54,10 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
         assert mUser != null;
         mInviterName = mUser.getInviterName();
-
         String inviterEmail = mUser.getInviterEmail();
-
         Log.d(TAG, "Inviter name is " + mInviterName);
         Log.d(TAG, "Inviter email is " + inviterEmail);
+
         // find inviter object in database
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(inviterEmail).get()
@@ -79,7 +79,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 });
 
 
-        // TODO: Probably need to fix this later
+        // TODO: Fix this code to not have testInvite set
         if (testInvite) {
             String name = "Ariana";
             mMemberText.setText(name);
@@ -96,17 +96,9 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 }
             });
         } else {
-
-
-            // get the member's name from data base and set it to member_name
-            // TODO: Re-design invitations
-
-
             // Find the users who have invited the invitee
             // TODO: Handle multiple inviters (not just 1)
-//            mInviterName = mInviter.getName();
             mMemberText.setText(mInviterName);
-
 
             mAcceptBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -162,8 +154,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
 
     public void onInviterAndInviteeNotOnTeamAccept() {
         Log.d(TAG, "onInviterAndInviteeNotOnTeam: ");
-        mUser.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_NAME);
-        mInviter.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_NAME);
+        mUser.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
+        mInviter.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
 
         TeamMember inviterTeamMember = new TeamMember(mInviter.getEmail(),
                 FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED,
@@ -278,8 +270,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                     }
                 });
 
-        // Update status on the "user"
-        mUser.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_NAME);
+        // Update team name on the "user"
+        mUser.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
 
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mUser.getEmail()).set(mUser).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -372,7 +364,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
 
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mInviter.getEmail()).collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH)
-                .document(mUser.getEmail()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                .document(mUser.getEmail()).delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Deleted invitee from inviter's list");
@@ -384,8 +377,6 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                         Log.w(TAG, "Error deleting document", e);
                     }
                 });
-
-
     }
 
     public void onInviterOnTeamAndInviteeNotOnTeamDecline() {
@@ -461,7 +452,24 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                     }
                 });
 
+        // Remove invitee from inviter's sub-collection
+        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                .document(mInviter.getEmail())
+                .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH)
+                .document(mUser.getEmail())
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "Deleted invitee from inviter's list");
+            }
+        })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error deleting document", e);
+                    }
+                });
 
     }
-
 }

@@ -25,56 +25,35 @@ public class Route implements Serializable {
     public static final String FIELD_WALKERS = "walkers";
 
 
-
-    // All the information that a Route should store
+    // Basic information that a Route should store
     private String routeName;
     private String startingPoint;
-    private String duration;
     private long steps;
     private double miles;
+    private String dateOfLastWalk;
 
-    // Additional information a Route can store
+    // Additional Route characteristics
     private List<String> tags;
     private boolean isFavorite;
     private String notes;
 
-    // Further information for a Route
-    private String ownerEmail;
+    // Properties of Routes that relate to users
     private String ownerName;
-    private Map<String, Walk> walkers;
+    private String ownerEmail;
+    private Map<String, Walk> walkers; // maps emails of users to their walk stats for this Route
+    private List<String> favoriters; // a list of people who have favorited this Route
 
+    // Not required, but informative
+    private String durationOfLastWalk;
 
     /**
      * Empty constructor required for Firestore
      */
     public Route() {
-        routeName = "testing";
     }
 
-    /**
-     * Constructor with additional information: tags, favorite, notes
-     *
-     * @param routeName
-     * @param startingPoint
-     * @param duration
-     * @param steps
-     * @param miles
-     * @param tags
-     * @param isFavorite
-     * @param notes
-     */
-    public Route(String routeName, String startingPoint, String duration,
-                 long steps, double miles, List<String> tags, boolean isFavorite, String notes) {
-        this.routeName = routeName;
-        this.startingPoint = startingPoint;
-        this.duration = duration;
-        this.steps = steps;
-        this.miles = miles;
-        this.tags = tags;
-        this.isFavorite = isFavorite;
-        this.notes = notes;
-    }
 
+    // Getters/setters for basic info
     public String getRouteName() {
         return routeName;
     }
@@ -91,12 +70,8 @@ public class Route implements Serializable {
         this.startingPoint = startingPoint;
     }
 
-    public String getDuration() {
-        return duration;
-    }
-
-    public void setDuration(String duration) {
-        this.duration = duration;
+    public void setDurationOfLastWalk(String duration) {
+        this.durationOfLastWalk = duration;
     }
 
     public long getSteps() {
@@ -114,6 +89,16 @@ public class Route implements Serializable {
     public void setMiles(double miles) {
         this.miles = miles;
     }
+
+    public String getDateOfLastWalk() {
+        return dateOfLastWalk;
+    }
+
+    public void setDateOfLastWalk(String dateOfLastWalk) {
+        this.dateOfLastWalk = dateOfLastWalk;
+    }
+
+    // Getters/setters for additional info
 
     public List<String> getTags() {
         return tags;
@@ -139,6 +124,8 @@ public class Route implements Serializable {
         this.notes = notes;
     }
 
+    // Getters/setters for external properties
+
     public String getOwnerEmail() {
         return ownerEmail;
     }
@@ -163,6 +150,19 @@ public class Route implements Serializable {
         this.walkers = walkers;
     }
 
+    public List<String> getFavoriters() {
+        return favoriters;
+    }
+
+    public void setFavoriters(List<String> favoriters) {
+        this.favoriters = favoriters;
+    }
+
+    // Extra getters/setters
+    public String getDurationOfLastWalk() {
+        return durationOfLastWalk;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -170,7 +170,7 @@ public class Route implements Serializable {
         stringBuilder.append("Route name: ").append(this.getRouteName()).append("\n");
         stringBuilder.append("Route starting point: ").append(this.getStartingPoint()).append("\n");
 //        stringBuilder.append("Route date: ").append(this.getDate()).append("\n");
-        stringBuilder.append("Route duration: ").append(this.getDuration()).append("\n");
+        stringBuilder.append("Route duration: ").append(this.getDurationOfLastWalk()).append("\n");
         stringBuilder.append("Route steps: ").append(this.getSteps()).append("\n");
         stringBuilder.append("Route miles: ").append(this.getMiles()).append("\n");
         stringBuilder.append("Route tags: ");

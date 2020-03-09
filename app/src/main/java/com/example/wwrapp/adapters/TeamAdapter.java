@@ -13,10 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.TeamMember;
+import com.example.wwrapp.utils.FirestoreConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
-public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember,TeamAdapter.TeamViewHolder> {
+public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember, TeamAdapter.TeamViewHolder> {
 
     private static final String TAG = "TeamAdapter";
 
@@ -26,7 +27,7 @@ public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember,TeamAdapter
 
     private IUser mUser;
 
-    public TeamAdapter(@NonNull FirestoreRecyclerOptions<TeamMember> options,IUser User) {
+    public TeamAdapter(@NonNull FirestoreRecyclerOptions<TeamMember> options, IUser User) {
         super(options);
         mUser = User;
         mOptions = options;
@@ -34,19 +35,20 @@ public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember,TeamAdapter
     }
 
 
-
     @Override
     public void onBindViewHolder(@NonNull TeamViewHolder holder, int position, @NonNull TeamMember model) {
         Log.d(TAG, "onBindViewHolder: called");
-        if(model.getEmail().equals(mUser.getEmail()))
-        {
+        Log.d(TAG, "TeamMember email is " + model.getEmail());
+        if (model.getEmail().equals(mUser.getEmail())) {
+            Log.d(TAG, "Hiding user from view");
             holder.itemView.setVisibility(View.GONE);
-            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0,0));
-        }
-        else {
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
+        } else {
+            Log.d(TAG, "Displaying user: " + model.getEmail());
+
             holder.teammateName.setText(model.getName());
             String status = model.getStatus();
-            if (status.equals("accepted")) {
+            if (status.equals(FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED)) {
                 holder.teammateName.setTextColor(Color.BLACK);
             } else {
                 holder.teammateName.setTextColor(Color.GRAY);
@@ -63,7 +65,7 @@ public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember,TeamAdapter
         return new TeamViewHolder(itemView);
     }
 
-    class TeamViewHolder extends RecyclerView.ViewHolder{
+    class TeamViewHolder extends RecyclerView.ViewHolder {
         TextView teammateName;
         View itemView;
 

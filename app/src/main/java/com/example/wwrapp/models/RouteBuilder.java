@@ -41,6 +41,10 @@ public class RouteBuilder {
         route.setMiles(miles);
         return this;
     }
+    public RouteBuilder setDateOfLastWalk(String dateOfLastWalk) {
+        route.setDateOfLastWalk(dateOfLastWalk);
+        return this;
+    }
 
     public RouteBuilder setFavorite(boolean favorite) {
         route.setFavorite(favorite);
@@ -57,10 +61,11 @@ public class RouteBuilder {
         return this;
     }
 
-    public RouteBuilder setDuration(String duration) {
-        route.setDuration(duration);
+    public RouteBuilder setOwnerName(String name) {
+        route.setOwnerName(name);
         return this;
     }
+
 
     public RouteBuilder setOwnerEmail(String email) {
         route.setOwnerEmail(email);
@@ -69,6 +74,16 @@ public class RouteBuilder {
 
     public RouteBuilder setWalkers(Map<String, Walk> walkers) {
         route.setWalkers(walkers);
+        return this;
+    }
+
+    public RouteBuilder setFavoriters(List<String> favoriters) {
+        route.setFavoriters(favoriters);
+        return this;
+    }
+
+    public RouteBuilder setDurationOfLastWalk(String duration) {
+        route.setDurationOfLastWalk(duration);
         return this;
     }
 
