@@ -18,6 +18,7 @@ import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
+import com.example.wwrapp.models.City;
 import com.example.wwrapp.models.GoogleUser;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
@@ -30,6 +31,7 @@ import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
 import com.example.wwrapp.utils.WWRConstants;
+import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -45,13 +47,13 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Home screen for the app
@@ -62,8 +64,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     // Numeric constants
     private static final double TENTHS_PLACE_ROUNDING_FACTOR = 10.0;
     private static final int MOCK_ACTIVITY_REQUEST_CODE = 1;
-    private static final int TEAM_ACTIVITY_REQUEST_CODE = 3;
+    private static final int TEAM_ACTIVITY_REQUEST_CODE = 2;
 
+    private static final int SET_USER_ACTIVITY_REQUEST_CODE = 3;
 
     // String constants
     public static final String NO_LAST_WALK_TIME_TEXT = "No last walk time available";
@@ -72,7 +75,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private static boolean sEnableFitnessRunner = false;
     private static boolean sIgnoreHeight = true;
 
-    public static boolean IS_MOCKING = false;
+    public static boolean IS_MOCKING = true;
 
     // Views for data
     private TextView mStepsTextView;
@@ -196,6 +199,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private void ADD_USERS() {
         Log.d(TAG, "ADD_USERS: ");
         IUser user = new MockUser(FirestoreConstants.MOCK_USER_NAME, FirestoreConstants.MOCK_USER_EMAIL);
+        user.setTeamName("team");
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(user.getEmail()).set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -272,7 +276,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
 //        ADD_TEAM_MEMBERS();
 //        QUERY_TEAM();
-//        signIn();
 //        ADD_USERS();
 //        CREATE_INVITEE();
 
@@ -322,17 +325,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
 
             // TODO: Remove later
-//            mUser.setTeamName("NOT EMPTY");
+            mUser.setTeamName("team");
         } else {
+            signIn();
             // TODO: Create a Google or Firebase user
-        }
-
-        // TODO: Check if the user exists already in the database
-        // Code here
-
-        // TODO: Implement real sign-in logic. Using a dummy user for now to make testing possible.
-        if (false) {
-            mUser = null;
             //Check if user exists
             DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(mUser.getEmail());
             findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -341,7 +337,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            Log.d(TAG, "FOUND ONE");
                             GoogleUser user = document.toObject(GoogleUser.class);
                             Log.d(TAG, "USER data: @" + user.getEmail());
                             mUser = user;
@@ -353,14 +348,12 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     } else {
                         Log.d(TAG, "get failed with ", task.getException());
                     }
-
-
                 }
-
-
             });
         }
 
+        // TODO: Check if the user exists already in the database
+        // Code here
 
         // TODO: Update this with actual sign-in logic later
         // Register the team screen button
@@ -373,6 +366,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
                 intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
                 startActivityForResult(intent, TEAM_ACTIVITY_REQUEST_CODE);
+
             }
         });
 
@@ -424,6 +418,13 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             }
         });
 
+        // Register the set user screen button
+        findViewById(R.id.set_user_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSetUserActivity();
+            }
+        });
         // Save the values of stored height, steps and miles, and last walk stats to their
         // respective member variables
         initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
@@ -609,6 +610,11 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         startActivityForResult(intent, MOCK_ACTIVITY_REQUEST_CODE);
     }
 
+    private void startSetUserActivity() {
+        Intent intent = new Intent(HomeScreenActivity.this, SetUserActivity.class);
+        startActivityForResult(intent, SET_USER_ACTIVITY_REQUEST_CODE);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -643,6 +649,34 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 }
                 break;
 
+            case SET_USER_ACTIVITY_REQUEST_CODE:
+                // The task returned from set user activity
+                if (resultCode == Activity.RESULT_OK) {
+                    //change the user
+                    String userEmail = data.getSerializableExtra(WWRConstants.EXTRA_USER_EMAIL_KEY).toString();
+                    String userName = data.getSerializableExtra(WWRConstants.EXTRA_USER_NAME_KEY).toString();
+                    DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(userEmail);
+                    findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    GoogleUser user = document.toObject(GoogleUser.class);
+                                    Log.d(TAG, "USER data: @" + user.getEmail());
+                                    mUser = user;
+                                } else {
+                                    Log.d(TAG, "Creating User");
+                                    GoogleUser user = new GoogleUser(userName, userEmail);
+                                    mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(user.getEmail()).set(user);
+                                }
+                            } else {
+                                Log.d(TAG, "get failed with ", task.getException());
+                            }
+                        }
+                    });
+                }
+                break;
             // If authentication was required during google fit setup, this will be called after the user authenticates
             case WWRConstants.GOOGLE_FIT_PERMISSIONS_REQUEST_CODE:
                 if (resultCode == Activity.RESULT_OK) {
@@ -817,10 +851,13 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             startActivityForResult(signInIntent, 420);
         } else {
             HomeScreenActivity.account = GoogleSignIn.getLastSignedInAccount(this);
+            saveUser();
             Log.d(TAG, "Email from last log in is " + account.getEmail());
         }
+    }
 
-        DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(account.getEmail());
+    private void saveUser() {
+        DocumentReference findUser = mFirestore.collection(FirestoreConstants.USERS_COLLECITON_KEY).document(HomeScreenActivity.account.getEmail());
         findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -854,6 +891,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             // Signed in successfully, show authenticated UI.
             Toast.makeText(this, "your email is " + account.getEmail(), Toast.LENGTH_SHORT).show();
             HomeScreenActivity.account = account;
+            saveUser();
             Log.d(TAG, "good");
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.

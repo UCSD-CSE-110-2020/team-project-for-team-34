@@ -7,7 +7,7 @@ public final class WWRConstants {
 
     // TODO: Determine whether to use this version of the request code or the uncommented one
 //    public final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = System.identityHashCode(this) & 0xFFFF;
-    public static final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 2;
+    public static final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 10;
 
     /**
      * Prevent external instantiation
@@ -29,6 +29,7 @@ public final class WWRConstants {
     public static final String EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID =
             "com.example.wwrapp.EXTRA_ROUTE_DETAIL_ACTIVITY";
     public static final String EXTRA_ROUTES_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_ROUTE_ACTIVITY";
+    public static final String EXTRA_SET_USER_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_SET_USER_ACTIVITY";
 
     // Keys
     public static final String EXTRA_WALK_OBJECT_KEY = "com.example.wwrapp.EXTRA_WALK_KEY";
@@ -40,6 +41,16 @@ public final class WWRConstants {
     // For user objects
     public static final String EXTRA_USER_KEY = "com.example.wwrapp.EXTRA_USER_KEY";
     public static final String EXTRA_USER_TYPE_KEY = "com.example.wwrapp.EXTRA_USER_TYPE_KEY";
+
+
+    //For mocking set user
+    public static final String EXTRA_USER_EMAIL_KEY = "com.example.wwrapp.EXTRA_USER_EMAIL_KEY";
+    public static final String EXTRA_USER_NAME_KEY = "com.example.wwrapp.EXTRA_USER_NAME_KEY";
+
+    // Firestore Keys
+    public static final String EXTRA_ROUTE_ID_KEY = "com.example.wwrapp.EXTRA_ROUTE_ID_KEY";
+    public static final String EXTRA_ROUTE_PATH_KEY = "com.example.wwrapp.EXTRA_ROUTE_PATH_KEY";
+
 
     // SharedPreferences constants
 
@@ -92,11 +103,5 @@ public final class WWRConstants {
     // Mocks
     public static final String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
     public static final long NO_MOCK_TIME = -1;
-
-   // Firestore Keys
-    public static final String EXTRA_ROUTE_ID_KEY = "com.example.wwrapp.EXTRA_ROUTE_ID_KEY";
-    public static final String EXTRA_ROUTE_PATH_KEY = "com.example.wwrapp.EXTRA_ROUTE_PATH_KEY";
-
-
 
 }
