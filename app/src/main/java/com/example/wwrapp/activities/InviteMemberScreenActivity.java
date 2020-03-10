@@ -169,7 +169,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
                 .document(mInviter.getEmail())
-                .set(inviterTeamMember).addOnSuccessListener(new OnSuccessListener<Void>() {
+                .set(inviterTeamMember)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Successfully added inviter to team!");

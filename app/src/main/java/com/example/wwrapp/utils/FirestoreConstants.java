@@ -5,6 +5,8 @@ package com.example.wwrapp.utils;
  */
 public class FirestoreConstants {
     public static final String PATH_SLASH_SEPARATOR = "/";
+    public static final String DOT_STR = ".";
+
 
     // "users" branch
     public static final String FIRESTORE_COLLECTION_USERS_PATH = "users";
@@ -15,9 +17,9 @@ public class FirestoreConstants {
     public static final String FIRESTORE_COLLECTION_TEAMS_PATH = "teams";
     public static final String FIRESTORE_DOCUMENT_TEAM_PATH = "team"; // teams/team
     public static final String FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH = "teamMembers"; // teams/team/teamMembers
+    public static final String FIRESTORE_COLLECTION_TEAM_ROUTES_PATH = "teamRoutes"; // teams/team/teamRoutes
 
-    public static final String FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH = "teamRoutes"; // teams/team/teamRoutes
-
+    public static final String FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH = "walkers"; // teams/team/teamRoutes/someRoute/walkers
 
     // Firestore user invite status constants
     public static final String FIRESTORE_TEAM_INVITE_ACCEPTED = "accepted";

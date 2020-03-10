@@ -35,4 +35,8 @@ public class RouteDocumentNameUtils {
         int routeNameStartIndex = pathToRouteDocument.lastIndexOf(FirestoreConstants.PATH_SLASH_SEPARATOR) + 1;
         return pathToRouteDocument.substring(routeNameStartIndex);
     }
+
+    public static String getNestedFieldName(String outerFieldName, String innerFieldName) {
+        return outerFieldName + FirestoreConstants.DOT_STR + innerFieldName;
+    }
 }

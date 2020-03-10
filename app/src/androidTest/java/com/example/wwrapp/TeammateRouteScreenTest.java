@@ -8,7 +8,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.example.wwrapp.activities.HomeScreenActivity;
 import com.example.wwrapp.activities.RoutesActivity;
-import com.example.wwrapp.activities.TeammateRouteActivity;
+import com.example.wwrapp.activities.TeamRoutesActivity;
 
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -40,7 +40,7 @@ public class TeammateRouteScreenTest {
     @Test
     public void NoTeammateRoutesTest() {
         mActivityTestRule.getActivity();
-        TeammateRouteActivity.IS_TESTING_EMPTY = true;
+        TeamRoutesActivity.IS_TESTING_EMPTY = true;
         ViewInteraction appCompatButton1 = onView(
                 allOf(withId(R.id.routeScreenButton),
                         isDisplayed()));

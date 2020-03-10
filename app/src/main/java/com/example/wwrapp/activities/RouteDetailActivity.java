@@ -40,6 +40,7 @@ public class RouteDetailActivity extends AppCompatActivity {
 
     private FirebaseFirestore mFirestore;
     private IUser mUser;
+    private Walk mWalk;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,71 +129,122 @@ public class RouteDetailActivity extends AppCompatActivity {
             }
         }
 
-        Context current = this;
+        Context currentContext = this;
         boolean isFavorite = route.isFavorite();
         mFavoriteBtn = findViewById(R.id.favoriteBtnDetail);
         if (isFavorite) {
-            mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(current, R.drawable.ic_star_on));
+            mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_on));
             mFavoriteBtn.setChecked(true);
         } else {
-            mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(current, R.drawable.ic_star_off));
+            mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_off));
         }
+
+        // Nested field name for favoriters
+        String nestedFieldName = RouteDocumentNameUtils.getNestedFieldName(Route.FIELD_FAVORITERS, mUser.getEmail());
+
         mFavoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 Log.d(TAG, "Clicked the favorite button");
-                if (isChecked) {
-                    mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(current, R.drawable.ic_star_on));
-                } else {
-                    mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(current, R.drawable.ic_star_off));
-                }
-
-                // Update the route's favorite status on Firestore
                 String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mUser.getEmail(), route.getRouteName());
 
-                // Update the user's personal route
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                        .document(mUser.getEmail())
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
-                        .document(routeDocName)
-                        .update(Route.FIELD_FAVORITE, isChecked)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d(TAG, "Successfully updated route favorite in personal collection");
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error writing favorite to personal collection", e);
-                            }
-                        });
 
-                // Update the route favorite on the team screen, if the user is on a team
-                if (!mUser.getTeamName().isEmpty()) {
-                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH)
+                if (isChecked) {
+                    mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_on));
+
+                    // Update the route's favorite status on Firestore
+
+                    // Update the user's personal route
+                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                            .document(mUser.getEmail())
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
                             .document(routeDocName)
-                            .update(Route.FIELD_FAVORITE, isChecked)
+                            .update(Route.FIELD_FAVORITE, true,
+                                    Route.FIELD_FAVORITERS, nestedFieldName)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-                                    Log.d(TAG, "Successfully updated route favorite in team collection");
+                                    Log.d(TAG, "Successfully updated route favorite in personal collection");
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Log.w(TAG, "Error writing favorite to team collection", e);
+                                    Log.w(TAG, "Error writing favorite to personal collection", e);
                                 }
                             });
-                }
-            }
-        });
 
-    }
+                    // Update the route favorite on the team screen, if the user is on a team
+                    if (!mUser.getTeamName().isEmpty()) {
+                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                .document(routeDocName)
+                                .update(Route.FIELD_FAVORITE, true,
+                                        nestedFieldName, true)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d(TAG, "Successfully updated route favorite in team collection");
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.w(TAG, "Error writing favorite to team collection", e);
+                                    }
+                                });
+                    }
+
+
+                } else {
+                    mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_off));
+
+                    // Update the user's personal route
+                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                            .document(mUser.getEmail())
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                            .document(routeDocName)
+                            .update(Route.FIELD_FAVORITE, false,
+                                    nestedFieldName, false)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "Successfully updated route favorite in personal collection");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error writing favorite to personal collection", e);
+                                }
+                            });
+
+                    // Update the route favorite on the team screen, if the user is on a team
+                    if (!mUser.getTeamName().isEmpty()) {
+                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                .document(routeDocName)
+                                .update(Route.FIELD_FAVORITE, false,
+                                        nestedFieldName, false)
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d(TAG, "Successfully updated route favorite in team collection");
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.w(TAG, "Error writing favorite to team collection", e);
+                                    }
+                                });
+                    }
+                }
+            } // end onCheckedChanged
+        });
+    } // end method
 
     /**
      * Starts the Walk activity from the RouteDetailActivity
@@ -214,6 +266,7 @@ public class RouteDetailActivity extends AppCompatActivity {
     private void returnToRoutesActivity(Route route) {
         Intent returnIntent = new Intent();
         returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+        returnIntent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, mWalk);
 
         // Return the Firestore info that was passed into this activity
         Intent incomingIntent = getIntent();
@@ -240,17 +293,17 @@ public class RouteDetailActivity extends AppCompatActivity {
             // If the user stopped the walk normally and there were no errors
             if (resultCode == Activity.RESULT_OK) {
                 // Get the new Walk
-                Walk walk = (Walk) (data.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
+                mWalk = (Walk) (data.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
 
                 // Update the corresponding Route with the new Walk
                 Route route = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
-                route.setSteps(walk.getSteps());
-                route.setMiles(walk.getMiles());
-                route.setDateOfLastWalk(walk.getDate());
+                route.setSteps(mWalk.getSteps());
+                route.setMiles(mWalk.getMiles());
+                route.setDateOfLastWalk(mWalk.getDate());
 
                 // Update the walkers for the route
-                route.addWalker(mUser.getEmail(), walk);
+                route.putWalker(mUser.getEmail(), mWalk);
 
                 // Return data to the routes activity
                 returnToRoutesActivity(route);

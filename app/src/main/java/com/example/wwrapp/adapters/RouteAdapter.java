@@ -25,7 +25,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,6 +61,7 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
         Log.d(TAG, "in onBindViewHolder");
 
         // TODO: Implement check-icon for previously walked routes
+        Log.d(TAG, "Route is " + model.toString());
         Map<String, Walk> walkers = model.getWalkers();
         if (walkers.get(mUser.getEmail()) != null) {
             // If the current user has walked this route, display the check icon
@@ -93,14 +93,11 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
                 Log.d(TAG, "onCheckedChanged: Clicked favorite star");
                 // Update the route's favorite status on Firestore
                 String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mUser.getEmail(), model.getRouteName());
+                String nestedFieldName = RouteDocumentNameUtils.getNestedFieldName(Route.FIELD_FAVORITERS, mUser.getEmail());
 
                 // If favorited
                 if (isChecked) {
                     holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
-
-                    // Add the user to the list of favoriters
-                    model.addFavoriter(mUser.getEmail());
-                    List<String> updatedFavoriters = model.getFavoriters();
 
                     // Update the user's personal route
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
@@ -108,7 +105,7 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
                             .document(routeDocName)
                             .update(Route.FIELD_FAVORITE, true,
-                                    Route.FIELD_FAVORITERS, updatedFavoriters)
+                                    nestedFieldName, true)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
@@ -127,10 +124,10 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
                     if (!mUser.getTeamName().isEmpty()) {
                         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH)
+                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
                                 .document(routeDocName)
-                                .update(Route.FIELD_FAVORITE, isChecked,
-                                        Route.FIELD_FAVORITERS, updatedFavoriters)
+                                .update(Route.FIELD_FAVORITE, true,
+                                        nestedFieldName, true)
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
@@ -151,17 +148,13 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
                     // If unfavorited
                     holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
 
-                    // Remove the user from the list of favoriters, if that hasn't been done so already
-                    model.removeFavoriter(mUser.getEmail());
-                    List<String> updatedFavoriters = model.getFavoriters();
-
                     // Update the user's personal route
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                             .document(mUser.getEmail())
                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
                             .document(routeDocName)
-                            .update(Route.FIELD_FAVORITE, isChecked,
-                                    Route.FIELD_FAVORITERS, updatedFavoriters)
+                            .update(Route.FIELD_FAVORITE, false,
+                                    nestedFieldName, false)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
@@ -180,10 +173,10 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
                     if (!mUser.getTeamName().isEmpty()) {
                         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH)
+                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
                                 .document(routeDocName)
-                                .update(Route.FIELD_FAVORITE, isChecked,
-                                        Route.FIELD_FAVORITERS, updatedFavoriters)
+                                .update(Route.FIELD_FAVORITE, false,
+                                        nestedFieldName, false)
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {

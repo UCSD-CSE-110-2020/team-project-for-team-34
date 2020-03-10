@@ -35,6 +35,6 @@ public class InitialsExtracter {
      * @return true if only one initial can be extracted from the given name
      */
     public static boolean hasOnlyOneInitial(String name) {
-        return name.contains(SPACE_STR);
+        return !name.contains(SPACE_STR);
     }
 }

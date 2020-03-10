@@ -156,6 +156,30 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     }
 
     /**
+     * Decides what to do when the walk is stopped
+     */
+    private void handleWalkStopped() {
+        Log.d(TAG, "handleWalkStopped called");
+        // Check which activity started this current one:
+        Intent incomingIntent = getIntent();
+        String callerId = incomingIntent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
+
+        switch(callerId) {
+            case WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID:
+                startEnterWalkInformationActivity();
+                break;
+            case WWRConstants.EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID:
+                returnToRouteDetailActivity();
+                break;
+            case WWRConstants.EXTRA_TEAM_ROUTE_DETAIL_ACTIVITY_CALLER_ID:
+                returnToTeamRouteDetailActivity();
+                break;
+        }
+        // Close up this activity
+        finish();
+    }
+
+    /**
      * Launches the activity to enter walk information
      */
     private void startEnterWalkInformationActivity() {
@@ -184,6 +208,40 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
 
         startActivity(intent);
+    }
+
+    /**
+     * Returns data to the RoutesDetailActivity
+     */
+    private void returnToTeamRouteDetailActivity() {
+        Log.d(TAG, "returnToTeamRouteDetail called");
+
+        // Create a new Walk
+        // TODO: Test that a walk is updated with a dummy number of steps.
+        // TODO: Remove the dummy steps in production.
+//        mStepsTaken = 100;
+
+        String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
+
+        // Convert LocalDateTime to String
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);
+        String formattedDate = mDateTime.format(dateTimeFormatter);
+        Log.d(TAG, "formatted date is " + formattedDate);
+
+        // Create the walk
+        WalkBuilder walkBuilder = new WalkBuilder();
+        Walk walk = walkBuilder.setSteps(mStepsTaken)
+                .setMiles(mMiles)
+                .setDate(formattedDate)
+                .setDuration(duration)
+                .getWalk();
+
+        Log.d(TAG, "Walk object returned to RouteDetail is\n" + walk.toString());
+
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
+        // Pass this Intent back
+        setResult(Activity.RESULT_OK, returnIntent);
     }
 
     /**
@@ -222,26 +280,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         setResult(Activity.RESULT_OK, returnIntent);
     }
 
-    /**
-     * Decides what to do when the walk is stopped
-     */
-    private void handleWalkStopped() {
-        Log.d(TAG, "handleWalkStopped called");
-        // Check which activity started this current one:
-        Intent incomingIntent = getIntent();
-        String callerId = incomingIntent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
 
-        switch(callerId) {
-            case WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID:
-                startEnterWalkInformationActivity();
-                break;
-            case WWRConstants.EXTRA_ROUTE_DETAIL_ACTIVITY_CALLER_ID:
-                returnToRouteDetailActivity();
-                break;
-        }
-        // Close up this activity
-        finish();
-    }
 
     @Override
     public void update(long steps) {

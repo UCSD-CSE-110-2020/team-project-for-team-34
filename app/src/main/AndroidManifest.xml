@@ -26,11 +26,11 @@
             android:exported="true" />
 
         <activity
-            android:name=".activities.TeammateRouteDetailActivity"
+            android:name=".activities.TeamRouteDetailActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".activities.TeammateRouteActivity"
+            android:name=".activities.TeamRoutesActivity"
             android:label="Routes"
             android:screenOrientation="portrait" />
         <activity

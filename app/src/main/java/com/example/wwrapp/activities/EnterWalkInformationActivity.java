@@ -224,11 +224,8 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         Map<String, Walk> walkers = new HashMap<>();
         walkers.put(mUser.getEmail(), walk);
 
-        List<String> favoriters = new ArrayList<>();
-        if (mFavorite) {
-            favoriters.add(mUser.getEmail());
-        }
-
+        Map<String, Boolean> favoriters = new HashMap<>();
+        favoriters.put(mUser.getEmail(), mFavorite);
 
         RouteBuilder routeBuilder = new RouteBuilder();
         route = routeBuilder.setRouteName(mRouteName)
@@ -253,8 +250,9 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         outgoingIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
         outgoingIntent.putExtra(WWRConstants.EXTRA_MANUALLY_CREATED_ROUTE_KEY, false);
 
-        // New: pass the user object
+        // New: pass the user object and walk object
         outgoingIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+        outgoingIntent.putExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY, walk);
 
         // Let the RoutesActivity know who launched it
         outgoingIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
@@ -276,10 +274,8 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);
         String formattedDate = WWRConstants.DATE_FOR_UNWALKED_ROUTE + LocalDateTime.now().format(dateTimeFormatter);
 
-        List<String> favoriters = new ArrayList<>();
-        if (mFavorite) {
-            favoriters.add(mUser.getEmail());
-        }
+        Map<String, Boolean> favoriters = new HashMap<>();
+        favoriters.put(mUser.getEmail(), mFavorite);
 
         RouteBuilder routeBuilder = new RouteBuilder();
         Route route = routeBuilder.setRouteName(mRouteName)

@@ -18,6 +18,7 @@ import com.example.wwrapp.R;
 import com.example.wwrapp.adapters.RouteAdapter;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.Route;
+import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.WWRConstants;
@@ -87,7 +88,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
         mTeammateRouteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(RoutesActivity.this, TeammateRouteActivity.class);
+                Intent intent = new Intent(RoutesActivity.this, TeamRoutesActivity.class);
                 intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
                 startActivity(intent);
             }
@@ -103,6 +104,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
         switch (callerId) {
             case WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID:
                 Intent incomingIntent = getIntent();
+                Walk walk = (Walk) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
                 Route route = (Route) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
                 Log.d(TAG, route.toString());
 
@@ -144,6 +146,27 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                             @Override
                             public void onSuccess(Void aVoid) {
                                 Log.d(TAG, "Successfully added route " + routeDocName + " for user!");
+
+                                // Add this user as a walker
+                                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                                        .document(mUser.getEmail())
+                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                                        .document(routeDocName)
+                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH)
+                                        .document(mUser.getEmail())
+                                        .set(walk)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Log.d(TAG, "Successfully added user as walker!");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w(TAG, "Error writing walker", e);
+                                            }
+                                        });
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -156,13 +179,32 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                 // If the user is on a team, also add the route to the team
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                         .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH)
+                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
                         .document(routeDocName)
                         .set(route)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 Log.d(TAG, "Successfully added route " + routeDocName + " for team!");
+                                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                        .document(routeDocName)
+                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH)
+                                        .document(mUser.getEmail())
+                                        .set(walk)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Log.d(TAG, "Successfully added user as walker to team!");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w(TAG, "Error writing walker", e);
+                                            }
+                                        });
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -270,6 +312,8 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
 
                 // If the RouteDetailActivity finished normally
                 if (resultCode == Activity.RESULT_OK) {
+                    // Get the walk object
+                    Walk walk = (Walk) (data.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
                     // Get the updated Route object
                     Route route = (Route) (data.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
                     assert route != null;
@@ -294,6 +338,28 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                         @Override
                         public void onSuccess(Void aVoid) {
                             Log.d(TAG, "Successfully updated existing route!");
+
+                            // Update walkers
+                            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                                    .document(mUser.getEmail())
+                                    .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                                    .document(routeDocName)
+                                    .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH)
+                                    .document(mUser.getEmail())
+                                    .set(walk)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.d(TAG, "Successfully added user as walker!");
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.w(TAG, "Error writing walker", e);
+                                        }
+                                    });
+
                         }
                     })
                             .addOnFailureListener(new OnFailureListener() {
@@ -306,7 +372,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                     // If the user is on a team, also add the route to the team
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH)
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
                             .document(routeDocName)
                             .update(
                                     Route.FIELD_STEPS, route.getSteps(),
@@ -318,6 +384,28 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     Log.d(TAG, "Successfully updated route " + routeDocName + " for team!");
+
+                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                            .document(routeDocName)
+                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH)
+                                            .document(mUser.getEmail())
+                                            .set(walk)
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Log.d(TAG, "Successfully added user as walker to team!");
+                                                }
+                                            })
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Log.w(TAG, "Error writing walker", e);
+                                                }
+                                            });
+
+
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -362,7 +450,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                     // If the user is on a team, also add the route to the team
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMMATE_ROUTES_PATH)
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
                             .document(routeDocName)
                             .set(route)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {

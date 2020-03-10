@@ -7,7 +7,7 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.example.wwrapp.activities.HomeScreenActivity;
-import com.example.wwrapp.activities.TeammateRouteActivity;
+import com.example.wwrapp.activities.TeamRoutesActivity;
 
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -31,7 +31,7 @@ public class TeammateRouteDetailedActivityTest {
     public static void initialize(){
         HomeScreenActivity.setIgnoreHeight(true);
         HomeScreenActivity.setEnableFitnessRunner(false);
-        TeammateRouteActivity.setTestTeammateRoute(true);
+        TeamRoutesActivity.setTestTeammateRoute(true);
     }
 
     @Test

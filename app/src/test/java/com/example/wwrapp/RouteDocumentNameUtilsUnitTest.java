@@ -1,5 +1,6 @@
 package com.example.wwrapp;
 
+import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.RouteDocumentNameUtils;
 
 import org.junit.Test;
@@ -24,5 +25,13 @@ public class RouteDocumentNameUtilsUnitTest {
         String path = "users/user/ariana@gmail.com/Ariana's favorite route";
         String expected = "Ariana's favorite route";
         assertEquals(expected, RouteDocumentNameUtils.getRouteDocumentNameFromPath(path));
+    }
+
+    @Test
+    public void testGetNestedFieldName() {
+        String outerFieldName = "outer";
+        String innerFieldName = "inner";
+        String expected = outerFieldName + FirestoreConstants.DOT_STR + innerFieldName;
+        assertEquals(expected, RouteDocumentNameUtils.getNestedFieldName(outerFieldName, innerFieldName));
     }
 }

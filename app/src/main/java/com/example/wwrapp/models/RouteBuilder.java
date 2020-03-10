@@ -11,7 +11,7 @@ import java.util.Map;
 public class RouteBuilder {
     private Route route; // route to build
     private Map<String, Walk> walkers;
-    private List<String> favoriters;
+    private Map<String, Boolean> favoriters;
     private List<String> tags;
 
     private static final String DEFAULT_STRING_FIELD_VALUE = "";
@@ -21,7 +21,7 @@ public class RouteBuilder {
         route = new Route();
 
         walkers = new HashMap<>();
-        favoriters = new ArrayList<>();
+        favoriters = new HashMap<>();
         tags = new ArrayList<>();
 
         route.setWalkers(walkers);
@@ -106,7 +106,7 @@ public class RouteBuilder {
         return this;
     }
 
-    public RouteBuilder setFavoriters(List<String> favoriters) {
+    public RouteBuilder setFavoriters(Map<String, Boolean> favoriters) {
         route.setFavoriters(favoriters);
         return this;
     }

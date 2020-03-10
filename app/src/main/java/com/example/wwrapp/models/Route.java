@@ -38,7 +38,7 @@ public class Route implements Serializable {
     private String ownerName;
     private String ownerEmail;
     private Map<String, Walk> walkers; // maps emails of users to their walk stats for this Route
-    private List<String> favoriters; // a set of people's emails who have favorited this Route
+    private Map<String, Boolean> favoriters; // a set of people's emails who have favorited this Route
 
     // Not required, but informative
     private String durationOfLastWalk;
@@ -147,24 +147,20 @@ public class Route implements Serializable {
         this.walkers = walkers;
     }
 
-    public void addWalker(String email, Walk walk) {
+    public void putWalker(String email, Walk walk) {
         walkers.put(email, walk);
     }
 
-    public List<String> getFavoriters() {
+    public Map<String, Boolean> getFavoriters() {
         return favoriters;
     }
 
-    public void setFavoriters(List<String> favoriters) {
+    public void putFavoriter(String email, Boolean rating) {
+        favoriters.put(email, rating);
+    }
+
+    public void setFavoriters(Map<String, Boolean> favoriters) {
         this.favoriters = favoriters;
-    }
-
-    public void addFavoriter(String email) {
-        favoriters.add(email);
-    }
-
-    public void removeFavoriter(String email) {
-        favoriters.remove(email);
     }
 
     // Extra getters/setters
