@@ -1,14 +1,16 @@
-package com.example.wwrapp;
+package com.example.wwrapp.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-public class ProposedWalkScreenActivity extends AppCompatActivity {
+import com.example.wwrapp.R;
+
+public class ProposeWalkScreenActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_proposed_walk_screen);
+        setContentView(R.layout.activity_propose_walk_screen);
     }
 }
