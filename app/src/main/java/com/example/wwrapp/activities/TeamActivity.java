@@ -53,6 +53,16 @@ public class TeamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_team);
         Log.d(TAG, "onCreate");
 
+        // Get the database
+        mFirestore = FirebaseFirestore.getInstance();
+
+        // Get this user
+        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        Log.d(TAG, "inviter Email is " + mUser.getInviterEmail());
+
+        // Set up Firestore and query for the routes to display
+        initQuery();
+
         // Render + button
         mAddNewTeamBtn = findViewById(R.id.addNewTeamButton);
         mAddNewTeamBtn.setOnClickListener(new View.OnClickListener() {
@@ -65,18 +75,11 @@ public class TeamActivity extends AppCompatActivity {
             }
         });
 
-        // Get the database
-        mFirestore = FirebaseFirestore.getInstance();
-
         // TODO: Remove this if-block For testing InviteMember
         if (testInvite) {
             Intent intent = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
             startActivity(intent);
         }
-
-        // Get this user
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-        Log.d(TAG, "inviter Email is " + mUser.getInviterEmail());
 
         // Check if user received a team invite since the Home Screen
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
@@ -100,8 +103,7 @@ public class TeamActivity extends AppCompatActivity {
                     } else {
                         Log.d(TAG, "Invitee doesn't have any new invites");
                     }
-                    // Set up Firestore and query for the routes to display
-                    initFirestore();
+
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
                 }
@@ -135,7 +137,7 @@ public class TeamActivity extends AppCompatActivity {
     /**
      * Queries Firestore for the users to display
      */
-    private void initFirestore() {
+    private void initQuery() {
         Log.d(TAG, "initFirestore:");
         // If the user is not on a team, display "team members" from the invitees field
         if (mUser.getTeamName().isEmpty()) {
@@ -183,7 +185,9 @@ public class TeamActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        setResult(resultCode);
+        Log.d(TAG, "request code = " + requestCode);
+        Log.d(TAG, "result code = " + resultCode);
+
         if (requestCode == ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE) {
             Log.d(TAG, "Returned from adding team member");
             // If a team member was added
@@ -194,6 +198,41 @@ public class TeamActivity extends AppCompatActivity {
             }
         } else if (requestCode == INVITE_ACTIVITY_REQUEST_CODE) {
             Log.d(TAG, "Returned from invite activity");
+            if (resultCode == Activity.RESULT_OK) {
+                Log.d(TAG, "Result code OK");
+
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                        .document(mUser.getEmail())
+                        .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, "Pulled updated user data: " + document.getData());
+                                // TODO: Use a consolidated User class
+                                mUser = document.toObject(MockUser.class);
+                                mUser.setStatus("!!!!");
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                                setResult(Activity.RESULT_OK, returnIntent);
+                                initQuery();
+                            } else {
+                                Log.d(TAG, "No such document");
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    }
+                });
+
+
+
+            } else {
+                Log.d(TAG, "Result code not OK");
+                setResult(Activity.RESULT_CANCELED);
+                finish();
+            }
         }
     }
 

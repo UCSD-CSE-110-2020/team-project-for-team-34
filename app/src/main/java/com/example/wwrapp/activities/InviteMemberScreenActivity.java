@@ -1,6 +1,7 @@
 package com.example.wwrapp.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,8 +14,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.MockUser;
+import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.TeamMember;
 import com.example.wwrapp.utils.FirestoreConstants;
+import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.WWRConstants;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -22,6 +25,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class InviteMemberScreenActivity extends AppCompatActivity {
     private static final String TAG = "InviteMemberScreenActivity";
@@ -117,7 +122,10 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                     }
 
                     // Return to Team screen
-                    setResult(Activity.RESULT_OK);
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra(WWRConstants.EXTRA_USER_TEAM_NAME_KEY, FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
+                    setResult(Activity.RESULT_OK, returnIntent);
+
                     finish();
                 }
             });
@@ -139,7 +147,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                     }
 
                     // Go back to team screen
-                    setResult(Activity.RESULT_OK);
+                    Intent returnIntent = new Intent();
+                    setResult(Activity.RESULT_OK, returnIntent);
                     finish();
                 }
             });
@@ -154,9 +163,12 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
 
     public void onInviterAndInviteeNotOnTeamAccept() {
         Log.d(TAG, "onInviterAndInviteeNotOnTeam: ");
+
+        // Set team name
         mUser.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
         mInviter.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
 
+        // Create team members
         TeamMember inviterTeamMember = new TeamMember(mInviter.getEmail(),
                 FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED,
                 mInviter.getName());
@@ -164,6 +176,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         TeamMember inviteeTeamMember = new TeamMember(mUser.getEmail(),
                 FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED,
                 mUser.getName());
+
+        // Store team members
 
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
@@ -174,6 +188,48 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Successfully added inviter to team!");
+
+                Log.d(TAG, "Adding inviter's routes to team");
+
+
+                // Add this team member's routes to the team
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                        .document(mInviter.getEmail())
+                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                        Route route = document.toObject(Route.class);
+
+                                        String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mInviter.getEmail(), route.getRouteName());
+                                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                                .document(routeDocName)
+                                                .set(route)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Log.d(TAG, "Successfully added route to team collection!");
+                                            }
+                                        })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Log.w(TAG, "Error writing document", e);
+                                                    }
+                                                });
+                                    }
+                                } else {
+                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                }
+                            }
+                        });
+
             }
         })
                 .addOnFailureListener(new OnFailureListener() {
@@ -191,6 +247,48 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Successfully added invitee to team!");
+
+                Log.d(TAG, "Adding invitee's routes to team");
+
+                // Add this team member's routes to the team
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                        .document(mUser.getEmail())
+                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                        Route route = document.toObject(Route.class);
+
+                                        String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mUser.getEmail(), route.getRouteName());
+                                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                                .document(routeDocName)
+                                                .set(route)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        Log.d(TAG, "Successfully added route to team collection!");
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Log.w(TAG, "Error writing document", e);
+                                                    }
+                                                });
+                                    }
+                                } else {
+                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                }
+                            }
+                        });
+
+
             }
         })
                 .addOnFailureListener(new OnFailureListener() {
@@ -200,7 +298,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                     }
                 });
 
-        // Update the team name
+        // Update the team name in Firestore
+
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mUser.getEmail()).set(mUser).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -250,10 +349,10 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
     }
 
 
-
-
     public void onInviterOnTeamAndInviteeNotOnTeamAccept() {
         Log.d(TAG, "onInviterAndInviteeNotOnTeam: ");
+
+        // Update invitee's member status
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
@@ -262,6 +361,47 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "Invitee status successfully updated!");
+
+                        // Add this team member's routes to the team
+                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                                .document(mUser.getEmail())
+                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                Log.d(TAG, document.getId() + " => " + document.getData());
+                                                Route route = document.toObject(Route.class);
+
+                                                String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mUser.getEmail(), route.getRouteName());
+                                                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                                        .document(routeDocName)
+                                                        .set(route)
+                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                            @Override
+                                                            public void onSuccess(Void aVoid) {
+                                                                Log.d(TAG, "Successfully added route to team collection!");
+                                                            }
+                                                        })
+                                                        .addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                Log.w(TAG, "Error writing document", e);
+                                                            }
+                                                        });
+                                            }
+                                        } else {
+                                            Log.d(TAG, "Error getting documents: ", task.getException());
+                                        }
+                                    }
+                                });
+
+
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -307,9 +447,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 });
     }
 
-
-
     public void onInviterNotOnTeamAndInviteeOnTeamAccept() {
+        // Update inviter's team member status
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
@@ -317,7 +456,47 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Successfully updated inviter to invitee's team members collection");
+                        Log.d(TAG, "Successfully updated inviter status in invitee's team members collection");
+
+                        // Add this team member's routes to the team
+                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                                .document(mInviter.getEmail())
+                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                                .get()
+                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                Log.d(TAG, document.getId() + " => " + document.getData());
+                                                Route route = document.toObject(Route.class);
+
+                                                String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mInviter.getEmail(), route.getRouteName());
+                                                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                                        .document(routeDocName)
+                                                        .set(route)
+                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                            @Override
+                                                            public void onSuccess(Void aVoid) {
+                                                                Log.d(TAG, "Successfully added route to team collection!");
+                                                            }
+                                                        })
+                                                        .addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                Log.w(TAG, "Error writing document", e);
+                                                            }
+                                                        });
+                                            }
+                                        } else {
+                                            Log.d(TAG, "Error getting documents: ", task.getException());
+                                        }
+                                    }
+                                });
+
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

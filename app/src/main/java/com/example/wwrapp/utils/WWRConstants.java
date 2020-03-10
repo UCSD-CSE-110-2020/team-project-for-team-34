@@ -48,6 +48,7 @@ public final class WWRConstants {
     // For user objects
     public static final String EXTRA_USER_KEY = "com.example.wwrapp.EXTRA_USER_KEY";
     public static final String EXTRA_USER_TYPE_KEY = "com.example.wwrapp.EXTRA_USER_TYPE_KEY";
+    public static final String EXTRA_USER_TEAM_NAME_KEY = "com.example.wwrapp.EXTRA_USER_TEAM_NAME_KEY";
 
 
     //For mocking set user

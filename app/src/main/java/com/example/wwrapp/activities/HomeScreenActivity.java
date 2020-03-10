@@ -285,13 +285,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         });
 
 
-
-
-//        ADD_TEAM_MEMBERS();
-//        QUERY_TEAM();
-//        ADD_USERS();
-//        CREATE_INVITEE();
-
         // Determine what type of user to use:
         String userType = getIntent().getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
         if (userType == null) {
@@ -475,36 +468,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
         Log.d(TAG, " daily steps = " + mDailyTotalSteps);
 
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail())
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                Log.d(TAG, "Setting inviter name and email");
-                                Log.d(TAG, "inviter name = " + document.getString(MockUser.FIELD_INVITER_NAME));
-                                Log.d(TAG, "inviter email = " + document.getString(MockUser.FIELD_INVITER_EMAIL));
-
-
-                                mUser.setInviterName(document.getString(MockUser.FIELD_INVITER_NAME));
-                                mUser.setInviterEmail(document.getString(MockUser.FIELD_INVITER_EMAIL));
-
-                            } else {
-                                Log.d( TAG, "Document does not exist");
-                            }
-                        } else {
-                            Log.d(TAG, "get failed with ", task.getException());
-                        }
-                    }
-
-
-                });
-
-
-
     }
 
     @Override
@@ -650,12 +613,28 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 Log.d(TAG, "request code is " + requestCode);
                 if (resultCode == Activity.RESULT_OK) {
                     Log.d(TAG, "Result is OK");
-                    mUser.setInviterEmail(MockUser.STRING_DEFAULT);
-                    mUser.setInviterName(MockUser.STRING_DEFAULT);
+                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                            .document(mUser.getEmail())
+                            .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@androidx.annotation.NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    Log.d(TAG, "Pulled updated user data: " + document.getData());
+                                    // TODO: Use a consolidated User class
+                                    mUser = document.toObject(MockUser.class);
+                                } else {
+                                    Log.d(TAG, "No such document");
+                                }
+                            } else {
+                                Log.d(TAG, "get failed with ", task.getException());
+                            }
+                        }
+                    });
                 } else if (resultCode == Activity.RESULT_CANCELED) {
+                    // If the user pressed the back button on the invite screen
                     Log.d(TAG, "Result is " + resultCode);
-                    mUser.setInviterEmail(MockUser.STRING_DEFAULT);
-                    mUser.setInviterName(MockUser.STRING_DEFAULT);
                 }
                 break;
 
@@ -717,6 +696,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         // Get the user's height
         mFeet = heightSharedPreferences.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, 0);
         mInches = heightSharedPreferences.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, 0);
+        Log.i(TAG, "initSavedData: mFeet is " + mFeet);
+        Log.i(TAG, "initSavedData: mInches is " + mInches);
+        mFeet = 5;
+        mInches = 3;
 
         // Get the user's steps, and use this value to calculate the miles
         mDailyTotalSteps = stepsSharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);

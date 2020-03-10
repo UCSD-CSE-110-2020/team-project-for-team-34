@@ -180,10 +180,12 @@ public class AddTeamMemberActivity extends AppCompatActivity {
             Log.d(TAG, "Inviter is not on team: ");
             // If invitee is not already on a team and inviter is not on a team
             if (mInvitee.getTeamName().isEmpty()) {
+                // Add invitee to inviter's list
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                         .document(mInviter.getEmail())
                         .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH)
-                        .document(mInviteeEmail).set(inviteeTeamMember).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        .document(mInviteeEmail).set(inviteeTeamMember)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.e(TAG, "Added invitee to inviter's invitees!");
@@ -196,6 +198,26 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                                 Log.e(TAG, "Error writing document", e);
                             }
                         });
+
+                // Add inviter to invitee's pending
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                        .document(mInviteeEmail)
+                        .update(MockUser.FIELD_INVITER_NAME, mInviter.getName(),
+                                MockUser.FIELD_INVITER_EMAIL, mInviter.getEmail())
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.e(TAG, "Added inviter to invitee's pending!");
+
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@android.support.annotation.NonNull Exception e) {
+                                Log.e(TAG, "Error writing inviter to pending", e);
+                            }
+                        });
+
             } else {
                 // If invitee is already on a team and inviter is not on team
                 TeamMember inviterTeamMember =
@@ -259,8 +281,6 @@ public class AddTeamMemberActivity extends AppCompatActivity {
             Log.d(TAG, "invitee is not on team: ");
             // If inviter is on team and invitee is not on team
             if (mInvitee.getTeamName().isEmpty()) {
-                // If inviter is on team and invitee is not on team
-
                 // Add invitee to teamMembers
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                         .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)

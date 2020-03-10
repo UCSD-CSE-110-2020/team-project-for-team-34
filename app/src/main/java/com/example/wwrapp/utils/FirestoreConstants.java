@@ -26,8 +26,8 @@ public class FirestoreConstants {
     public static final String FIRESTORE_TEAM_INVITE_PENDING = "pending";
 
     // Attributes of a mock user
-    public static final String MOCK_USER_NAME = "CC";
-    public static final String MOCK_USER_EMAIL = "CC@";
+    public static final String MOCK_USER_NAME = "DD";
+    public static final String MOCK_USER_EMAIL = "DD@";
 
     public static final String SECOND_MOCK_USER_NAME = "secondMockName";
     public static final String SECOND_MOCK_USER_EMAIL = "secondMockEmail";
