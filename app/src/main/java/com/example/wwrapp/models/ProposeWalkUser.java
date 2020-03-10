@@ -1,5 +1,7 @@
 package com.example.wwrapp.models;
 
+import com.example.wwrapp.utils.WWRConstants;
+
 public class ProposeWalkUser {
 
     private static boolean DEFAULT_PENDING = true;
@@ -36,7 +38,11 @@ public class ProposeWalkUser {
     }
 
     public void setReason(int reason) {
-
-        isPending = false;
+        if(reason == WWRConstants.PROPOSED_WALK_ACCEPT_STATUS ||
+           reason == WWRConstants.PROPOSED_WALK_BAD_ROUTE_STATUS ||
+           reason == WWRConstants.PROPOSED_WALK_BAD_TIME_STATUS) {
+            this.reason = reason;
+            isPending = false;
+        }
     }
 }
