@@ -22,8 +22,6 @@ import com.example.wwrapp.models.GoogleUser;
 import com.example.wwrapp.models.IUser;
 import com.example.wwrapp.models.IUserFactory;
 import com.example.wwrapp.models.MockUser;
-import com.example.wwrapp.models.Team;
-import com.example.wwrapp.models.TeamMember;
 import com.example.wwrapp.services.DummyFitnessServiceWrapper;
 import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -37,19 +35,12 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Home screen for the app
@@ -108,155 +99,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     private String mFitnessServiceKey;
     private boolean mIsObserving;
-
-    // Convenience method to delete all of the data in Firestore
-    private void DELETE_FIRESTORE_TEAM() {
-        Log.e(TAG, "In method DELETE");
-        // Delete the "teams" branch
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                .delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.e(TAG, "DocumentSnapshot successfully deleted!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error deleting document", e);
-                    }
-                });
-    }
-
-    // Convenience method to add team members
-    private void ADD_TEAM_MEMBERS() {
-        Log.e(TAG, "In method ADD");
-        // Create a team with a map of members
-        Map<String, Boolean> members = new HashMap<>();
-        members.put(FirestoreConstants.MOCK_USER_EMAIL, true);
-        members.put(FirestoreConstants.SECOND_MOCK_USER_EMAIL, false);
-        members.put(FirestoreConstants.THIRD_MOCK_USER_EMAIL, true);
-        List<String> userEmails =
-                Arrays.asList(FirestoreConstants.MOCK_USER_EMAIL,
-                        FirestoreConstants.SECOND_MOCK_USER_EMAIL,
-                        FirestoreConstants.THIRD_MOCK_USER_EMAIL);
-        List<String> userTeamStatus =
-                Arrays.asList(FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED,
-                        FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING,
-                        FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
-        Team team = new Team(members);
-
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                .set(team)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.e(TAG, "DocumentSnapshot successfully written!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Error writing document", e);
-                    }
-                });
-    }
-
-    private void UPDATE_TEAM() {
-    }
-
-    private void QUERY_TEAM() {
-        Log.e(TAG, "in method QUERY");
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                                Log.d(TAG, "Members map: " + document.get("emailMap"));
-                            } else {
-                                Log.d(TAG, "No such document");
-                            }
-                        } else {
-                            Log.d(TAG, "get failed with ", task.getException());
-                        }
-                    }
-                });
-        ;
-    }
-
-    private void ADD_USERS() {
-        Log.d(TAG, "ADD_USERS: ");
-        IUser user = new MockUser(FirestoreConstants.MOCK_USER_NAME, FirestoreConstants.MOCK_USER_EMAIL);
-        user.setTeamName("team");
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(user.getEmail()).set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.e(TAG, "DocumentSnapshot successfully written!");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Error writing document", e);
-                    }
-                });
-        ;
-    }
-
-    // Example of creating team and email-status pair
-    private void CREATE_TEAM() {
-        TeamMember teamMember = new TeamMember(FirestoreConstants.MOCK_USER_EMAIL,
-                FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED,
-                FirestoreConstants.MOCK_USER_NAME);
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
-                .document(FirestoreConstants.MOCK_USER_EMAIL)
-                .set(teamMember).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.e(TAG, "DocumentSnapshot successfully written!");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Error writing document", e);
-                    }
-                });
-    }
-
-    private void CREATE_INVITEE() {
-        Log.d(TAG, "CREATE_INVITEE: ");
-        TeamMember teamMember = new TeamMember(FirestoreConstants.SECOND_MOCK_USER_EMAIL,
-                FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED
-                , FirestoreConstants.MOCK_USER_NAME);
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(FirestoreConstants.MOCK_USER_EMAIL)
-                .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH)
-                .document(teamMember.getEmail())
-                .set(teamMember).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.e(TAG, "DocumentSnapshot successfully written!");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "Error writing document", e);
-                    }
-                });
-    }
 
 
     @Override
@@ -613,6 +455,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 Log.d(TAG, "request code is " + requestCode);
                 if (resultCode == Activity.RESULT_OK) {
                     Log.d(TAG, "Result is OK");
+
+                    // Pull the updated user from Firestore to get the updated team name, if applicable
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                             .document(mUser.getEmail())
                             .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -698,8 +542,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         mInches = heightSharedPreferences.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_INCHES_KEY, 0);
         Log.i(TAG, "initSavedData: mFeet is " + mFeet);
         Log.i(TAG, "initSavedData: mInches is " + mInches);
-        mFeet = 5;
-        mInches = 3;
 
         // Get the user's steps, and use this value to calculate the miles
         mDailyTotalSteps = stepsSharedPreferences.getLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, 0);

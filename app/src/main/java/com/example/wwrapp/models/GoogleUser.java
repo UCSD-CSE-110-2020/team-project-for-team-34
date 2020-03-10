@@ -40,7 +40,6 @@ public class GoogleUser implements IUser, Serializable {
 
     @Override
     public void setInviterName(String inviterName) {
-
     }
 
     @Override
@@ -74,12 +73,6 @@ public class GoogleUser implements IUser, Serializable {
     }
 
     @Override
-
-    public List<Route> getRoutes() {
-        return routes;
-    }
-
-    @Override
     public void setInviterEmail(String newInviter) {
         inviter = newInviter;
     }
@@ -87,16 +80,6 @@ public class GoogleUser implements IUser, Serializable {
     @Override
     public void setTeamName(String newTeamName){
         teamName = newTeamName;
-    }
-
-    @Override
-    public void addInvitees(IUser user) {
-        invitees.add(user.getEmail());
-    }
-
-    @Override
-    public void setRoutes(List<Route> newRoutes) {
-        routes = newRoutes;
     }
 
 

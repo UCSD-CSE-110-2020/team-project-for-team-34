@@ -17,8 +17,6 @@ public class MockUser implements IUser {
     public static final String FIELD_INVITER_EMAIL = "inviterEmail";
     public static final String FIELD_TEAM_NAME = "teamName";
 
-
-
     private static final List<String> INVITEES_DEFAULT = new ArrayList<>();
     private static final List<Route> ROUTES_DEFAULT = new ArrayList<>();
     public static final String STRING_DEFAULT = "";
@@ -88,12 +86,6 @@ public class MockUser implements IUser {
     }
 
     @Override
-
-    public List<Route> getRoutes() {
-        return routes;
-    }
-
-    @Override
     public void setInviterEmail(String newInviter) {
         inviterEmail = newInviter;
     }
@@ -101,16 +93,6 @@ public class MockUser implements IUser {
     @Override
     public void setTeamName(String newTeamName) {
         teamName = newTeamName;
-    }
-
-    @Override
-    public void addInvitees(IUser user) {
-        invitees.add(user.getEmail());
-    }
-
-    @Override
-    public void setRoutes(List<Route> newRoutes) {
-        routes = newRoutes;
     }
 
 
