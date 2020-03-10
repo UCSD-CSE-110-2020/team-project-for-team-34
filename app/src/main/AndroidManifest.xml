@@ -3,37 +3,47 @@
     package="com.example.wwrapp">
 
     <application
-        android:name=".fitness.MockFitnessApplication"
+        android:name=".fitness.FitnessApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".TeammateRouteDetailActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".TeammateRouteActivity"
-            android:label="Routes"
-            android:screenOrientation="portrait" />
+        <activity android:name=".activities.SetUserActivity"></activity>
 
+        <service
+            android:name=".services.GoogleFitAdapterService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name=".services.DummyFitnessService"
+            android:enabled="true"
+            android:exported="true" />
         <service
             android:name=".fitness.MockFitnessService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".RouteDetailActivity"
+            android:name=".activities.TeamRouteDetailActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".MockWalkActivity"
+            android:name=".activities.TeamRoutesActivity"
+            android:label="Routes"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.RouteDetailActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activities.MockWalkActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-        <activity android:name=".EnterWalkInformationActivity" />
+        <activity android:name=".activities.EnterWalkInformationActivity" />
         <activity
-            android:name=".HomeScreenActivity"
+            android:name=".activities.HomeScreenActivity"
             android:label="HomeScreen"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
@@ -44,22 +54,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".WalkActivity"
+            android:name=".activities.WalkActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".RoutesActivity"
+            android:name=".activities.RoutesActivity"
             android:label="Routes"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".HeightScreenActivity"
+            android:name=".activities.HeightScreenActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".InviteMemberScreenActivity"
+            android:name=".activities.InviteMemberScreenActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".AddTeamMemberActivity"
+        <activity
+            android:name=".activities.AddTeamMemberActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".TeamActivity"
+        <activity
+            android:name=".activities.TeamActivity"
             android:screenOrientation="portrait" />
     </application>
 

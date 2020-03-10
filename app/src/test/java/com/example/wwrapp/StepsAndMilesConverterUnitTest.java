@@ -1,5 +1,7 @@
 package com.example.wwrapp;
 
+import com.example.wwrapp.utils.StepsAndMilesConverter;
+
 import org.junit.Before;
 import org.junit.Test;
 

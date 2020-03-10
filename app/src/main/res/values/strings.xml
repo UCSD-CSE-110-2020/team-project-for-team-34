@@ -89,4 +89,14 @@
     <string name="invite_decline">Decline</string>
     <string name="invite_description">Invited you to their team</string>
 
+    <string name="go_to_team">Go to team</string>
+    <string name="set_user">Set user</string>
+    <string name="new_email">new email</string>
+    <string name="set_user_cancel">Cancel</string>
+    <string name="set_user_ok">OK</string>
+    <string name="new_name">new name</string>
+    <string name="teammate_name">Teammate Name</string>
+    <string name="propose">Propose</string>
+
+
 </resources>

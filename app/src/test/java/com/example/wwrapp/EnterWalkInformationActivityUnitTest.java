@@ -1,16 +1,14 @@
 package com.example.wwrapp;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import com.example.wwrapp.activities.EnterWalkInformationActivity;
 
 import org.junit.After;
 import org.junit.Before;
@@ -18,7 +16,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowToast;
 
 import static org.junit.Assert.assertEquals;
 
