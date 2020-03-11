@@ -38,6 +38,7 @@ public class ProposeWalk {
         return date;
     }
 
-
-
+    public List<ProposeWalkUser> getUserEmails() {
+        return userEmails;
+    }
 }
