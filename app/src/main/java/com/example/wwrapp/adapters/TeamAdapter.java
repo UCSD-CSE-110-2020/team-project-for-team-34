@@ -11,22 +11,49 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.model.MockUser;
+import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.TeamMember;
+import com.example.wwrapp.utils.FirestoreConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
-import java.util.List;
+public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember, TeamAdapter.TeamViewHolder> {
 
-public class TeamAdapter extends FirestoreRecyclerAdapter<MockUser,TeamAdapter.TeamViewHolder> {
+    private static final String TAG = "TeamAdapter";
 
-    private static final String TAG = "TeamListAdapter";
-
-    private List<String> mName;
     private LayoutInflater mInflater;
 
-    //TODO:implement actual user
-    public TeamAdapter(@NonNull FirestoreRecyclerOptions<MockUser> options) {
+    private FirestoreRecyclerOptions<TeamMember> mOptions;
+
+    private IUser mUser;
+
+    public TeamAdapter(@NonNull FirestoreRecyclerOptions<TeamMember> options, IUser User) {
         super(options);
+        mUser = User;
+        mOptions = options;
+        Log.d(TAG, "in TeamAdapter constructor");
+    }
+
+
+    @Override
+    public void onBindViewHolder(@NonNull TeamViewHolder holder, int position, @NonNull TeamMember model) {
+        Log.d(TAG, "onBindViewHolder: called");
+        Log.d(TAG, "TeamMember email is " + model.getEmail());
+        if (model.getEmail().equals(mUser.getEmail())) {
+            Log.d(TAG, "Hiding user from view");
+            holder.itemView.setVisibility(View.GONE);
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
+        } else {
+            Log.d(TAG, "Displaying user: " + model.getEmail());
+
+            holder.teammateName.setText(model.getName());
+            String status = model.getStatus();
+            if (status.equals(FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED)) {
+                holder.teammateName.setTextColor(Color.BLACK);
+            } else {
+                holder.teammateName.setTextColor(Color.GRAY);
+            }
+        }
     }
 
     @NonNull
@@ -34,44 +61,20 @@ public class TeamAdapter extends FirestoreRecyclerAdapter<MockUser,TeamAdapter.T
     public TeamViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Log.d(TAG, "in onCreateViewHolder");
         mInflater = LayoutInflater.from(parent.getContext());
-        View itemView = mInflater.inflate(R.layout.layout_listitem, parent, false);
+        View itemView = mInflater.inflate(R.layout.layout_team, parent, false);
         return new TeamViewHolder(itemView);
     }
 
-    //TODO:implement actual user
-    @Override
-    public void onBindViewHolder(@NonNull TeamViewHolder holder, int position, @NonNull MockUser model) {
-        Log.d(TAG, "onBindViewHolder: called");
-        holder.teammateName.setText(model.getName());
-
-        //TODO: Change Invite Status in IUSER to Boolean
-        /*boolean isTeammate = model.getInviteStatus();
-        if (isTeammate) {
-            holder.teammateName.setTextColor(Color.BLACK);
-        } else {
-            holder.teammateName.setTextColor(Color.GRAY);
-        }*/
-    }
-
-    @Override
-    public int getItemCount() {
-        if (mName != null) {
-            return mName.size();
-        } else {
-            return 0;
-        }
-    }
-
-
-    class TeamViewHolder extends RecyclerView.ViewHolder{
+    class TeamViewHolder extends RecyclerView.ViewHolder {
         TextView teammateName;
+        View itemView;
 
         //RelativeLayout parentLayout;
         public TeamViewHolder(@NonNull View itemView) {
             super(itemView);
+            Log.d(TAG, "TeamViewHolder: in TeamViewHolder constructor");
             teammateName = itemView.findViewById(R.id.teammate_name);
-
+            this.itemView = itemView;
         }
-
     }
 }

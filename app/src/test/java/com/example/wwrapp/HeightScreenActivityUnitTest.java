@@ -9,6 +9,9 @@ import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.example.wwrapp.activities.HeightScreenActivity;
+import com.example.wwrapp.utils.WWRConstants;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
