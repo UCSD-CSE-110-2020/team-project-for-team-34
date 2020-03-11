@@ -6,33 +6,51 @@
     android:layout_height="match_parent"
     tools:context=".activities.ProposeWalkScreenActivity">
 
-    <Spinner
-        android:id="@+id/time_spinner"
-        android:layout_width="185dp"
-        android:layout_height="42dp"
-        android:layout_marginStart="181dp"
-        android:layout_marginTop="206dp"
-        android:layout_marginEnd="45dp"
-        android:layout_marginBottom="483dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/time_text"
+        android:id="@+id/proposeDateString"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="22dp"
-        android:layout_marginTop="206dp"
-        android:layout_marginEnd="317dp"
-        android:layout_marginBottom="482dp"
-        android:text="Time"
-        android:textSize="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="28dp"
+        android:text="@string/propose_date"
+        android:textSize="20sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/routeToolbar" />
+
+    <TextView
+        android:id="@+id/proposeTimeString"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/propose_time"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/proposeDateInput" />
+
+    <TextView
+        android:id="@+id/proposeDateInput"
+        android:layout_width="376dp"
+        android:layout_height="38dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="12dp"
+        android:text="@string/propose_date_input"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/proposeDateString" />
+
+    <TextView
+        android:id="@+id/proposeTimeInput"
+        android:layout_width="376dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/propose_time_input"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.685"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/proposeTimeString" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/routeToolbar"
@@ -60,37 +78,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:background="@color/fui_transparent"
-            android:textSize="32dp"
-            android:text="@string/x" />
+            android:text="@string/x"
+            android:textSize="32dp" />
     </androidx.appcompat.widget.Toolbar>
-
-    <TextView
-        android:id="@+id/date_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="22dp"
-        android:layout_marginTop="100dp"
-        android:layout_marginEnd="323dp"
-        android:layout_marginBottom="588dp"
-        android:text="Date"
-        android:textSize="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Spinner
-        android:id="@+id/date_spinner"
-        android:layout_width="185dp"
-        android:layout_height="42dp"
-        android:layout_marginStart="181dp"
-        android:layout_marginTop="100dp"
-        android:layout_marginEnd="45dp"
-        android:layout_marginBottom="589dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/send_button"
@@ -105,4 +95,5 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -99,5 +99,11 @@
     <string name="propose">Propose</string>
     <string name="propose_walk">Propose Walk</string>
 
+    <!-- For Propose Walk Screen -->
+    <string name="propose_date">Select Date</string>
+    <string name="propose_time">Select Time</string>
+    <string name="propose_date_input">Click Here to select Date</string>
+    <string name="propose_time_input">Click Here to select Time</string>
+
 
 </resources>
