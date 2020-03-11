@@ -31,6 +31,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firestore.v1.FirestoreGrpc;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -95,32 +96,16 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(isDateValid()) {
+                    ProposeWalk walk = new ProposeWalk(mRoute);
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH).get()
-                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
+                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(walk)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                    if (task.isSuccessful()) {
-                                        DocumentSnapshot document = task.getResult();
-                                        if (document.exists()) {
-                                            Team team = document.toObject(Team.class);
-                                            team.setProposeWalk(mRoute);
-                                            //TODO: IDK HOW THE TEAMS DATA SCEHEMA WORKS
-                                            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                                                    .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH).set(team)
-                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                        @Override
-                                                        public void onSuccess(Void aVoid) {
-                                                            finish();
-                                                            Log.d(TAG, "Team Proposed Walk Updated1");
-                                                        }
-                                                    });
-                                        } else {
-                                            Log.d(TAG, "Could not find team");
-                                        }
-                                    } else {
-                                        Log.d(TAG, "get failed with ", task.getException());
-                                    }
+                                public void onSuccess(Void aVoid) {
+                                    finish();
+                                    Log.d(TAG, "Team Proposed Walk Updated1");
                                 }
                             });
                 }
