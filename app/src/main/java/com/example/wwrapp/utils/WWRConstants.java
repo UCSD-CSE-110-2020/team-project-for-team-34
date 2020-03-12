@@ -55,6 +55,10 @@ public final class WWRConstants {
     public static final String EXTRA_USER_EMAIL_KEY = "com.example.wwrapp.EXTRA_USER_EMAIL_KEY";
     public static final String EXTRA_USER_NAME_KEY = "com.example.wwrapp.EXTRA_USER_NAME_KEY";
 
+    // Value will be true if we are requesting a sign-in, false if we just want to mock
+    public static final String EXTRA_IS_SIGNING_IN_KEY = "com.example.wwrapp.EXTRA_IS_SIGINING_IN_KEY";
+
+
     // Firestore Keys
     public static final String EXTRA_ROUTE_ID_KEY = "com.example.wwrapp.EXTRA_ROUTE_ID_KEY";
     public static final String EXTRA_ROUTE_PATH_KEY = "com.example.wwrapp.EXTRA_ROUTE_PATH_KEY";
@@ -71,7 +75,6 @@ public final class WWRConstants {
 
     public static final String SHARED_PREFERENCES_USER_INFO_EMAIL_KEY =
             "com.example.wwrapp.SHARED_PREFERENCES_USER_INFO_EMAIL_KEY";
-
 
 
     // Height file

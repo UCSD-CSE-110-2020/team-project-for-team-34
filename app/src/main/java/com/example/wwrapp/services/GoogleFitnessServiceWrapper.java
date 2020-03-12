@@ -66,7 +66,7 @@ public class GoogleFitnessServiceWrapper implements IFitnessService, IFitnessSub
     public void startGoogleService(Activity activity) {
         // Save the activity
         this.mActivity = activity;
-        Log.d(TAG, "In method startDummyService()");
+        Log.d(TAG, "In method startGoogleService()");
         if (!mIsBound) {
             Log.d(TAG, "Binding service");
             Intent intent = new Intent(mContext, GoogleFitAdapterService.class);
@@ -76,7 +76,7 @@ public class GoogleFitnessServiceWrapper implements IFitnessService, IFitnessSub
     }
 
     public void stopGoogleService() {
-        Log.d(TAG, "In method stopDummyService()");
+        Log.d(TAG, "In method stopGoogleService()");
         if (mIsBound) {
             Log.d(TAG, "Unbinding service");
             Intent intent = new Intent(mContext, GoogleFitAdapterService.class);

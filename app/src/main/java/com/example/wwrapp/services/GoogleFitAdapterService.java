@@ -11,7 +11,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.wwrapp.activities.HomeScreenActivity;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
@@ -32,6 +31,7 @@ import java.util.List;
 public class GoogleFitAdapterService extends Service implements IFitnessService, IFitnessSubject {
     private static final String TAG = "GoogleFitAdapterService";
 
+    private boolean mDoneSettingUp;
 
     // Whether the inner thread is running
     private boolean mIsRunning;
@@ -70,7 +70,10 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
                     // Increment steps
                     try {
                         wait(WWRConstants.WAIT_TIME);
-                        updateStepCount();
+                        Log.d(TAG, "Value of mDoneSettingUp is " + mDoneSettingUp);
+                        if (mDoneSettingUp) {
+                            updateStepCount();
+                        }
                     }
                     catch (InterruptedException e) {
                         Log.d(TAG, e.getMessage());
@@ -128,20 +131,22 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
                 .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
                 .build();
-        mAccount = GoogleSignIn.getAccountForExtension(mActivity,fitnessOptions);
-        if (!GoogleSignIn.hasPermissions(HomeScreenActivity.account, fitnessOptions)) {
+        mAccount = GoogleSignIn.getAccountForExtension(mActivity, fitnessOptions);
+        if (!GoogleSignIn.hasPermissions(mAccount, fitnessOptions)) {
+            Log.d(TAG, "Sign in permissions evaluated to false");
             GoogleSignIn.requestPermissions(
                     mActivity, // your activity
                     WWRConstants.GOOGLE_FIT_PERMISSIONS_REQUEST_CODE,
-                    HomeScreenActivity.account,
+                    mAccount,
                     fitnessOptions);
         } else {
-            updateStepCount();
+            Log.d(TAG, "Calling startRecording");
             startRecording();
         }
     }
 
     private void startRecording() {
+        Log.d(TAG, "startRecording:");
         if (mAccount == null) {
             return;
         }
@@ -152,20 +157,23 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.i(TAG, "Successfully subscribed!");
+                        mDoneSettingUp = true;
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.i(TAG, "There was a problem subscribing.");
+                        Log.i(TAG, "onFailure: " + e.getMessage());
                     }
                 });
     }
 
     @Override
     public void updateStepCount() {
-        Log.d(TAG, "In method updateStepCount");
+        Log.v(TAG, "In method updateStepCount");
         if (mAccount == null) {
+            Log.d(TAG, "updateStepCount: mAccount is null");
             return;
         }
 
@@ -180,7 +188,7 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
                                         dataSet.isEmpty()
                                                 ? 0
                                                 : dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
-                                Log.d(TAG, "total is: " + total);
+                                Log.v(TAG, "total is: " + total);
 
                                 SharedPreferences saveSteps = mActivity.getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE);
                                 SharedPreferences.Editor editor = saveSteps.edit();
@@ -197,15 +205,14 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
                                 editor.putLong(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_KEY, total);
                                 editor.apply();
 
-                                Log.d(TAG, "Total steps: " + total);
-                                System.out.println("Total steps: " + total);
+                                Log.v(TAG, "Total steps: " + total);
                             }
                         })
                 .addOnFailureListener(
                         new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                Log.d(TAG, "There was a problem getting the step count.", e);
+                                Log.w(TAG, "There was a problem getting the step count.", e);
                             }
                         });
     }
