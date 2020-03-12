@@ -46,6 +46,15 @@ public class ProposedWalkActivity extends AppCompatActivity {
 
         mFirestore = FirebaseFirestore.getInstance();
 
+        findViewById(R.id.close_route_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Close up this activity
+                Log.d(TAG, "Clicked 'X' button");
+                finish();
+            }
+        });
+
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
@@ -67,6 +76,60 @@ public class ProposedWalkActivity extends AppCompatActivity {
                             Intent intent = getIntent();
                             mRoute = mWalk.getRoute();
                             mUser = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+
+                            TextView routeNameText = findViewById(R.id.route_detail_name);
+                            routeNameText.setText(mRoute.getRouteName());
+
+                            TextView startingPointText = findViewById(R.id.starting_point_text_view);
+                            startingPointText.setText(mRoute.getStartingPoint());
+
+                            TextView routeDateText = findViewById(R.id.route_detail_date);
+                            routeDateText.setText(mRoute.getDateOfLastWalk());
+
+                            double miles = mRoute.getMiles();
+                            TextView routeMilesText = findViewById(R.id.miles_text_view);
+                            routeMilesText.setText(String.valueOf(miles));
+
+                            long steps = mRoute.getSteps();
+                            TextView routeStepsText = findViewById(R.id.steps_text_view);
+                            routeStepsText.setText(String.valueOf(steps));
+
+                            TextView noteText = findViewById(R.id.notes_text_view);
+                            noteText.setText(mRoute.getNotes());
+
+                            // Display the tags
+                            List<String> tags = mRoute.getTags();
+                            if (tags != null) {
+                                int i = 1;
+                                for (String tag : tags) {
+                                    TextView tagText;
+                                    switch (i) {
+                                        case 1:
+                                            tagText = findViewById(R.id.tag1);
+                                            tagText.setText(tag);
+                                            break;
+                                        case 2:
+                                            tagText = findViewById(R.id.tag2);
+                                            tagText.setText(tag);
+                                            break;
+                                        case 3:
+                                            tagText = findViewById(R.id.tag3);
+                                            tagText.setText(tag);
+                                            break;
+                                        case 4:
+                                            tagText = findViewById(R.id.tag4);
+                                            tagText.setText(tag);
+                                            break;
+                                        case 5:
+                                            tagText = findViewById(R.id.tag5);
+                                            tagText.setText(tag);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    i++;
+                                }
+                            }
 
                             timeView.setText(mWalk.getTime());
                             dateView.setText(mWalk.getDate());
