@@ -38,7 +38,7 @@ public class TeammateRouteScreenTest {
         RoutesActivity.setIsTest(true);
     }
 
-    @Ignore
+
     @Test
     public void NoTeammateRoutesTest() {
         mActivityTestRule.getActivity();
