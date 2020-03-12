@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -190,6 +191,13 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
             // Set the owner's name
             holder.teammateName.setText(iconName);
 
+            // Set the checkMark
+            // TODO: implement backend logic
+            boolean isWalked = true;
+            if(!isWalked)
+            {
+                holder.checkMark.setVisibility(View.GONE);
+            }
 
             // Listen for favorite changes
             holder.favoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -263,6 +271,7 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
         TextView routeSteps;
         TextView teammateName;
         ToggleButton favoriteBtn;
+        ImageView checkMark;
         View itemView;
 
         public TeammateRouteViewHolder(@NonNull View itemView) {
@@ -274,6 +283,7 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
             routeMiles = itemView.findViewById(R.id.route_mile);
             routeSteps = itemView.findViewById(R.id.route_step);
             favoriteBtn = itemView.findViewById(R.id.favoriteBtn);
+            checkMark = itemView.findViewById(R.id.check_mark);
             teammateName = itemView.findViewById(R.id.teammate_name);
             this.itemView = itemView;
 
