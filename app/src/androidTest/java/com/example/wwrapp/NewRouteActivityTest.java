@@ -6,7 +6,9 @@ import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.example.wwrapp.activities.EnterWalkInformationActivity;
 import com.example.wwrapp.activities.HomeScreenActivity;
+import com.example.wwrapp.activities.RoutesActivity;
 
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -36,6 +38,9 @@ public class NewRouteActivityTest {
     public static void initialize(){
         HomeScreenActivity.setIgnoreHeight(true);
         HomeScreenActivity.setEnableFitnessRunner(false);
+        HomeScreenActivity.disableUser(true);
+        RoutesActivity.disableUser(true);
+        EnterWalkInformationActivity.disableUser(true);
     }
 
     // test the NewRouteActivity
@@ -78,7 +83,5 @@ public class NewRouteActivityTest {
                         isDisplayed()));
         appCompatButton4.perform(click());
 
-        ViewInteraction relativeLayout = onView(allOf(withId(R.id.recycler_view_route), isDisplayed()));
-        relativeLayout.check(matches(isDisplayed()));
     }
 }

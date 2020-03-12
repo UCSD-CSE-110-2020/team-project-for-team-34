@@ -6,7 +6,9 @@ import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.example.wwrapp.activities.AddTeamMemberActivity;
 import com.example.wwrapp.activities.HomeScreenActivity;
+import com.example.wwrapp.activities.TeamActivity;
 
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -34,13 +36,14 @@ public class AddMemberActivityTest {
     public static void initialize(){
         HomeScreenActivity.setIgnoreHeight(true);
         HomeScreenActivity.setEnableFitnessRunner(false);
+        HomeScreenActivity.disableUser(true);
+        TeamActivity.disableUser(true);
+        AddTeamMemberActivity.disableUser(true);
     }
 
     @Test
     public void inviteMemberActivityTest(){
-        ViewInteraction appCompatButton1 = onView(
-                allOf(withId(R.id.teamScreenButton), withText("Go To Team"),
-                        isDisplayed()));
+        ViewInteraction appCompatButton1 = onView((withId(R.id.teamScreenButton)));
         appCompatButton1.perform(click());
 
         ViewInteraction appCompatButton2 = onView(
