@@ -14,7 +14,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.RouteBuilder;
 import com.example.wwrapp.models.Walk;
@@ -58,7 +58,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
     private RadioButton mRouteDifficultyRadioBtn;
     private RadioButton mRouteFavoriteRadioBtn;
 
-    private IUser mUser;
+    private AbstractUser mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +66,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_enter_walk_information);
 
         // Get the user
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
         // Create the list of tags
         mTags = new ArrayList<>();

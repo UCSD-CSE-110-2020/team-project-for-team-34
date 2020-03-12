@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.adapters.TeamAdapter;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.TeamMember;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -41,7 +41,7 @@ public class TeamActivity extends AppCompatActivity {
     // Backend-related objects
     private FirebaseFirestore mFirestore;
     private Query mQuery;
-    private IUser mUser;
+    private AbstractUser mUser;
     private boolean mUserIsOnTeam;
 
     // For testing InviteMemberScreen
@@ -57,7 +57,7 @@ public class TeamActivity extends AppCompatActivity {
         mFirestore = FirebaseFirestore.getInstance();
 
         // Get this user
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
         Log.d(TAG, "inviter Email is " + mUser.getInviterEmail());
 
         // Set up Firestore and query for the routes to display
@@ -69,7 +69,7 @@ public class TeamActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(TeamActivity.this, AddTeamMemberActivity.class);
-                final IUser user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+                final AbstractUser user = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
                 intent.putExtra(WWRConstants.EXTRA_USER_KEY, user);
                 startActivityForResult(intent, ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE);
             }
@@ -90,8 +90,8 @@ public class TeamActivity extends AppCompatActivity {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data for invitee: " + document.getData());
-                        String newInviterName = document.getString(MockUser.FIELD_INVITER_NAME);
-                        String newInviterEmail = document.getString(MockUser.FIELD_INVITER_EMAIL);
+                        String newInviterName = document.getString(AbstractUser.FIELD_INVITER_NAME);
+                        String newInviterEmail = document.getString(AbstractUser.FIELD_INVITER_EMAIL);
                         // If there a new inviter sent an invitation:
                         if (!newInviterName.isEmpty()) {
                             mUser.setInviterName(newInviterName);
@@ -212,7 +212,7 @@ public class TeamActivity extends AppCompatActivity {
                                 Log.d(TAG, "Pulled updated user data: " + document.getData());
                                 // TODO: Use a consolidated User class
                                 mUser = document.toObject(MockUser.class);
-                                mUser.setStatus("!!!!");
+                                mUser.setTeamStatus("!!!!");
                                 Intent returnIntent = new Intent();
                                 returnIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
                                 setResult(Activity.RESULT_OK, returnIntent);

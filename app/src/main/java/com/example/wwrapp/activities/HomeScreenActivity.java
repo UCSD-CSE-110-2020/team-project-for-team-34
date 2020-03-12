@@ -18,10 +18,11 @@ import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.GoogleUser;
-import com.example.wwrapp.models.IUser;
-import com.example.wwrapp.models.IUserFactory;
+import com.example.wwrapp.models.AbstractUserFactory;
 import com.example.wwrapp.models.MockUser;
+import com.example.wwrapp.models.WWRUser;
 import com.example.wwrapp.services.DummyFitnessServiceWrapper;
 import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -35,12 +36,12 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 /**
  * Home screen for the app
@@ -91,7 +92,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     private boolean mUserIsBeingInvited;
 
-    private IUser mUser;
+    private AbstractUser mUser;
 
     // TODO: Set this variable to true if you want to test the invite member screen
     // TODO: else set to false if you want to test the team screen
@@ -110,98 +111,75 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         // Initialize the database
         mFirestore = FirebaseFirestore.getInstance();
 
-        mFirestore.collection("testRoutes")
-                .document("testRoute")
-                .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Log.w(TAG, document.getId() + " => " + document.getData());
-                    }
-                } else {
-                    Log.d(TAG, "Error getting documents: ", task.getException());
-                }
-            }
-        });
+//        mFirestore.collection("testRoutes")
+//                .document("testRoute")
+//                .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+//                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                if (task.isSuccessful()) {
+//                    for (QueryDocumentSnapshot document : task.getResult()) {
+//                        Log.w(TAG, document.getId() + " => " + document.getData());
+//                    }
+//                } else {
+//                    Log.d(TAG, "Error getting documents: ", task.getException());
+//                }
+//            }
+//        });
 
 
-        // Determine what type of user to use:
-        String userType = getIntent().getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
-        if (userType == null) {
-            // Default to the mock user
-            Log.d(TAG, "Creating Mock user");
-            mUser = IUserFactory.createUser
-                    (WWRConstants.MOCK_USER_FACTORY_KEY,
-                            FirestoreConstants.MOCK_USER_NAME,
-                            FirestoreConstants.MOCK_USER_EMAIL);
-
-            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                    .document(mUser.getEmail())
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                if (document.exists()) {
-                                    Log.d(TAG, "Setting inviter name and email");
-                                    Log.d(TAG, "inviter name = " + document.getString(MockUser.FIELD_INVITER_NAME));
-                                    Log.d(TAG, "inviter email = " + document.getString(MockUser.FIELD_INVITER_EMAIL));
-                                    Log.d(TAG, "user team = " + document.getString(MockUser.FIELD_TEAM_NAME));
+        // Create a User object. This object will be passed around the entire app to get the user's
+        // info.
+        Log.d(TAG, "Creating local WWR user");
+        mUser = AbstractUserFactory.createUser
+                (WWRConstants.WWR_USER_FACTORY_KEY,
+                        FirestoreConstants.WWR_USER_NAME,
+                        FirestoreConstants.WWR_USER_EMAIL,
+                        FirestoreConstants.FIRESTORE_DEFAULT_TEAM_NAME,
+                        FirestoreConstants.FIRESTORE_DEFAULT_TEAM_STATUS);
 
 
-                                    mUser.setInviterName(document.getString(MockUser.FIELD_INVITER_NAME));
-                                    mUser.setInviterEmail(document.getString(MockUser.FIELD_INVITER_EMAIL));
-                                    mUser.setTeamName(document.getString(MockUser.FIELD_TEAM_NAME));
+        // Check if the user has already logged in by checking SharedPreferences:
+        SharedPreferences loginSharedPreferences =
+                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_USER_INFO_FILE_NAME, MODE_PRIVATE);
+        String userName = readUserNameFromSharedPreferences(loginSharedPreferences);
+        String userEmail = readUserEmailFromSharedPreferences(loginSharedPreferences);
 
-                                } else {
-                                    Log.d(TAG, "Creating Mock User");
-                                    IUser user = new MockUser(mUser.getName(), mUser.getEmail());
-                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
-                                }
-                            } else {
-                                Log.d(TAG, "get failed with ", task.getException());
-                            }
+        // If the login info fields are null, the user hasn't signed in before *OR*
+        // the device's data has been wiped, and the user may already exist on Firestore:
+        // TODO: Wrap this check inside of a flag check for testing
+        if (userName == null || userEmail == null) {
+            Log.d(TAG, "User name and/or email are null");
+            // TODO: Prompt the user to enter their name and email again, and get these values
+            userName = FirestoreConstants.WWR_USER_NAME;
+            userEmail = FirestoreConstants.WWR_USER_EMAIL;
+            // TODO: End TODO
 
+            // Recreate the user with the entered-in name and email
+            mUser = AbstractUserFactory.createUser
+                    (WWRConstants.WWR_USER_FACTORY_KEY,
+                            userName,
+                            userEmail,
+                            FirestoreConstants.FIRESTORE_DEFAULT_TEAM_NAME,
+                            FirestoreConstants.FIRESTORE_DEFAULT_TEAM_STATUS);
 
-                        }
-
-
-                    });
+            // Save the login info on FireStore
+            writeUserToFireStore(mUser);
+            // Save the login info locally:
+            writeUserLoginToSharedPreferences(loginSharedPreferences, userName, userEmail);
         } else {
-            signIn();
-            // TODO: Create a Google or Firebase user
-            //Check if user exists
-            DocumentReference findUser = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(mUser.getEmail());
-            findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            GoogleUser user = document.toObject(GoogleUser.class);
-                            Log.d(TAG, "USER data: @" + user.getEmail());
-                            mUser = user;
-                        } else {
-                            Log.d(TAG, "Creating User");
-                            GoogleUser user = new GoogleUser(mUser.getName(), mUser.getEmail());
-                            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
-                        }
-                    } else {
-                        Log.d(TAG, "get failed with ", task.getException());
-                    }
-                }
-            });
+            Log.d(TAG, "User login info already exists, fetching from Firestore ...");
+
+            // The user has signed in before OR we have their login info locally:
+            // Just pull user data
+            readUserFromFireStore();
         }
 
-        // TODO: Check if the user exists already in the database
-        // Code here
 
-        // TODO: Update this with actual sign-in logic later
+        // We need this alias to access the user from inner classes
+        AbstractUser finalUser = mUser;
+
         // Register the team screen button
-        IUser finalUser = mUser;
         findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -269,6 +247,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 startSetUserActivity();
             }
         });
+
         // Save the values of stored height, steps and miles, and last walk stats to their
         // respective member variables
         initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
@@ -277,14 +256,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
         // Update the UI
         updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
-
-
-        // use this code to reset the last walk's stats
-        // TODO: Comment out in production. If you don't, the last walk stats won't work.
-//        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-//        SharedPreferences.Editor editor = spfs.edit();
-//        editor.clear();
-//        editor.apply();
     }
 
     @Override
@@ -669,6 +640,36 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         HomeScreenActivity.sIgnoreHeight = ignoreHeight;
     }
 
+
+    // Code moved out of onCreate for now
+    private void TODO_GOOGLE_SIGN_IN() {
+        Log.d(TAG, "Before method signIn()");
+        signIn();
+        // TODO: Create a Google or Firebase user
+        //Check if user exists
+        DocumentReference findUser = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(mUser.getEmail());
+        findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        GoogleUser user = document.toObject(GoogleUser.class);
+                        Log.d(TAG, "USER data: @" + user.getEmail());
+                        mUser = user;
+                    } else {
+                        Log.d(TAG, "Creating User");
+                        GoogleUser user = new GoogleUser(mUser.getName(), mUser.getEmail());
+                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+
+    }
+
     private void signIn() {
         FitnessOptions fitnessOptions = FitnessOptions.builder()
                 .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
@@ -706,10 +707,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                         return;
                     } else {
                         Log.d(TAG, "User does not Exist");
-                        IUserFactory userFac = new IUserFactory();
-                        mUser = userFac.createUser(WWRConstants.GOOGLE_USER_FACTORY_KEY,
+                        mUser = AbstractUserFactory.createUser(WWRConstants.GOOGLE_USER_FACTORY_KEY,
                                 account.getDisplayName(),
-                                account.getEmail());
+                                account.getEmail(), null, null);
                         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(mUser.getEmail()).set(mUser);
                     }
                 } else {
@@ -742,5 +742,115 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         // If testVal == -1, then there was no height
         return testVal != -1;
     }
+
+    private void writeUserLoginToSharedPreferences(SharedPreferences sharedPreferences, String name, String email) {
+        Log.d(TAG, "writeUserLoginToSharedPreferences: in method");
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(WWRConstants.SHARED_PREFERENCES_USER_INFO_NAME_KEY, name);
+        editor.putString(WWRConstants.SHARED_PREFERENCES_USER_INFO_EMAIL_KEY, email);
+        editor.apply();
+    }
+
+    private String readUserNameFromSharedPreferences(SharedPreferences sharedPreferences) {
+        Log.d(TAG, "readUserNameFromSharedPreferences: ");
+        String name = sharedPreferences.getString(WWRConstants.SHARED_PREFERENCES_USER_INFO_NAME_KEY, null);
+        return name;
+    }
+
+    private String readUserEmailFromSharedPreferences(SharedPreferences sharedPreferences) {
+        Log.d(TAG, "readUserEmailFromSharedPreferences: ");
+        String email = sharedPreferences.getString(WWRConstants.SHARED_PREFERENCES_USER_INFO_EMAIL_KEY, null);
+        return email;
+    }
+
+    /**
+     * Writes the member user to FireStore. If the user exists already, DOES NOT override any data.
+     * @param user
+     */
+    private void writeUserToFireStore(AbstractUser user) {
+        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                .document(mUser.getEmail())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.i(TAG, "User does exist on Firestore, fetching data ...");
+                                Log.d(TAG, "inviter name = " + document.getString(AbstractUser.FIELD_INVITER_NAME));
+                                Log.d(TAG, "inviter email = " + document.getString(AbstractUser.FIELD_INVITER_EMAIL));
+                                Log.d(TAG, "user team = " + document.getString(AbstractUser.FIELD_TEAM_NAME));
+
+                                AbstractUser user = document.toObject(WWRUser.class);
+                                Log.i(TAG, "Fetched user object is " + user.toString());
+                                mUser = user;
+//
+//                                mUser.setInviterName(document.getString(AbstractUser.FIELD_INVITER_NAME));
+//                                mUser.setInviterEmail(document.getString(AbstractUser.FIELD_INVITER_EMAIL));
+//                                mUser.setTeamName(document.getString(AbstractUser.FIELD_TEAM_NAME));
+
+                            } else {
+                                Log.i(TAG, "User doesn't exist on Firestore, creating now ...");
+                                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                                        .document(mUser.getEmail())
+                                        .set(mUser)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Log.d(TAG, "Successfully created new user!");
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.w(TAG, "Error creating new user", e);
+                                            }
+                                        });
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    } // end onComplete
+                }); // end query
+    }
+
+    /**
+     * Reads the user from FireStore. The user MUST exist!
+     */
+    private void readUserFromFireStore() {
+        Log.d(TAG, "readUserFromFireStore: ");
+        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                .document(mUser.getEmail())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            mUser = document.toObject(WWRUser.class);
+                            Log.d(TAG, "User is\n" + mUser.toString());
+                          
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    } // end onComplete
+                }); // end query
+    }
+
+    private void clearLoginSharedPreferences() {
+        SharedPreferences login = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_USER_INFO_FILE_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = login.edit();
+        editor.clear();
+        editor.apply();
+    }
+
+    private void clearDailyStepsSharedPreferences() {
+        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = spfs.edit();
+        editor.clear();
+        editor.apply();
+    }
+
 } // end class
 

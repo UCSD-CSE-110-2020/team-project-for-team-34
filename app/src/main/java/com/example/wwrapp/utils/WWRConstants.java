@@ -62,6 +62,18 @@ public final class WWRConstants {
 
     // SharedPreferences constants
 
+    // User login info
+    public static final String SHARED_PREFERENCES_USER_INFO_FILE_NAME =
+            "com.example.wwrapp.SHARED_PREFERENCES_USER_INFO_FILE_NAME";
+
+    public static final String SHARED_PREFERENCES_USER_INFO_NAME_KEY =
+            "com.example.wwrapp.SHARED_PREFERENCES_USER_INFO_NAME_KEY";
+
+    public static final String SHARED_PREFERENCES_USER_INFO_EMAIL_KEY =
+            "com.example.wwrapp.SHARED_PREFERENCES_USER_INFO_EMAIL_KEY";
+
+
+
     // Height file
     public static final String SHARED_PREFERENCES_HEIGHT_FILE_NAME = "com.example.wwrapp.SHARED_PREFERENCES_HEIGHT_FILE_NAME";
     public static final String SHARED_PREFERENCES_HEIGHT_FEET_KEY = "com.example.wwrapp.SHARED_PREFERENCES_HEIGHT_FEET_KEY";
@@ -107,6 +119,8 @@ public final class WWRConstants {
     // User Factory keys/types
     public static final String GOOGLE_USER_FACTORY_KEY = "com.example.wwrapp.GOOGLE_USER_FACTORY_KEY";
     public static final String MOCK_USER_FACTORY_KEY = "com.example.wwrapp.MOCK_USER_FACTORY_KEY";
+    public static final String WWR_USER_FACTORY_KEY = "com.example.wwrapp.WWR_USER_FACTORY_KEY";
+
 
     // Mocks
     public static final String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";

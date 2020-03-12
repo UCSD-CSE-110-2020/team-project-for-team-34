@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.TeamMember;
@@ -36,8 +36,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
     private TextView mMemberText;
     private String mInviterName;
     private FirebaseFirestore mFirestore;
-    private IUser mUser;
-    private IUser mInviter;
+    private AbstractUser mUser;
+    private AbstractUser mInviter;
 
     // For testing purposes
     private static boolean testInvite = false;
@@ -56,7 +56,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         mDeclineBtn = findViewById(R.id.invite_decline_button);
 
         // get user and inviter
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
         assert mUser != null;
         mInviterName = mUser.getInviterName();
         String inviterEmail = mUser.getInviterEmail();
@@ -332,7 +332,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         // Reset invitee's inviter Email
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mUser.getEmail())
-                .update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT, MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT)
+                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -432,7 +432,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         // Reset invitee's inviter Email
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mUser.getEmail())
-                .update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT, MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT)
+                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -510,7 +510,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         // Reset invitee's inviter Email
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mUser.getEmail())
-                .update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT, MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT)
+                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -528,8 +528,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
     public void onInviterAndInviteeNotOnTeamDecline() {
         Log.d(TAG, "onInviterAndInviteeNotOnTeamDecline: ");
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail()).update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT,
-                MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT).addOnSuccessListener(new OnSuccessListener<Void>() {
+                .document(mUser.getEmail()).update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT,
+                AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Successfully reset invitee's inviter name and email");
@@ -562,8 +562,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
     public void onInviterOnTeamAndInviteeNotOnTeamDecline() {
         Log.d(TAG, "onInviterOnTeamAndInviteeNotOnTeamDecline: ");
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail()).update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT,
-                MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT).addOnSuccessListener(new OnSuccessListener<Void>() {
+                .document(mUser.getEmail()).update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT,
+                AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Successfully reset invitee's inviter name and email");
@@ -618,7 +618,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         // Reset invitee's inviter email
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mUser.getEmail())
-                .update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT, MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT)
+                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.adapters.RouteAdapter;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -44,7 +44,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
     private Button mTeammateRouteButton;
 
     // Backend-related objects
-    private IUser mUser;
+    private AbstractUser mUser;
     private FirebaseFirestore mFirestore;
     private Query mQuery;
 
@@ -58,7 +58,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
         Log.d(TAG, "in onCreate");
 
         // Get this user
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
         // Set up Firestore and query for the routes to display
         initFirestore();

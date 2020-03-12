@@ -17,7 +17,7 @@ import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.models.WalkBuilder;
@@ -66,7 +66,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     private boolean mIsObserving;
 
     private LocalDateTime mDateTime;
-    private IUser mUser;
+    private AbstractUser mUser;
     private String mFitnessServiceKey;
 
     @Override
@@ -76,7 +76,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         setContentView(R.layout.activity_walk);
 
         // Get the user
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
         // Get the service type
         mFitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
 

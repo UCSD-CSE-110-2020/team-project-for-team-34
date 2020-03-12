@@ -14,8 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
-import com.example.wwrapp.models.IUserFactory;
+import com.example.wwrapp.models.AbstractUser;
+import com.example.wwrapp.models.AbstractUserFactory;
 import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.TeamMember;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -49,8 +49,8 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 
     private FirebaseFirestore mFirestore;
 
-    private IUser mInviter;
-    private IUser mInvitee;
+    private AbstractUser mInviter;
+    private AbstractUser mInvitee;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +77,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String userType = intent.getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
         assert userType != null;
-        mInviter = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mInviter = (AbstractUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
         Log.i(TAG, "inviter  email is " + mInviter.getEmail());
 
@@ -114,9 +114,12 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                                 mInvitee = document.toObject(MockUser.class);
                                 Log.d(TAG, "DocumentSnapshot data for invitee: " + document.getData());
                             } else {
-                                mInvitee = IUserFactory.createUser(WWRConstants.MOCK_USER_FACTORY_KEY,
+                                // TODO: User factory
+                                mInvitee = AbstractUserFactory.createUser(WWRConstants.MOCK_USER_FACTORY_KEY,
                                         mInviteeName,
-                                        mInviteeEmail);
+                                        mInviteeEmail,
+                                        FirestoreConstants.FIRESTORE_DEFAULT_TEAM_NAME,
+                                        FirestoreConstants.FIRESTORE_DEFAULT_TEAM_STATUS);
                                 onInviteeIsNotInFirestore();
                                 Log.d(TAG, "No such document for invitee");
                             }
@@ -153,7 +156,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
         Log.d(TAG, "sequenceInviteeIsOnTeam: ");
         // if invitee does not exist on firebase, add it to the collection.
 
-        mInvitee.setStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING);
+        mInvitee.setTeamStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING);
         mInvitee.setInviterEmail(mInviter.getEmail());
         mInvitee.setInviterName(mInviter.getName());
 
@@ -202,8 +205,8 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                 // Add inviter to invitee's pending
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                         .document(mInviteeEmail)
-                        .update(MockUser.FIELD_INVITER_NAME, mInviter.getName(),
-                                MockUser.FIELD_INVITER_EMAIL, mInviter.getEmail())
+                        .update(AbstractUser.FIELD_INVITER_NAME, mInviter.getName(),
+                                AbstractUser.FIELD_INVITER_EMAIL, mInviter.getEmail())
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
@@ -244,8 +247,8 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 
                 // Update invitee (on team already) email
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                        .document(mInviteeEmail).update(MockUser.FIELD_INVITER_NAME, mInviter.getName(),
-                        MockUser.FIELD_INVITER_EMAIL, mInviter.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        .document(mInviteeEmail).update(AbstractUser.FIELD_INVITER_NAME, mInviter.getName(),
+                        AbstractUser.FIELD_INVITER_EMAIL, mInviter.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "Successfully updated invitee's email");
@@ -302,9 +305,9 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 
                 // Set the inviter email
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                        .document(mInviteeEmail).update(MockUser.FIELD_INVITER_NAME,
+                        .document(mInviteeEmail).update(AbstractUser.FIELD_INVITER_NAME,
                         mInviter.getName(),
-                        MockUser.FIELD_INVITER_EMAIL, mInviter.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        AbstractUser.FIELD_INVITER_EMAIL, mInviter.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "Successfully set inviter name and email for invitee");
