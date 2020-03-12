@@ -76,7 +76,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
             });
         } else {
             // Get this user
-            mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
             // Set up Firestore and query for the routes to display
             initFirestore();

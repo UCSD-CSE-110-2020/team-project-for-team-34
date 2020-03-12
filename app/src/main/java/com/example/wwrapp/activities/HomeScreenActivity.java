@@ -106,7 +106,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
 
-        if(disablemUser){
+        if (disablemUser) {
             mUser = new MockUser(FirestoreConstants.MOCK_USER_NAME, FirestoreConstants.MOCK_USER_EMAIL);
             findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -137,49 +137,49 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 //        clearLastWalkSharedPreferences();
 //        clearHeightSharedPreferences();
 
-        // Check if the user has already logged in by checking SharedPreferences:
-        SharedPreferences loginSharedPreferences =
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_USER_INFO_FILE_NAME, MODE_PRIVATE);
-        String userName = readUserNameFromSharedPreferences(loginSharedPreferences);
-        String userEmail = readUserEmailFromSharedPreferences(loginSharedPreferences);
+            // Check if the user has already logged in by checking SharedPreferences:
+            SharedPreferences loginSharedPreferences =
+                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_USER_INFO_FILE_NAME, MODE_PRIVATE);
+            String userName = readUserNameFromSharedPreferences(loginSharedPreferences);
+            String userEmail = readUserEmailFromSharedPreferences(loginSharedPreferences);
 
-        // If the login info fields are null, the user hasn't signed in before *OR*
-        // the device's data has been wiped, and the user may already exist on Firestore:
-        // TODO: Wrap this check inside of a flag check for testing
-        if (userName == null || userEmail == null) {
-            Log.d(TAG, "User name and/or email are null");
-            // Prompt the user to enter their name and email again, and get these values
-            // in onActivityResult
-            startSetUserActivity(true);
-            // TODO: End TODO
-            Log.d(TAG, "Continuing execution after calling startSetUserActivity");
+            // If the login info fields are null, the user hasn't signed in before *OR*
+            // the device's data has been wiped, and the user may already exist on Firestore:
+            // TODO: Wrap this check inside of a flag check for testing
+            if (userName == null || userEmail == null) {
+                Log.d(TAG, "User name and/or email are null");
+                // Prompt the user to enter their name and email again, and get these values
+                // in onActivityResult
+                startSetUserActivity(true);
+                // TODO: End TODO
+                Log.d(TAG, "Continuing execution after calling startSetUserActivity");
 
-        } else {
-            Log.d(TAG, "User login info already exists, fetching from Firestore ...");
+            } else {
+                Log.d(TAG, "User login info already exists, fetching from Firestore ...");
 
-            // The user has signed in before OR we have their login info locally:
-            // Just pull user data
-            readUserFromFireStore(userEmail);
-        }
-
-
-        // Check for a saved height. If there is not height, prompt the user to enter it.
-        if (!sIgnoreHeight) { // <-- this evaluates to false when testing to skip the prompt
-            if (!checkHasHeight()) {
-                Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
-                startActivity(askHeight);
+                // The user has signed in before OR we have their login info locally:
+                // Just pull user data
+                readUserFromFireStore(userEmail);
             }
-        }
 
 
-        // We need this alias to access the user from inner classes
-        AbstractUser finalUser = mUser;
+            // Check for a saved height. If there is not height, prompt the user to enter it.
+            if (!sIgnoreHeight) { // <-- this evaluates to false when testing to skip the prompt
+                if (!checkHasHeight()) {
+                    Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
+                    startActivity(askHeight);
+                }
+            }
 
-        // Register the team screen button
-        findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "user email is " + finalUser.getEmail());
+
+            // We need this alias to access the user from inner classes
+            AbstractUser finalUser = mUser;
+
+            // Register the team screen button
+            findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "user email is " + finalUser.getEmail());
 
                     Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
                     intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
@@ -188,9 +188,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 }
             });
 
-        // Determine what type of fitness service to use
-        mFitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
-        startObservingFitnessService(mFitnessServiceKey);
+            // Determine what type of fitness service to use
+            mFitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
+            startObservingFitnessService(mFitnessServiceKey);
 
 
             // Set up the main UI elements relating to walk stats
@@ -228,23 +228,24 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 }
             });
 
-        // Register the set user screen button
-        findViewById(R.id.set_user_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startSetUserActivity(false);
-            }
-        });
+            // Register the set user screen button
+            findViewById(R.id.set_user_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startSetUserActivity(false);
+                }
+            });
 
-        // Save the values of stored height, steps and miles, and last walk stats to their
-        // respective member variables
-        initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
+            // Save the values of stored height, steps and miles, and last walk stats to their
+            // respective member variables
+            initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
+                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
+                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
 
-        // Update the UI
-        updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
+            // Update the UI
+            updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
 
+        }
     }
 
     @Override

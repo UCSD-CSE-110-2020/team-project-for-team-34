@@ -74,7 +74,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
             mFirestore = FirebaseFirestore.getInstance();
 
             // get user and inviter
-            mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
             assert mUser != null;
             mInviterName = mUser.getInviterName();
             String inviterEmail = mUser.getInviterEmail();

@@ -17,7 +17,6 @@ import com.example.wwrapp.R;
 import com.example.wwrapp.adapters.TeamAdapter;
 import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.MockUser;
-import com.example.wwrapp.models.Team;
 import com.example.wwrapp.models.TeamMember;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
@@ -76,7 +75,7 @@ public class TeamActivity extends AppCompatActivity {
             mFirestore = FirebaseFirestore.getInstance();
 
             // Get this user
-            mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
             Log.d(TAG, "user email is " + mUser.getEmail());
             Log.d(TAG, "inviter Email is " + mUser.getInviterEmail());
 
@@ -89,7 +88,7 @@ public class TeamActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(TeamActivity.this, AddTeamMemberActivity.class);
-                    final IUser user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+                    final AbstractUser user = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
                     intent.putExtra(WWRConstants.EXTRA_USER_KEY, user);
                     startActivityForResult(intent, ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE);
                 }

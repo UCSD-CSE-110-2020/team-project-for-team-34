@@ -95,7 +95,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
             Intent intent = getIntent();
             String userType = intent.getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
             assert userType != null;
-            mInviter = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            mInviter = (AbstractUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
             Log.i(TAG, "inviter  email is " + mInviter.getEmail());
 
@@ -132,9 +132,11 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                                     mInvitee = document.toObject(MockUser.class);
                                     Log.d(TAG, "DocumentSnapshot data for invitee: " + document.getData());
                                 } else {
-                                    mInvitee = IUserFactory.createUser(WWRConstants.MOCK_USER_FACTORY_KEY,
+                                    mInvitee = AbstractUserFactory.createUser(WWRConstants.MOCK_USER_FACTORY_KEY,
                                             mInviteeName,
-                                            mInviteeEmail);
+                                            mInviteeEmail,
+                                            FirestoreConstants.FIRESTORE_DEFAULT_TEAM_NAME,
+                                            FirestoreConstants.FIRESTORE_DEFAULT_WALK_STATUS);
                                     onInviteeIsNotInFirestore();
                                     Log.d(TAG, "No such document for invitee");
                                 }
