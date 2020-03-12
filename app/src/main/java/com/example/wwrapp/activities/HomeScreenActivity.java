@@ -266,23 +266,30 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                                     if (document.exists()) {
                                         ProposeWalk walk;
                                         walk = document.toObject(ProposeWalk.class);
+                                        Log.d(TAG, "Loaded walk " + walk.getRoute().getRouteName());
                                         List<ProposeWalkUser> users = walk.getUsers();
-                                        if (users == null) {
-                                            Log.d(TAG, "No users added to walk");
-                                            startRoutesActivity();
-                                        } else {
-                                            for (ProposeWalkUser user : users) {
-                                                if(user.getEmail() == mUser.getEmail()) {
-                                                    if(user.getIsPending()) {
-                                                        //TODO: start invite screen
-                                                        Toast.makeText(HomeScreenActivity.this, "start invite screen",Toast.LENGTH_SHORT).show();
-                                                    }
-                                                    else {
-                                                        Log.d(TAG, "Not pending invitation");
-                                                        startRoutesActivity();
-                                                    }
+                                        Log.d(TAG, "current User " + mUser.getEmail());
+                                        boolean userIsFound = false;
+                                        for (ProposeWalkUser user : users) {
+                                            String userEmail = user.getEmail();
+                                            Log.d(TAG, "trying to find " + user.getEmail());
+                                            Log.d(TAG, String.valueOf(mUser.getEmail().equals(userEmail)));
+                                            if(mUser.getEmail().equals(userEmail)) {
+                                                userIsFound = true;
+                                                if(user.getIsPending()) {
+                                                    Log.d(TAG, "USER IS PENDING");
+                                                    startProposedWalkActivity(walk);
+                                                }
+                                                else {
+                                                    Log.d(TAG, "Not pending invitation");
+                                                    startRoutesActivity();
                                                 }
                                             }
+                                        }
+                                        if(!userIsFound) {
+                                            //IsOwnerOfProposedWalk
+                                            Log.d(TAG, "Owner of route Invitation");
+                                            startRoutesActivity();
                                         }
                                     } else {
                                         Log.d(TAG, "No route");
@@ -458,6 +465,17 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         startActivity(intent);
     }
 
+    private void startProposedWalkActivity(ProposeWalk walk) {
+        Intent intent = new Intent(HomeScreenActivity.this, ProposedWalkActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+        startActivity(intent);
+
+//        Intent routeIntent = new Intent(HomeScreenActivity.this, RoutesActivity.class);
+//        routeIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
+//                WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+//        routeIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+//        startActivity(routeIntent);
+    }
     /**
      * Starts the mocking activity
      */

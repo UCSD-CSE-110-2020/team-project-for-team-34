@@ -114,6 +114,8 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
                                                 walk.addUser((String)document.get("email"));
                                             }
                                         }
+                                        walk.setDate(dateShow.getText().toString());
+                                        walk.setTime(timeShow.getText().toString());
                                         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)

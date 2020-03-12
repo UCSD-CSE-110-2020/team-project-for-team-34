@@ -2,15 +2,20 @@ package com.example.wwrapp.models;
 
 import android.util.Log;
 
+import com.example.wwrapp.utils.WWRConstants;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
-public class ProposeWalk {
+public class ProposeWalk implements Serializable {
 
     private Route route;
     private List<ProposeWalkUser> users;
     private String owner;
     private String date;
+    private String time;
 
     public ProposeWalk() {}
 
@@ -20,15 +25,19 @@ public class ProposeWalk {
         users = new ArrayList<>();
     }
 
+    public String getOwner() {
+        return owner;
+    }
+
     public void addUser(String userEmail) {
-        if(userEmail != owner) {
+        if(userEmail.equals(owner)) {
             ProposeWalkUser user = new ProposeWalkUser(userEmail);
             users.add(user);
         }
     }
 
     public void addUser(IUser user) {
-        if(user.getEmail() != owner) {
+        if(user.getEmail().equals(owner)) {
             ProposeWalkUser propUser = new ProposeWalkUser(user);
             users.add(propUser);
         }
@@ -38,8 +47,23 @@ public class ProposeWalk {
         this.date = date;
     }
 
+    public void setTime(String time) {
+        this.time = time;
+    }
+
     public void setRoute(Route route) {
         this.route = route;
+    }
+
+    public void setUserReason(IUser user, int reason) {
+        ListIterator<ProposeWalkUser> iterator = users.listIterator();
+        while (iterator.hasNext()){
+            ProposeWalkUser propUser = iterator.next();
+            if(propUser.getEmail() == user.getEmail()) {
+                propUser.setReason(reason);
+                iterator.set(propUser);
+            }
+        }
     }
 
     public Route getRoute() {
@@ -48,6 +72,10 @@ public class ProposeWalk {
 
     public String getDate() {
         return date;
+    }
+
+    public String getTime() {
+        return time;
     }
 
     public List<ProposeWalkUser> getUsers() {

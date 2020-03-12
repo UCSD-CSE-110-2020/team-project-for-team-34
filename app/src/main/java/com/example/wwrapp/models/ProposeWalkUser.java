@@ -2,7 +2,9 @@ package com.example.wwrapp.models;
 
 import com.example.wwrapp.utils.WWRConstants;
 
-public class ProposeWalkUser {
+import java.io.Serializable;
+
+public class ProposeWalkUser implements Serializable {
 
     private static boolean DEFAULT_PENDING = true;
     private static int DEFAULT_REASON = 0;
