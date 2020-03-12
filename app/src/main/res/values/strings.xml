@@ -105,6 +105,7 @@
     <string name="propose_date_input">Click Here to select Date</string>
     <string name="propose_time_input">Click Here to select Time</string>
     <string name="startingPoint">starting point</string>
+    <string name="proposed_walk">Proposed Walk</string>
 
 
 </resources>

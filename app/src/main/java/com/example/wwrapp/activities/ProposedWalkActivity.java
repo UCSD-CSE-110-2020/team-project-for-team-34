@@ -77,9 +77,6 @@ public class ProposedWalkActivity extends AppCompatActivity {
                             mRoute = mWalk.getRoute();
                             mUser = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
-                            TextView routeNameText = findViewById(R.id.route_detail_name);
-                            routeNameText.setText(mRoute.getRouteName());
-
                             TextView startingPointText = findViewById(R.id.starting_point_text_view);
                             startingPointText.setText(mRoute.getStartingPoint());
 

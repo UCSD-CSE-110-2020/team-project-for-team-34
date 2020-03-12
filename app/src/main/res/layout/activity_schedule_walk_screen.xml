@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.ProposedWalkActivity">
+    tools:context=".activities.ScheduleWalkScreenActivity">
 
     <TextView
         android:id="@+id/proposedDateTextView"
@@ -117,7 +117,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/proposed_walk"
+            android:text="Schedule Walk"
             android:textSize="32sp" />
 
         <Button
@@ -182,20 +182,10 @@
         app:layout_constraintTop_toBottomOf="@id/starting_point_text_view" />
 
     <Button
-        android:id="@+id/badRouteBtn"
+        android:id="@+id/scheduleBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Decline (BAD ROUTE)"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/badTimeBtn"
-        app:layout_constraintTop_toBottomOf="@+id/response_Layout" />
-
-    <Button
-        android:id="@+id/acceptBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Accept"
+        android:text="Schedule"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/badTimeBtn"
         app:layout_constraintStart_toStartOf="parent"
@@ -243,13 +233,12 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/badTimeBtn"
+        android:id="@+id/withdrawBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Decline (BAD TIME)"
+        android:text="Withdraw"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/badRouteBtn"
-        app:layout_constraintStart_toEndOf="@+id/acceptBtn"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/response_Layout" />
 
     <LinearLayout
