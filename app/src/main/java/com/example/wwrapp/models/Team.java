@@ -34,10 +34,6 @@ public class Team {
         return members;
     }
 
-    public void setProposeWalk(Route route) {
-        proposeWalk = new ProposeWalk(route);
-    }
-
     public ProposeWalk getProposeWalk(){
         return proposeWalk;
     }

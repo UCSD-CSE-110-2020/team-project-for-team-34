@@ -1,25 +1,37 @@
 package com.example.wwrapp.models;
 
+import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProposeWalk {
 
     private Route route;
-    private List<ProposeWalkUser> userEmails;
+    private List<ProposeWalkUser> users;
+    private String owner;
     private String date;
 
     public ProposeWalk() {}
 
-    public ProposeWalk(Route route) {
+    public ProposeWalk(Route route, String owner) {
         this.route = route;
+        this.owner = owner;
+        users = new ArrayList<>();
     }
 
     public void addUser(String userEmail) {
-        userEmails.add(new ProposeWalkUser(userEmail));
+        if(userEmail != owner) {
+            ProposeWalkUser user = new ProposeWalkUser(userEmail);
+            users.add(user);
+        }
     }
 
     public void addUser(IUser user) {
-        userEmails.add(new ProposeWalkUser(user));
+        if(user.getEmail() != owner) {
+            ProposeWalkUser propUser = new ProposeWalkUser(user);
+            users.add(propUser);
+        }
     }
 
     public void setDate(String date) {
@@ -38,7 +50,7 @@ public class ProposeWalk {
         return date;
     }
 
-    public List<ProposeWalkUser> getUserEmails() {
-        return userEmails;
+    public List<ProposeWalkUser> getUsers() {
+        return users;
     }
 }

@@ -79,6 +79,7 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(TeamRouteDetailActivity.this, ProposeWalkScreenActivity.class);
                 intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, mRoute);
+                intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
                 startActivity(intent);
             }
         });

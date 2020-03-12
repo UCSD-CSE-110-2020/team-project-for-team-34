@@ -31,6 +31,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firestore.v1.FirestoreGrpc;
 
 import java.util.Calendar;
@@ -53,6 +55,7 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
     private static TextView timeShow;
     private Button sendButton;
 
+    private IUser mUser;
     private Route mRoute;
     private FirebaseFirestore mFirestore;
 
@@ -76,6 +79,7 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
         sendButton = findViewById(R.id.send_button);
 
         mRoute = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
+        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
         dateInput.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,16 +100,34 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(isDateValid()) {
-                    ProposeWalk walk = new ProposeWalk(mRoute);
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
-                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(walk)
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
+                            .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                 @Override
-                                public void onSuccess(Void aVoid) {
-                                    finish();
-                                    Log.d(TAG, "Team Proposed Walk Updated1");
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    ProposeWalk walk = new ProposeWalk(mRoute, mUser.getEmail());
+                                    if (task.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            if(document.get("email") != null && ((String)document.get("email")) != "") {
+                                                Log.d(TAG, document.get("email") + " added to route");
+                                                walk.addUser((String)document.get("email"));
+                                            }
+                                        }
+                                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
+                                                .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(walk)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        Log.d(TAG, "Team Proposed Walk Updated");
+                                                        finish();
+                                                    }
+                                                });
+                                    } else {
+                                        Log.d(TAG, "No team members", task.getException());
+                                    }
                                 }
                             });
                 }
