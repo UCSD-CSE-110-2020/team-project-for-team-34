@@ -20,4 +20,7 @@ public interface IUser extends Serializable {
 
     public String getStatus();
     public void setStatus(String status);
+
+    public int getColor();
+//    public void setColor(int newColor);
 }

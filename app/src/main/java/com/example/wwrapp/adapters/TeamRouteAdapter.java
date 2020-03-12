@@ -1,9 +1,13 @@
 package com.example.wwrapp.adapters;
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -18,6 +22,7 @@ import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.InitialsExtracter;
+import com.example.wwrapp.utils.RandomColorGenerator;
 import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.WWRConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -186,10 +191,16 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
                 secondInitial = InitialsExtracter.getSecondInitial(ownerName);
             }
             String iconName = firstInitial + secondInitial;
+            int iconColor = model.getOwnerColor();
 
             // Set the owner's name
             holder.teammateName.setText(iconName);
 
+            // Set the owner's color
+            Drawable roundDrawable = holder.teammateIcon.getResources().getDrawable(R.drawable.button_background);
+            roundDrawable.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP);
+            holder.teammateIcon.setBackground(roundDrawable);
+            holder.teammateIcon.setText(iconName);
 
             // Listen for favorite changes
             holder.favoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -263,6 +274,7 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
         TextView routeSteps;
         TextView teammateName;
         ToggleButton favoriteBtn;
+        Button teammateIcon;
         View itemView;
 
         public TeammateRouteViewHolder(@NonNull View itemView) {
@@ -275,6 +287,10 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
             routeSteps = itemView.findViewById(R.id.route_step);
             favoriteBtn = itemView.findViewById(R.id.favoriteBtn);
             teammateName = itemView.findViewById(R.id.teammate_name);
+            teammateIcon = itemView.findViewById(R.id.teammate_icon);
+//            Drawable roundDrawable = teammateIcon.getResources().getDrawable(R.drawable.button_background);
+//            roundDrawable.setColorFilter(RandomColorGenerator.generateRandomNum(), PorterDuff.Mode.SRC_ATOP);
+//            teammateIcon.setBackground(roundDrawable);
             this.itemView = itemView;
 
             // Register this view to respond to clicks

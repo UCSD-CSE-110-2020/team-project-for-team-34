@@ -1,6 +1,7 @@
 package com.example.wwrapp.models;
 
 import com.example.wwrapp.utils.FirestoreConstants;
+import com.example.wwrapp.utils.RandomColorGenerator;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ public class GoogleUser implements IUser, Serializable {
     private List<String> invitees;
     private List<Route> routes;
     private String status;
+    private int color;
 
     public GoogleUser() {}
 
@@ -26,11 +28,17 @@ public class GoogleUser implements IUser, Serializable {
 
         this.name = name;
         this.email = email;
+        color = RandomColorGenerator.generateRandomNum();
         status = FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED;
         inviter = STRING_DEFAULT;
         teamName = STRING_DEFAULT;
         invitees = INVITEES_DEFAULT;
         routes = ROUTES_DEFAULT;
+    }
+
+    @Override
+    public int getColor() {
+        return color;
     }
 
     @Override

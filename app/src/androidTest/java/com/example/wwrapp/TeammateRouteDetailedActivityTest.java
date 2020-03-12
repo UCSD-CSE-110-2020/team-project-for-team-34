@@ -7,6 +7,7 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.example.wwrapp.activities.HomeScreenActivity;
+import com.example.wwrapp.activities.TeamActivity;
 import com.example.wwrapp.activities.TeamRoutesActivity;
 
 import org.junit.BeforeClass;
@@ -32,20 +33,21 @@ public class TeammateRouteDetailedActivityTest {
     public static void initialize(){
         HomeScreenActivity.setIgnoreHeight(true);
         HomeScreenActivity.setEnableFitnessRunner(false);
-        TeamRoutesActivity.setTestTeammateRoute(true);
+        //TeamRoutesActivity.setTestTeammateRoute(true);
+        HomeScreenActivity.disableUser(true);
+        TeamActivity.disableUser(true);
+        TeamRoutesActivity.disableUser(true);
     }
 
-    @Ignore
+   // @Ignore
     @Test
     public void teammateRouteDetailedTest(){
         ViewInteraction appCompatButton1 = onView(
-                allOf(withId(R.id.routeScreenButton), withText("Go to Routes"),
-                        isDisplayed()));
+                allOf(withId(R.id.routeScreenButton), withText("Go to Routes")));
         appCompatButton1.perform(click());
 
         ViewInteraction appCompatButton2 = onView(
-                allOf(withId(R.id.teammateRouteBtn), withText("Teammate Routes"),
-                        isDisplayed()));
+                allOf(withId(R.id.teammateRouteBtn), withText("Teammate Routes")));
         appCompatButton2.perform(click());
 
         // TODO: Add more since right now teammate route is just a place holder.
