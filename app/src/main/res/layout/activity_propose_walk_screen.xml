@@ -82,6 +82,8 @@
             android:textSize="32dp" />
     </androidx.appcompat.widget.Toolbar>
 
+
+
     <Button
         android:id="@+id/send_button"
         android:layout_width="wrap_content"

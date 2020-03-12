@@ -98,6 +98,7 @@
     <string name="teammate_name">Teammate Name</string>
     <string name="propose">Propose</string>
     <string name="propose_walk">Propose Walk</string>
+    <string name="time">Time:</string>
 
     <!-- For Propose Walk Screen -->
     <string name="propose_date">Select Date</string>

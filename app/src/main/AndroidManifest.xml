@@ -10,7 +10,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.ProposeWalkScreenActivity"></activity>
+        <activity android:name=".activities.ProposedWalkActivity"></activity>
+        <activity
+            android:name=".activities.ProposeWalkScreenActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".activities.SetUserActivity" />
 
         <service
