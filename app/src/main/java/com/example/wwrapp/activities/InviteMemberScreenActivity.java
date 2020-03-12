@@ -47,41 +47,10 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invite_member);
 
-        // Get the database instance
-        mFirestore = FirebaseFirestore.getInstance();
-
         // Set up display
         mMemberText = findViewById(R.id.team_member_name_text_view);
         mAcceptBtn = findViewById(R.id.invite_accept_button);
         mDeclineBtn = findViewById(R.id.invite_decline_button);
-
-        // get user and inviter
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-        assert mUser != null;
-        mInviterName = mUser.getInviterName();
-        String inviterEmail = mUser.getInviterEmail();
-        Log.d(TAG, "Inviter name is " + mInviterName);
-        Log.d(TAG, "Inviter email is " + inviterEmail);
-
-        // find inviter object in database
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(inviterEmail).get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                Log.d(TAG, "Got inviter data: " + document.getData());
-                                mInviter = (document.toObject(MockUser.class));
-                            } else {
-                                Log.d(TAG, "Couldn't find inviter");
-                            }
-                        } else {
-                            Log.d(TAG, "get failed with ", task.getException());
-                        }
-                    }
-                });
 
 
         // TODO: Fix this code to not have testInvite set
@@ -101,6 +70,37 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 }
             });
         } else {
+            // Get the database instance
+            mFirestore = FirebaseFirestore.getInstance();
+
+            // get user and inviter
+            mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            assert mUser != null;
+            mInviterName = mUser.getInviterName();
+            String inviterEmail = mUser.getInviterEmail();
+            Log.d(TAG, "Inviter name is " + mInviterName);
+            Log.d(TAG, "Inviter email is " + inviterEmail);
+
+            // find inviter object in database
+            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                    .document(inviterEmail).get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    Log.d(TAG, "Got inviter data: " + document.getData());
+                                    mInviter = (document.toObject(MockUser.class));
+                                } else {
+                                    Log.d(TAG, "Couldn't find inviter");
+                                }
+                            } else {
+                                Log.d(TAG, "get failed with ", task.getException());
+                            }
+                        }
+                    });
+
             // Find the users who have invited the invitee
             // TODO: Handle multiple inviters (not just 1)
             mMemberText.setText(mInviterName);
@@ -652,4 +652,6 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 });
 
     }
+
+
 }

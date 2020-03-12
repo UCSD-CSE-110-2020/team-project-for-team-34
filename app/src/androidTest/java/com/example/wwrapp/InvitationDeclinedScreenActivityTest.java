@@ -32,6 +32,8 @@ public class InvitationDeclinedScreenActivityTest {
     public static void initialize(){
         HomeScreenActivity.setIgnoreHeight(true);
         HomeScreenActivity.setEnableFitnessRunner(false);
+        HomeScreenActivity.disableUser(true);
+        TeamActivity.disableUser(true);
         TeamActivity.mockInviteMemberScreen(true);
         InviteMemberScreenActivity.testInvite(true);
     }
@@ -39,8 +41,7 @@ public class InvitationDeclinedScreenActivityTest {
     @Test
     public void invitationActivityTest(){
         ViewInteraction appCompatButton1 = onView(
-                allOf(withId(R.id.teamScreenButton), withText("Go To Team"),
-                        isDisplayed()));
+                allOf(withId(R.id.teamScreenButton)));
         appCompatButton1.perform(click());
 
         ViewInteraction appCompatButton2 = onView(

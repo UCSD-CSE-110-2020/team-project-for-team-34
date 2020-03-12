@@ -10,6 +10,7 @@ import com.example.wwrapp.activities.HomeScreenActivity;
 import com.example.wwrapp.activities.TeamRoutesActivity;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +35,7 @@ public class TeammateRouteDetailedActivityTest {
         TeamRoutesActivity.setTestTeammateRoute(true);
     }
 
+    @Ignore
     @Test
     public void teammateRouteDetailedTest(){
         ViewInteraction appCompatButton1 = onView(

@@ -11,6 +11,7 @@ import com.example.wwrapp.activities.RoutesActivity;
 import com.example.wwrapp.activities.TeamRoutesActivity;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +38,7 @@ public class TeammateRouteScreenTest {
         RoutesActivity.setIsTest(true);
     }
 
+    @Ignore
     @Test
     public void NoTeammateRoutesTest() {
         mActivityTestRule.getActivity();

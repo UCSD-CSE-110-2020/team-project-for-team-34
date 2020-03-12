@@ -80,6 +80,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private double mLastWalkMiles;
     private String mLastWalkTime;
 
+    private static boolean disablemUser = false;
+
     // Fitness service
     // TODO: Implement proper mocking of FitnessServices. Google Fit needs to be decoupled from
     // TODO: HomeScreenActivity
@@ -107,184 +109,209 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
 
-        // Initialize the database
-        mFirestore = FirebaseFirestore.getInstance();
-
-        mFirestore.collection("testRoutes")
-                .document("testRoute")
-                .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
-                .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Log.w(TAG, document.getId() + " => " + document.getData());
-                    }
-                } else {
-                    Log.d(TAG, "Error getting documents: ", task.getException());
-                }
-            }
-        });
-
-
-        // Determine what type of user to use:
-        String userType = getIntent().getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
-        if (userType == null) {
-            // Default to the mock user
-            Log.d(TAG, "Creating Mock user");
-            mUser = IUserFactory.createUser
-                    (WWRConstants.MOCK_USER_FACTORY_KEY,
-                            FirestoreConstants.MOCK_USER_NAME,
-                            FirestoreConstants.MOCK_USER_EMAIL);
-
-            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                    .document(mUser.getEmail())
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                if (document.exists()) {
-                                    Log.d(TAG, "Setting inviter name and email");
-                                    Log.d(TAG, "inviter name = " + document.getString(MockUser.FIELD_INVITER_NAME));
-                                    Log.d(TAG, "inviter email = " + document.getString(MockUser.FIELD_INVITER_EMAIL));
-                                    Log.d(TAG, "user team = " + document.getString(MockUser.FIELD_TEAM_NAME));
-
-
-                                    mUser.setInviterName(document.getString(MockUser.FIELD_INVITER_NAME));
-                                    mUser.setInviterEmail(document.getString(MockUser.FIELD_INVITER_EMAIL));
-                                    mUser.setTeamName(document.getString(MockUser.FIELD_TEAM_NAME));
-
-                                } else {
-                                    Log.d(TAG, "Creating Mock User");
-                                    IUser user = new MockUser(mUser.getName(), mUser.getEmail());
-                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
-                                }
-                            } else {
-                                Log.d(TAG, "get failed with ", task.getException());
-                            }
-
-
-                        }
-
-
-                    });
-        } else {
-            signIn();
-            // TODO: Create a Google or Firebase user
-            //Check if user exists
-            DocumentReference findUser = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(mUser.getEmail());
-            findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        if(disablemUser){
+            mUser = new MockUser(FirestoreConstants.MOCK_USER_NAME, FirestoreConstants.MOCK_USER_EMAIL);
+            findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                public void onClick(View v) {
+                    Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
+                    startActivity(intent);
+                }
+            });
+            findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(HomeScreenActivity.this, RoutesActivity.class);
+                    startActivity(intent);
+                }
+            });
+            findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(HomeScreenActivity.this, WalkActivity.class);
+                    startActivity(intent);
+                }
+            });
+        } else {
+            // Initialize the database
+            mFirestore = FirebaseFirestore.getInstance();
+
+            mFirestore.collection("testRoutes")
+                    .document("testRoute")
+                    .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                    .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
                     if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            GoogleUser user = document.toObject(GoogleUser.class);
-                            Log.d(TAG, "USER data: @" + user.getEmail());
-                            mUser = user;
-                        } else {
-                            Log.d(TAG, "Creating User");
-                            GoogleUser user = new GoogleUser(mUser.getName(), mUser.getEmail());
-                            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Log.w(TAG, document.getId() + " => " + document.getData());
                         }
                     } else {
-                        Log.d(TAG, "get failed with ", task.getException());
+                        Log.d(TAG, "Error getting documents: ", task.getException());
                     }
                 }
             });
-        }
 
-        // TODO: Check if the user exists already in the database
-        // Code here
 
-        // TODO: Update this with actual sign-in logic later
-        // Register the team screen button
-        IUser finalUser = mUser;
-        findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "user email is " + finalUser.getEmail());
+            // Determine what type of user to use:
+            String userType = getIntent().getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
+            if (userType == null) {
+                // Default to the mock user
+                Log.d(TAG, "Creating Mock user");
+                mUser = IUserFactory.createUser
+                        (WWRConstants.MOCK_USER_FACTORY_KEY,
+                                FirestoreConstants.MOCK_USER_NAME,
+                                FirestoreConstants.MOCK_USER_EMAIL);
 
-                Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
-                intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
-                startActivityForResult(intent, TEAM_ACTIVITY_REQUEST_CODE);
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                        .document(mUser.getEmail())
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    DocumentSnapshot document = task.getResult();
+                                    if (document.exists()) {
+                                        Log.d(TAG, "Setting inviter name and email");
+                                        Log.d(TAG, "inviter name = " + document.getString(MockUser.FIELD_INVITER_NAME));
+                                        Log.d(TAG, "inviter email = " + document.getString(MockUser.FIELD_INVITER_EMAIL));
+                                        Log.d(TAG, "user team = " + document.getString(MockUser.FIELD_TEAM_NAME));
 
+
+                                        mUser.setInviterName(document.getString(MockUser.FIELD_INVITER_NAME));
+                                        mUser.setInviterEmail(document.getString(MockUser.FIELD_INVITER_EMAIL));
+                                        mUser.setTeamName(document.getString(MockUser.FIELD_TEAM_NAME));
+
+                                    } else {
+                                        Log.d(TAG, "Creating Mock User");
+                                        IUser user = new MockUser(mUser.getName(), mUser.getEmail());
+                                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
+                                    }
+                                } else {
+                                    Log.d(TAG, "get failed with ", task.getException());
+                                }
+
+
+                            }
+
+
+                        });
+            } else {
+                signIn();
+                // TODO: Create a Google or Firebase user
+                //Check if user exists
+                DocumentReference findUser = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(mUser.getEmail());
+                findUser.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                GoogleUser user = document.toObject(GoogleUser.class);
+                                Log.d(TAG, "USER data: @" + user.getEmail());
+                                mUser = user;
+                            } else {
+                                Log.d(TAG, "Creating User");
+                                GoogleUser user = new GoogleUser(mUser.getName(), mUser.getEmail());
+                                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    }
+                });
             }
-        });
+
+            // TODO: Check if the user exists already in the database
+            // Code here
+
+            // TODO: Update this with actual sign-in logic later
+            // Register the team screen button
+            IUser finalUser = mUser;
+            findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "user email is " + mUser.getEmail());
+
+                    Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
+                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                    startActivityForResult(intent, TEAM_ACTIVITY_REQUEST_CODE);
+
+                }
+            });
 
 
-        // Check for a saved height. If there is not height, prompt the user to enter it.
-        if (!sIgnoreHeight) { // <-- this evaluates to false when testing to skip the prompt
-            if (!checkHasHeight()) {
-                Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
-                startActivity(askHeight);
+            // Check for a saved height. If there is not height, prompt the user to enter it.
+            if (!sIgnoreHeight) { // <-- this evaluates to false when testing to skip the prompt
+                if (!checkHasHeight()) {
+                    Intent askHeight = new Intent(HomeScreenActivity.this, HeightScreenActivity.class);
+                    startActivity(askHeight);
+                }
             }
-        }
 
-        // Determine what type of fitness service to use
-        mFitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
-        startObservingFitnessService(mFitnessServiceKey);
+            // Determine what type of fitness service to use
+            mFitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
+            startObservingFitnessService(mFitnessServiceKey);
 
-        // Set up the main UI elements relating to walk stats
-        mStepsTextView = findViewById(R.id.homeSteps);
-        mMilesTextView = findViewById(R.id.homeMiles);
-        mLastWalkStepsTextView = findViewById(R.id.lastWalkSteps);
-        mLastWalkMilesTextView = findViewById(R.id.lastWalkDistance);
-        mLastWalkTimeTextView = findViewById(R.id.lastWalkTime);
+            // Set up the main UI elements relating to walk stats
+            mStepsTextView = findViewById(R.id.homeSteps);
+            mMilesTextView = findViewById(R.id.homeMiles);
+            mLastWalkStepsTextView = findViewById(R.id.lastWalkSteps);
+            mLastWalkMilesTextView = findViewById(R.id.lastWalkDistance);
+            mLastWalkTimeTextView = findViewById(R.id.lastWalkTime);
 
-        // Setup toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+            // Setup toolbar
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
 
-        // Register the start walk button
-        findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startWalkActivity();
-            }
-        });
+            // Register the start walk button
+            findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startWalkActivity();
+                }
+            });
 
-        // Register the routes screen button
-        findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startRoutesActivity();
-            }
-        });
+            // Register the routes screen button
+            findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startRoutesActivity();
+                }
+            });
 
-        // Register the mock screen button
-        findViewById(R.id.mockButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startMockActivity();
-            }
-        });
+            // Register the mock screen button
+            findViewById(R.id.mockButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startMockActivity();
+                }
+            });
 
-        // Register the set user screen button
-        findViewById(R.id.set_user_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startSetUserActivity();
-            }
-        });
-        // Save the values of stored height, steps and miles, and last walk stats to their
-        // respective member variables
-        initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
+            // Register the set user screen button
+            findViewById(R.id.set_user_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startSetUserActivity();
+                }
+            });
+            // Save the values of stored height, steps and miles, and last walk stats to their
+            // respective member variables
+            initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
+                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
+                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
 
-        // Update the UI
-        updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
+            // Update the UI
+            updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
 
 
-        // use this code to reset the last walk's stats
-        // TODO: Comment out in production. If you don't, the last walk stats won't work.
+            // use this code to reset the last walk's stats
+            // TODO: Comment out in production. If you don't, the last walk stats won't work.
 //        SharedPreferences spfs = getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
 //        SharedPreferences.Editor editor = spfs.edit();
 //        editor.clear();
 //        editor.apply();
+        }
     }
 
     @Override
@@ -297,18 +324,20 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onResume();
         Log.d(TAG, "In method onResume");
 
-        // Re-register this activity as an observer if it has been un-registered.
-        if (!mIsObserving) {
-            // The current value of the key tells us which fitness service we last started.
-            startObservingFitnessService(mFitnessServiceKey);
-        }
+        if(!disablemUser){
+            // Re-register this activity as an observer if it has been un-registered.
+            if (!mIsObserving) {
+                // The current value of the key tells us which fitness service we last started.
+                startObservingFitnessService(mFitnessServiceKey);
+            }
 
-        // TODO: Should these lines be in onResume or onCreate (or both) ?
-        initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
-        updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
-        Log.d(TAG, " daily steps = " + mDailyTotalSteps);
+            // TODO: Should these lines be in onResume or onCreate (or both) ?
+            initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
+                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
+                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
+            updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
+            Log.d(TAG, " daily steps = " + mDailyTotalSteps);
+        }
 
     }
 
@@ -495,13 +524,14 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                             if (task.isSuccessful()) {
                                 DocumentSnapshot document = task.getResult();
                                 if (document.exists()) {
-                                    GoogleUser user = document.toObject(GoogleUser.class);
+                                    IUser user = document.toObject(MockUser.class);
                                     Log.d(TAG, "USER data: @" + user.getEmail());
                                     mUser = user;
                                 } else {
                                     Log.d(TAG, "Creating User");
-                                    GoogleUser user = new GoogleUser(userName, userEmail);
+                                    IUser user = new MockUser(userName, userEmail);
                                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH).document(user.getEmail()).set(user);
+                                    mUser = user;
                                 }
                             } else {
                                 Log.d(TAG, "get failed with ", task.getException());
@@ -741,6 +771,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         int testVal = saveHeight.getInt(WWRConstants.SHARED_PREFERENCES_HEIGHT_FEET_KEY, -1);
         // If testVal == -1, then there was no height
         return testVal != -1;
+    }
+
+    public static void disableUser(Boolean disable){
+        disablemUser = disable;
     }
 } // end class
 
