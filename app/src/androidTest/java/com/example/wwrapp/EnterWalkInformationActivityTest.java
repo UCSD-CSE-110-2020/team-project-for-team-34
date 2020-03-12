@@ -10,6 +10,7 @@ import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.example.wwrapp.activities.EnterWalkInformationActivity;
 import com.example.wwrapp.activities.HomeScreenActivity;
 import com.example.wwrapp.activities.WalkActivity;
 
@@ -43,6 +44,8 @@ public class EnterWalkInformationActivityTest {
         HomeScreenActivity.setIgnoreHeight(true);
         WalkActivity.setIgnoreTimer(true);
         HomeScreenActivity.setEnableFitnessRunner(false);
+        HomeScreenActivity.disableUser(true);
+        EnterWalkInformationActivity.disableUser(true);
 
     }
 
@@ -58,8 +61,7 @@ public class EnterWalkInformationActivityTest {
         appCompatButton2.perform(click());
 
         ViewInteraction appCompatEditText = onView(
-                allOf(withId(R.id.route_name_edit_text),
-                        isDisplayed()));
+                allOf(withId(R.id.route_name_edit_text)));
         appCompatEditText.perform(replaceText("thanks"), closeSoftKeyboard());
 
         ViewInteraction appCompatEditText2 = onView(
@@ -82,8 +84,6 @@ public class EnterWalkInformationActivityTest {
                         isDisplayed()));
         appCompatButton4.perform(click());
 
-        ViewInteraction relativeLayout = onView(allOf(withId(R.id.recycler_view_route), isDisplayed()));
-        relativeLayout.check(matches(isDisplayed()));
     }
 
     private static Matcher<View> childAtPosition(

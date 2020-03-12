@@ -11,10 +11,13 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.example.wwrapp.activities.HomeScreenActivity;
+import com.example.wwrapp.activities.RoutesActivity;
+import com.example.wwrapp.activities.TeamActivity;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +36,14 @@ public class TeammateRouteTest {
 
     @Rule
     public ActivityTestRule<HomeScreenActivity> mActivityTestRule = new ActivityTestRule<>(HomeScreenActivity.class);
+
+    @BeforeClass
+    public static void initialize() {
+        HomeScreenActivity.setIgnoreHeight(true);
+        HomeScreenActivity.setEnableFitnessRunner(false);
+        HomeScreenActivity.disableUser(true);
+        RoutesActivity.disableUser(true);
+    }
 
     @Test
     public void teammateRouteTest() {

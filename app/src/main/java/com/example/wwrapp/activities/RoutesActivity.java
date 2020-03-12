@@ -36,6 +36,7 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
     private static final int START_ADD_NEW_ROUTE_ACTIVITY_REQUEST_CODE = 2;
 
     private static final int QUERY_LIMIT = 50;
+    private static boolean disablemUser = false;
 
     // UI-related objects
     private RouteAdapter mRouteAdapter;
@@ -57,62 +58,90 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
         setContentView(R.layout.activity_routes);
         Log.d(TAG, "in onCreate");
 
-        // Get this user
-        mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
-        // Set up Firestore and query for the routes to display
-        initFirestore();
+        if(disablemUser){
+            findViewById(R.id.teammateRouteBtn).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(RoutesActivity.this, TeamRoutesActivity.class);
+                    startActivity(intent);
+                }
+            });
+            findViewById(R.id.addNewRouteButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(RoutesActivity.this, EnterWalkInformationActivity.class);
+                    startActivity(intent);
+                }
+            });
+        } else {
+            // Get this user
+            mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
-        // Set up recycler view for routes
-        initRecyclerView();
+            // Set up Firestore and query for the routes to display
+            initFirestore();
 
-        // Enable Firestore logging
-        FirebaseFirestore.setLoggingEnabled(true);
+            // Set up recycler view for routes
+            initRecyclerView();
 
-        // Testing code block
-        if (sIsTest) {
-            generateFakeRoute();
-        }
+            // Enable Firestore logging
+            FirebaseFirestore.setLoggingEnabled(true);
 
-        // Register the add new route button
-        mAddNewRouteButton = findViewById(R.id.addNewRouteButton);
-        mAddNewRouteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startAddNewRouteActivity();
+            // Testing code block
+            if (sIsTest) {
+                generateFakeRoute();
             }
-        });
 
-        // Register the teammate route button
-        mTeammateRouteButton = findViewById(R.id.teammateRouteBtn);
-        mTeammateRouteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(RoutesActivity.this, TeamRoutesActivity.class);
-                intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
-                startActivity(intent);
-            }
-        });
+            // Register the add new route button
+            mAddNewRouteButton = findViewById(R.id.addNewRouteButton);
+            mAddNewRouteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startAddNewRouteActivity();
+                }
+            });
 
-        // Determine who launched the RoutesActivity
-        Intent intent = getIntent();
-        String callerId = intent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
-        Log.i(TAG, "callerID is: " + callerId);
+            // Register the teammate route button
+            mTeammateRouteButton = findViewById(R.id.teammateRouteBtn);
+            mTeammateRouteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(RoutesActivity.this, TeamRoutesActivity.class);
+                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                    startActivity(intent);
+                }
+            });
 
-        // If the Routes activity was launched by the EnterWalkInformation activity, then
-        // update the routes database.
-        switch (callerId) {
-            case WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID:
-                Intent incomingIntent = getIntent();
-                Walk walk = (Walk) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
-                Route route = (Route) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
-                Log.d(TAG, route.toString());
+            // Determine who launched the RoutesActivity
+            Intent intent = getIntent();
+            String callerId = intent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
+            Log.i(TAG, "callerID is: " + callerId);
 
-                boolean manuallyCreatedRoute = incomingIntent.getBooleanExtra
-                        (WWRConstants.EXTRA_MANUALLY_CREATED_ROUTE_KEY, false);
+            // If the Routes activity was launched by the EnterWalkInformation activity, then
+            // update the routes database.
+            switch (callerId) {
+                case WWRConstants.EXTRA_ENTER_WALK_INFORMATION_ACTIVITY_CALLER_ID:
+                    Intent incomingIntent = getIntent();
+                    Walk walk = (Walk) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_WALK_OBJECT_KEY));
+                    Route route = (Route) (incomingIntent.getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
+                    Log.d(TAG, route.toString());
 
-                // If the route was generated by a spontaneous walk
-                if (!manuallyCreatedRoute) {
+                    boolean manuallyCreatedRoute = incomingIntent.getBooleanExtra
+                            (WWRConstants.EXTRA_MANUALLY_CREATED_ROUTE_KEY, false);
+
+                    // If the route was generated by a spontaneous walk
+                    if (!manuallyCreatedRoute) {
+                        // Save the newest walk
+                        SharedPreferences sharedPreferences =
+                                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, route.getSteps());
+                        editor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, (float) route.getMiles());
+                        editor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, route.getDateOfLastWalk());
+                        editor.apply();
+                    }
+
+
                     // Save the newest walk
                     SharedPreferences sharedPreferences =
                             getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
@@ -120,107 +149,97 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
                     editor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, route.getSteps());
                     editor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, (float) route.getMiles());
                     editor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, route.getDateOfLastWalk());
+
                     editor.apply();
-                }
+                    Log.d(TAG, "Right before route insertion");
 
+                    // Add the route based on the user's identity.
+                    String routeDocName = mUser.getEmail() + route.getRouteName();
+                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                            .document(mUser.getEmail())
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                            .document(routeDocName)
+                            .set(route)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "Successfully added route " + routeDocName + " for user!");
 
-                // Save the newest walk
-                SharedPreferences sharedPreferences =
-                        getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putLong(WWRConstants.SHARED_PREFERENCES_LAST_WALK_STEPS_KEY, route.getSteps());
-                editor.putFloat(WWRConstants.SHARED_PREFERENCES_LAST_WALK_MILES_KEY, (float) route.getMiles());
-                editor.putString(WWRConstants.SHARED_PREFERENCES_LAST_WALK_DATE_KEY, route.getDateOfLastWalk());
+                                    // Add this user as a walker
+                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                                            .document(mUser.getEmail())
+                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
+                                            .document(routeDocName)
+                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH)
+                                            .document(mUser.getEmail())
+                                            .set(walk)
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Log.d(TAG, "Successfully added user as walker!");
+                                                }
+                                            })
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Log.w(TAG, "Error writing walker", e);
+                                                }
+                                            });
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error writing route", e);
+                                }
+                            });
 
-                editor.apply();
-                Log.d(TAG, "Right before route insertion");
+                    // If the user is on a team, also add the route to the team
+                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                            .document(routeDocName)
+                            .set(route)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d(TAG, "Successfully added route " + routeDocName + " for team!");
+                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                            .document(routeDocName)
+                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH)
+                                            .document(mUser.getEmail())
+                                            .set(walk)
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Log.d(TAG, "Successfully added user as walker to team!");
+                                                }
+                                            })
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Log.w(TAG, "Error writing walker", e);
+                                                }
+                                            });
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error writing route", e);
+                                }
+                            });
 
-                // Add the route based on the user's identity.
-                String routeDocName = mUser.getEmail() + route.getRouteName();
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                        .document(mUser.getEmail())
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
-                        .document(routeDocName)
-                        .set(route)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d(TAG, "Successfully added route " + routeDocName + " for user!");
+                    break;
+                case WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID:
+                    break;
+                default:
+                    Log.d(TAG, "caller is: " + callerId);
+            }
 
-                                // Add this user as a walker
-                                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                                        .document(mUser.getEmail())
-                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
-                                        .document(routeDocName)
-                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH)
-                                        .document(mUser.getEmail())
-                                        .set(walk)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d(TAG, "Successfully added user as walker!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w(TAG, "Error writing walker", e);
-                                            }
-                                        });
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error writing route", e);
-                            }
-                        });
-
-                // If the user is on a team, also add the route to the team
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
-                        .document(routeDocName)
-                        .set(route)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.d(TAG, "Successfully added route " + routeDocName + " for team!");
-                                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
-                                        .document(routeDocName)
-                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH)
-                                        .document(mUser.getEmail())
-                                        .set(walk)
-                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d(TAG, "Successfully added user as walker to team!");
-                                            }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Log.w(TAG, "Error writing walker", e);
-                                            }
-                                        });
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.w(TAG, "Error writing route", e);
-                            }
-                        });
-
-                break;
-            case WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID:
-                break;
-            default:
-                Log.d(TAG, "caller is: " + callerId);
         }
-
 
     }
 
@@ -498,6 +517,10 @@ public class RoutesActivity extends AppCompatActivity implements RouteAdapter.On
 
         intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
         startActivityForResult(intent, START_ROUTE_DETAIL_ACTIVITY_REQUEST_CODE);
+    }
+
+    public static void disableUser(Boolean disable){
+        disablemUser = disable;
     }
 
 }

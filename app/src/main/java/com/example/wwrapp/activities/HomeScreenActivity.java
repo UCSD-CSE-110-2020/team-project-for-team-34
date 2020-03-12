@@ -79,6 +79,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     private double mLastWalkMiles;
     private String mLastWalkTime;
 
+    private static boolean disablemUser = false;
+
     // Fitness service
     // TODO: Implement proper mocking of FitnessServices. Google Fit needs to be decoupled from
     // TODO: HomeScreenActivity
@@ -104,8 +106,32 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
 
-        // Initialize the database
-        mFirestore = FirebaseFirestore.getInstance();
+        if(disablemUser){
+            mUser = new MockUser(FirestoreConstants.MOCK_USER_NAME, FirestoreConstants.MOCK_USER_EMAIL);
+            findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
+                    startActivity(intent);
+                }
+            });
+            findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(HomeScreenActivity.this, RoutesActivity.class);
+                    startActivity(intent);
+                }
+            });
+            findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(HomeScreenActivity.this, WalkActivity.class);
+                    startActivity(intent);
+                }
+            });
+        } else {
+            // Initialize the database
+            mFirestore = FirebaseFirestore.getInstance();
 
 //        clearLoginSharedPreferences();
 //        clearLastWalkSharedPreferences();
@@ -155,51 +181,52 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             public void onClick(View v) {
                 Log.d(TAG, "user email is " + finalUser.getEmail());
 
-                Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
-                intent.putExtra(WWRConstants.EXTRA_USER_KEY, finalUser);
-                startActivityForResult(intent, TEAM_ACTIVITY_REQUEST_CODE);
+                    Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
+                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                    startActivityForResult(intent, TEAM_ACTIVITY_REQUEST_CODE);
 
-            }
-        });
+                }
+            });
 
         // Determine what type of fitness service to use
         mFitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
         startObservingFitnessService(mFitnessServiceKey);
 
-        // Set up the main UI elements relating to walk stats
-        mStepsTextView = findViewById(R.id.homeSteps);
-        mMilesTextView = findViewById(R.id.homeMiles);
-        mLastWalkStepsTextView = findViewById(R.id.lastWalkSteps);
-        mLastWalkMilesTextView = findViewById(R.id.lastWalkDistance);
-        mLastWalkTimeTextView = findViewById(R.id.lastWalkTime);
 
-        // Setup toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+            // Set up the main UI elements relating to walk stats
+            mStepsTextView = findViewById(R.id.homeSteps);
+            mMilesTextView = findViewById(R.id.homeMiles);
+            mLastWalkStepsTextView = findViewById(R.id.lastWalkSteps);
+            mLastWalkMilesTextView = findViewById(R.id.lastWalkDistance);
+            mLastWalkTimeTextView = findViewById(R.id.lastWalkTime);
 
-        // Register the start walk button
-        findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startWalkActivity();
-            }
-        });
+            // Setup toolbar
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
 
-        // Register the routes screen button
-        findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startRoutesActivity();
-            }
-        });
+            // Register the start walk button
+            findViewById(R.id.startNewWalkButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startWalkActivity();
+                }
+            });
 
-        // Register the mock screen button
-        findViewById(R.id.mockButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startMockActivity();
-            }
-        });
+            // Register the routes screen button
+            findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startRoutesActivity();
+                }
+            });
+
+            // Register the mock screen button
+            findViewById(R.id.mockButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startMockActivity();
+                }
+            });
 
         // Register the set user screen button
         findViewById(R.id.set_user_button).setOnClickListener(new View.OnClickListener() {
@@ -217,6 +244,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
         // Update the UI
         updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
+
     }
 
     @Override
@@ -229,18 +257,20 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onResume();
         Log.d(TAG, "In method onResume");
 
-        // Re-register this activity as an observer if it has been un-registered.
-        if (!mIsObserving) {
-            // The current value of the key tells us which fitness service we last started.
-            startObservingFitnessService(mFitnessServiceKey);
-        }
+        if(!disablemUser){
+            // Re-register this activity as an observer if it has been un-registered.
+            if (!mIsObserving) {
+                // The current value of the key tells us which fitness service we last started.
+                startObservingFitnessService(mFitnessServiceKey);
+            }
 
-        // TODO: Should these lines be in onResume or onCreate (or both) ?
-        initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
-                getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
-        updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
-        Log.d(TAG, " daily steps = " + mDailyTotalSteps);
+            // TODO: Should these lines be in onResume or onCreate (or both) ?
+            initSavedData(getSharedPreferences(WWRConstants.SHARED_PREFERENCES_HEIGHT_FILE_NAME, MODE_PRIVATE),
+                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_LAST_WALK_FILE_NAME, MODE_PRIVATE),
+                    getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
+            updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
+            Log.d(TAG, " daily steps = " + mDailyTotalSteps);
+        }
 
     }
 
@@ -425,6 +455,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 } // end if resultCode
                 else {
                     Log.d(TAG, "onActivityResult: Returned from SetUserActivity with result code " + resultCode);
+
                 }
                 break;
             // If authentication was required during google fit setup, this will be called after the user authenticates
@@ -796,5 +827,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         editor.apply();
     }
 
+    public static void disableUser(Boolean disable){
+        disablemUser = disable;
+    }
 } // end class
 

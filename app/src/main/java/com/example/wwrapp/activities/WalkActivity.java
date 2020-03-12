@@ -103,7 +103,8 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         }
 
         if(ignoreTimer){
-            handleWalkStopped();
+            Intent intent = new Intent(WalkActivity.this, EnterWalkInformationActivity.class);
+            startActivity(intent);
         }
 
         mWalkTimer = new TimerTask(this);
