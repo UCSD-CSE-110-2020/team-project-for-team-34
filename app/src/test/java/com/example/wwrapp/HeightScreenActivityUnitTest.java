@@ -23,7 +23,7 @@ import org.robolectric.shadows.ShadowToast;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(AndroidJUnit4.class)
-@Config(sdk = Config.OLDEST_SDK)
+@Config(sdk = 28)
 public class HeightScreenActivityUnitTest {
 
     @Rule

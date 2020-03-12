@@ -1,10 +1,12 @@
 package com.example.wwrapp.fitness;
 
+import android.app.Activity;
+
 /**
  * Defines operations that a walking fitness service must provide
  */
 public interface IFitnessService {
-    int getRequestCode();
     void setup();
-    void updateStepCount();
+    void startFitnessService(Activity activity);
+    void stopFitnessService();
 }
