@@ -56,12 +56,11 @@ public class ProposeWalk implements Serializable {
     }
 
     public void setUserReason(IUser user, int reason) {
-        ListIterator<ProposeWalkUser> iterator = users.listIterator();
-        while (iterator.hasNext()){
-            ProposeWalkUser propUser = iterator.next();
-            if(propUser.getEmail() == user.getEmail()) {
+        for( int i = 0; i < users.size() ; i++ ) {
+            ProposeWalkUser propUser = users.get(i);
+            if(propUser.getEmail().equals(user.getEmail())) {
                 propUser.setReason(reason);
-                iterator.set(propUser);
+                users.set(i, propUser);
             }
         }
     }

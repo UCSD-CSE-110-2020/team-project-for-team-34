@@ -46,15 +46,6 @@ public class ProposedWalkActivity extends AppCompatActivity {
 
         mFirestore = FirebaseFirestore.getInstance();
 
-        findViewById(R.id.close_route_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Close up this activity
-                Log.d(TAG, "Clicked 'X' button");
-                finish();
-            }
-        });
-
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
@@ -65,8 +56,16 @@ public class ProposedWalkActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Document found in the offline cache
                             DocumentSnapshot document = task.getResult();
-                            mWalk = document.toObject(ProposeWalk.class);
                             setContentView(R.layout.activity_proposed_walk);
+                            mWalk = document.toObject(ProposeWalk.class);
+                            findViewById(R.id.close_route_btn).setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    // Close up this activity
+                                    Log.d(TAG, "Clicked 'X' button");
+                                    finish();
+                                }
+                            });
                             timeView = findViewById(R.id.proposedDateTextView);
                             dateView = findViewById(R.id.proposedTimeTextView);
                             acceptButton = findViewById(R.id.acceptBtn);

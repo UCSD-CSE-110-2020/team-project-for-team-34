@@ -153,8 +153,8 @@
 
     <TextView
         android:id="@+id/notes_text_view"
-        android:layout_width="409dp"
-        android:layout_height="200dp"
+        android:layout_width="412dp"
+        android:layout_height="142dp"
         android:text=""
         android:textSize="@dimen/route_detail"
         app:layout_constraintEnd_toEndOf="parent"
