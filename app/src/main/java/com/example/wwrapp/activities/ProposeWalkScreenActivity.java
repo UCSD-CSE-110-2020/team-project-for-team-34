@@ -98,15 +98,17 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
-                            .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                     ProposeWalk walk = new ProposeWalk(mRoute, mUser.getEmail());
                                     if (task.isSuccessful()) {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
-                                            if(document.get("email") != null && ((String)document.get("email")) != "") {
+                                            Log.d(TAG, "Document data -> " + document.getData());
+                                            if(!document.get(AbstractUser.FIELD_TEAM_NAME).toString().isEmpty()) {
                                                 Log.d(TAG, document.get("email") + " added to route");
-                                                walk.addUser((String)document.get("email"));
+                                                walk.addUser((String)(document.get("email")));
                                             }
                                         }
                                         walk.setDate(dateShow.getText().toString());
@@ -114,7 +116,8 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
                                         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
-                                                .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(walk)
+                                                .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
+                                                .set(walk)
                                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                     @Override
                                                     public void onSuccess(Void aVoid) {

@@ -64,6 +64,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     // String constants
     public static final String NO_LAST_WALK_TIME_TEXT = "No last walk time available";
+    public static final String NO_PROPOSED_WALKS_TOAST_TEXT = "There are no proposed walks for your team.";
+    public static final String USER_IS_NOT_ON_TEAM_TOAST_TEXT = "You aren't on a team.";
+
+
 
     // True to enable the FitnessRunner, false otherwise
     private static boolean sEnableFitnessRunner = false;
@@ -115,9 +119,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
 
-        clearLoginSharedPreferences();
-        clearLastWalkSharedPreferences();
-        clearHeightSharedPreferences();
+//        clearLoginSharedPreferences();
+//        clearLastWalkSharedPreferences();
+//        clearHeightSharedPreferences();
 
         if (disablemUser) {
             mUser = AbstractUserFactory.createUser(WWRConstants.WWR_USER_FACTORY_KEY,
@@ -165,7 +169,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                             }
                         }
                     });
-
 
 
             if (false) {
@@ -267,63 +270,68 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 }
             });
 
-        // Register the routes screen button
-        findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startRoutesActivity();
-                if (true) {
-                    return;
+            findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startRoutesActivity();
                 }
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
-                        .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).get()
-                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@androidx.annotation.NonNull Task<DocumentSnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    DocumentSnapshot document = task.getResult();
-                                    if (document.exists()) {
-                                        ProposeWalk walk;
-                                        walk = document.toObject(ProposeWalk.class);
-                                        if(mUser.getEmail().equals(walk.getOwner())) {
-                                            startScheduleWalkActivity(walk);
-                                        }
-                                        List<ProposeWalkUser> users = walk.getUsers();
-                                        boolean userIsFound = false;
-                                        for (ProposeWalkUser user : users) {
-                                            String userEmail = user.getEmail();
-                                            Log.d(TAG, "trying to find " + user.getEmail());
-                                            Log.d(TAG, String.valueOf(mUser.getEmail().equals(userEmail)));
-                                            if(mUser.getEmail().equals(userEmail)) {
-                                                userIsFound = true;
-                                                if(user.getIsPending()) {
-                                                    Log.d(TAG, "USER IS PENDING");
-                                                    startProposedWalkActivity(walk);
+            });
+
+            // Register the propose walk button
+            findViewById(R.id.propose_walk_btn_home).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
+                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).get()
+                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@androidx.annotation.NonNull Task<DocumentSnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        DocumentSnapshot document = task.getResult();
+                                        if (document.exists()) {
+                                            ProposeWalk walk;
+                                            walk = document.toObject(ProposeWalk.class);
+                                            if (mUser.getEmail().equals(walk.getOwner())) {
+                                                startScheduleWalkActivity(walk);
+                                            } else {
+                                                List<ProposeWalkUser> users = walk.getUsers();
+                                                boolean userIsFound = false;
+                                                for (ProposeWalkUser user : users) {
+                                                    String userEmail = user.getEmail();
+                                                    Log.d(TAG, "trying to find " + user.getEmail());
+                                                    Log.d(TAG, String.valueOf(mUser.getEmail().equals(userEmail)));
+                                                    if (mUser.getEmail().equals(userEmail)) {
+                                                        userIsFound = true;
+                                                        if (user.getIsPending()) {
+                                                            Log.d(TAG, "USER IS PENDING");
+                                                            startProposedWalkActivity(walk);
+                                                        } else {
+                                                            Log.d(TAG, "Not pending invitation");
+                                                            startRoutesActivity();
+                                                        }
+                                                    }
                                                 }
-                                                else {
-                                                    Log.d(TAG, "Not pending invitation");
-                                                    startRoutesActivity();
+                                                if (!userIsFound) {
+                                                    Toast.makeText(HomeScreenActivity.this,
+                                                            USER_IS_NOT_ON_TEAM_TOAST_TEXT,
+                                                            Toast.LENGTH_SHORT).show();
                                                 }
                                             }
-                                        }
-                                        if(!userIsFound) {
-                                            //IsOwnerOfProposedWalk
-                                            Log.d(TAG, "Owner of route Invitation");
-                                            startRoutesActivity();
+
+                                        } else {
+                                            Log.d(TAG, "No route");
+                                            Toast.makeText(HomeScreenActivity.this,
+                                                    NO_PROPOSED_WALKS_TOAST_TEXT, Toast.LENGTH_SHORT).show();
                                         }
                                     } else {
-                                        Log.d(TAG, "No route");
-                                        startRoutesActivity();
+                                        Log.d(TAG, "get failed with ", task.getException());
                                     }
-                                } else {
-                                    Log.d(TAG, "get failed with ", task.getException());
                                 }
-                            }
-                        });
-            }
-        });
+                            });
+                }
+            });
 
 
             // Register the mock screen button
@@ -364,7 +372,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onResume();
         Log.d(TAG, "In method onResume");
 
-        if(!disablemUser){
+        if (!disablemUser) {
             // Re-register this activity as an observer if it has been un-registered.
             if (!mIsObserving) {
                 // The current value of the key tells us which fitness service we last started.
@@ -473,6 +481,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
         startActivity(intent);
     }
+
     /**
      * Starts the mocking activity
      */
@@ -522,21 +531,21 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                             .document(mUser.getEmail())
                             .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                @Override
-                                public void onComplete(@androidx.annotation.NonNull Task<DocumentSnapshot> task) {
-                                    if (task.isSuccessful()) {
-                                        DocumentSnapshot document = task.getResult();
-                                        if (document.exists()) {
-                                            Log.d(TAG, "Pulled updated user data: " + document.getData());
-                                            mUser = document.toObject(WWRUser.class);
-                                        } else {
-                                            Log.d(TAG, "No such document");
-                                        }
-                                    } else {
-                                        Log.d(TAG, "get failed with ", task.getException());
-                                    }
+                        @Override
+                        public void onComplete(@androidx.annotation.NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    Log.d(TAG, "Pulled updated user data: " + document.getData());
+                                    mUser = document.toObject(WWRUser.class);
+                                } else {
+                                    Log.d(TAG, "No such document");
                                 }
-                            });
+                            } else {
+                                Log.d(TAG, "get failed with ", task.getException());
+                            }
+                        }
+                    });
                 } else if (resultCode == Activity.RESULT_CANCELED) {
                     // If the user pressed the back button on the invite screen
                     Log.d(TAG, "Result is " + resultCode);
@@ -947,7 +956,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         editor.apply();
     }
 
-    public static void disableUser(Boolean disable){
+    public static void disableUser(Boolean disable) {
         disablemUser = disable;
     }
 } // end class

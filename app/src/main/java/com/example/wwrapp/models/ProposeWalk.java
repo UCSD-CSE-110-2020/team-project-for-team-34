@@ -25,14 +25,14 @@ public class ProposeWalk implements Serializable {
     }
 
     public void addUser(String userEmail) {
-        if(userEmail.equals(owner)) {
+        if(!userEmail.equals(owner)) {
             ProposeWalkUser user = new ProposeWalkUser(userEmail);
             users.add(user);
         }
     }
 
     public void addUser(AbstractUser user) {
-        if(user.getEmail().equals(owner)) {
+        if(!user.getEmail().equals(owner)) {
             ProposeWalkUser propUser = new ProposeWalkUser(user);
             users.add(propUser);
         }

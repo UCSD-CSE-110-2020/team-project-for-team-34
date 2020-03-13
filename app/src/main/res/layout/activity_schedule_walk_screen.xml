@@ -7,7 +7,7 @@
     tools:context=".activities.ScheduleWalkScreenActivity">
 
     <TextView
-        android:id="@+id/proposedDateTextView"
+        android:id="@+id/proposedDateTextView_schedule"
         android:layout_width="288dp"
         android:layout_height="wrap_content"
         android:text=""
@@ -18,7 +18,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Propsed Date"
+        android:text="Proposed Date"
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
         app:layout_constraintStart_toStartOf="parent"
@@ -34,7 +34,7 @@
         app:layout_constraintTop_toBottomOf="@+id/proposedDateTextView" />
 
     <TextView
-        android:id="@+id/proposedTimeTextView"
+        android:id="@+id/proposedTimeTextView_scheduled"
         android:layout_width="272dp"
         android:layout_height="wrap_content"
         android:text=""

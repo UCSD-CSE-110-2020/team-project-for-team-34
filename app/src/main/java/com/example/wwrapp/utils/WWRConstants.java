@@ -36,6 +36,9 @@ public final class WWRConstants {
     public static final String EXTRA_TEAM_ROUTE_DETAIL_ACTIVITY_CALLER_ID =
             "com.example.wwrapp.EXTRA_ROUTE_ACTIVITY";
 
+    public static final String EXTRA_SCHEDULE_WALK_ACTIVITY_CALLER_ID =
+            "com.example.wwrapp.SCHEDULE_WALK_ACTIVITY_CALLER_ID";
+
     public static final String EXTRA_SET_USER_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_SET_USER_ACTIVITY";
 
     // Keys
