@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -43,7 +43,7 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
 
     private ToggleButton mFavoriteBtn;
 
-    private IUser mUser;
+    private AbstractUser mUser;
     private FirebaseFirestore mFirestore;
     private Route mRoute;
 
@@ -58,7 +58,7 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
         mRoute = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
 
         // Get the user
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
         mFavoriteBtn = findViewById(R.id.favoriteBtnDetail);
 

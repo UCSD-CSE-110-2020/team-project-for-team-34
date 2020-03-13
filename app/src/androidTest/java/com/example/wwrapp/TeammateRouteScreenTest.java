@@ -11,6 +11,7 @@ import com.example.wwrapp.activities.RoutesActivity;
 import com.example.wwrapp.activities.TeamRoutesActivity;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,23 +38,21 @@ public class TeammateRouteScreenTest {
         RoutesActivity.setIsTest(true);
     }
 
+
     @Test
     public void NoTeammateRoutesTest() {
         mActivityTestRule.getActivity();
         TeamRoutesActivity.IS_TESTING_EMPTY = true;
         ViewInteraction appCompatButton1 = onView(
-                allOf(withId(R.id.routeScreenButton),
-                        isDisplayed()));
+                allOf(withId(R.id.routeScreenButton)));
         appCompatButton1.perform(click());
 
         ViewInteraction appCompatButton2 = onView(
-                allOf(withId(R.id.teammateRouteBtn),
-                        isDisplayed()));
+                allOf(withId(R.id.teammateRouteBtn)));
         appCompatButton2.perform(click());
 
         ViewInteraction appCompatView = onView(
-                allOf(withId(R.id.emptyStringView),
-                        isDisplayed()));
+                allOf(withId(R.id.emptyStringView)));
         appCompatView.check(matches(withText("None of your teammates have routes :(")));
     }
 }

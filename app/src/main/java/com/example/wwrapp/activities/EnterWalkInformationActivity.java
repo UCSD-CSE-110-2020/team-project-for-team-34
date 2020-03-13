@@ -14,7 +14,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
+import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.RouteBuilder;
 import com.example.wwrapp.models.Walk;
@@ -35,6 +36,8 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
     private static final String TAG = "EnterWalkInformationActivity";
 
     private static String ENTER_ROUTE_NAME_TOAST = "Please enter the route name";
+
+    private static boolean testing = false;
 
     private Button mDoneButton;
     private Button mCancelButton;
@@ -58,128 +61,167 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
     private RadioButton mRouteDifficultyRadioBtn;
     private RadioButton mRouteFavoriteRadioBtn;
 
-    private IUser mUser;
+    private AbstractUser mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_enter_walk_information);
 
+
         // Get the user
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
-        // Create the list of tags
-        mTags = new ArrayList<>();
+        if(testing){
+            mUser = new MockUser("test", "testing@gmail.com");
 
-        final EditText routeName = findViewById(R.id.route_name_edit_text);
-        final EditText startingPoint = findViewById(R.id.starting_point_edit_text);
+            final EditText routeName = findViewById(R.id.route_name_edit_text);
+            final EditText startingPoint = findViewById(R.id.starting_point_edit_text);
 
-        mDoneButton = findViewById(R.id.enter_walk_info_done_button);
-        mRouteShapeRadioGroup = findViewById(R.id.route_shape_radio_group);
-        mRouteElevationRadioGroup = findViewById(R.id.route_elevation_radio_group);
-        mRouteEnvironmentRadioGroup = findViewById(R.id.route_environment_radio_group);
-        mRouteSmoothnessRadioGroup = findViewById(R.id.route_smoothness_radio_group);
-        mRouteDifficultyRadioGroup = findViewById(R.id.route_difficulty_radio_group);
-        mRouteFavoriteRadioGroup = findViewById(R.id.route_favorite_radio_group);
+            mDoneButton = findViewById(R.id.enter_walk_info_done_button);
+            mCancelButton = findViewById(R.id.enter_walk_info_cancel_button);
+            mRouteShapeRadioGroup = findViewById(R.id.route_shape_radio_group);
+            mRouteElevationRadioGroup = findViewById(R.id.route_elevation_radio_group);
+            mRouteEnvironmentRadioGroup = findViewById(R.id.route_environment_radio_group);
+            mRouteSmoothnessRadioGroup = findViewById(R.id.route_smoothness_radio_group);
+            mRouteDifficultyRadioGroup = findViewById(R.id.route_difficulty_radio_group);
+            mRouteFavoriteRadioGroup = findViewById(R.id.route_favorite_radio_group);
 
-        mRouteShapeRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
+            mRouteShapeRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(RadioGroup group, int checkedId) {
 
-            }
-        });
+                }
+            });
 
-        // Register the done button
-        mDoneButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // If the user hasn't entered a route name
-                if (routeName.getText().toString().isEmpty()) {
-                    Toast.makeText(getApplicationContext(), ENTER_ROUTE_NAME_TOAST, Toast.LENGTH_LONG).show();
-                } else {
-                    // extract info from radio group
-                    if (mRouteShapeRadioGroup.getCheckedRadioButtonId() != -1) {
-                        int id = mRouteShapeRadioGroup.getCheckedRadioButtonId();
-                        mRouteShapeRadioBtn = findViewById(id);
-                        String shapeTag = mRouteShapeRadioBtn.getText().toString();
-                        Log.d(TAG, "Shape is: " + shapeTag);
-                        // Save this tag
-                        mTags.add(shapeTag);
-                    }
-                    if (mRouteElevationRadioGroup.getCheckedRadioButtonId() != -1) {
-                        int id = mRouteElevationRadioGroup.getCheckedRadioButtonId();
-                        mRouteElevationRadioBtn = findViewById(id);
-                        String elevationTag = mRouteElevationRadioBtn.getText().toString();
-                        Log.d(TAG, "Elevation is: " + elevationTag);
-                        mTags.add(elevationTag);
-                    }
-                    if (mRouteEnvironmentRadioGroup.getCheckedRadioButtonId() != -1) {
-                        int id = mRouteEnvironmentRadioGroup.getCheckedRadioButtonId();
-                        mRouteEnvironmentRadioBtn = findViewById(id);
-                        String environmentTag = mRouteEnvironmentRadioBtn.getText().toString();
-                        Log.d(TAG, "Environment is: " + environmentTag);
-                        mTags.add(environmentTag);
-                    }
-                    if (mRouteSmoothnessRadioGroup.getCheckedRadioButtonId() != -1) {
-                        int id = mRouteSmoothnessRadioGroup.getCheckedRadioButtonId();
-                        mRouteSmoothnessRadioBtn = findViewById(id);
-                        String smoothnessTag = mRouteSmoothnessRadioBtn.getText().toString();
-                        Log.d(TAG, "Smoothness is: " + smoothnessTag);
-                        mTags.add(smoothnessTag);
-                    }
-                    if (mRouteDifficultyRadioGroup.getCheckedRadioButtonId() != -1) {
-                        int id = mRouteDifficultyRadioGroup.getCheckedRadioButtonId();
-                        mRouteDifficultyRadioBtn = findViewById(id);
-                        String difficultyTags = mRouteDifficultyRadioBtn.getText().toString();
-                        Log.d(TAG, "Difficulty is: " + difficultyTags);
-                        mTags.add(difficultyTags);
-                    }
-                    if (mRouteFavoriteRadioGroup.getCheckedRadioButtonId() != -1) {
-                        int id = mRouteFavoriteRadioGroup.getCheckedRadioButtonId();
-                        mRouteFavoriteRadioBtn = findViewById(id);
-                        if (mRouteFavoriteRadioBtn.isChecked()) {
-                            mFavorite = true;
-                        } else {
-                            mFavorite = false;
+            mDoneButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+            mCancelButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+        } else {
+            mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            // Create the list of tags
+            mTags = new ArrayList<>();
+
+            final EditText routeName = findViewById(R.id.route_name_edit_text);
+            final EditText startingPoint = findViewById(R.id.starting_point_edit_text);
+
+            mDoneButton = findViewById(R.id.enter_walk_info_done_button);
+            mRouteShapeRadioGroup = findViewById(R.id.route_shape_radio_group);
+            mRouteElevationRadioGroup = findViewById(R.id.route_elevation_radio_group);
+            mRouteEnvironmentRadioGroup = findViewById(R.id.route_environment_radio_group);
+            mRouteSmoothnessRadioGroup = findViewById(R.id.route_smoothness_radio_group);
+            mRouteDifficultyRadioGroup = findViewById(R.id.route_difficulty_radio_group);
+            mRouteFavoriteRadioGroup = findViewById(R.id.route_favorite_radio_group);
+
+            mRouteShapeRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+                }
+            });
+
+            // Register the done button
+            mDoneButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // If the user hasn't entered a route name
+                    if (routeName.getText().toString().isEmpty()) {
+                        Toast.makeText(getApplicationContext(), ENTER_ROUTE_NAME_TOAST, Toast.LENGTH_LONG).show();
+                    } else {
+                        // extract info from radio group
+                        if (mRouteShapeRadioGroup.getCheckedRadioButtonId() != -1) {
+                            int id = mRouteShapeRadioGroup.getCheckedRadioButtonId();
+                            mRouteShapeRadioBtn = findViewById(id);
+                            String shapeTag = mRouteShapeRadioBtn.getText().toString();
+                            Log.d(TAG, "Shape is: " + shapeTag);
+                            // Save this tag
+                            mTags.add(shapeTag);
                         }
+                        if (mRouteElevationRadioGroup.getCheckedRadioButtonId() != -1) {
+                            int id = mRouteElevationRadioGroup.getCheckedRadioButtonId();
+                            mRouteElevationRadioBtn = findViewById(id);
+                            String elevationTag = mRouteElevationRadioBtn.getText().toString();
+                            Log.d(TAG, "Elevation is: " + elevationTag);
+                            mTags.add(elevationTag);
+                        }
+                        if (mRouteEnvironmentRadioGroup.getCheckedRadioButtonId() != -1) {
+                            int id = mRouteEnvironmentRadioGroup.getCheckedRadioButtonId();
+                            mRouteEnvironmentRadioBtn = findViewById(id);
+                            String environmentTag = mRouteEnvironmentRadioBtn.getText().toString();
+                            Log.d(TAG, "Environment is: " + environmentTag);
+                            mTags.add(environmentTag);
+                        }
+                        if (mRouteSmoothnessRadioGroup.getCheckedRadioButtonId() != -1) {
+                            int id = mRouteSmoothnessRadioGroup.getCheckedRadioButtonId();
+                            mRouteSmoothnessRadioBtn = findViewById(id);
+                            String smoothnessTag = mRouteSmoothnessRadioBtn.getText().toString();
+                            Log.d(TAG, "Smoothness is: " + smoothnessTag);
+                            mTags.add(smoothnessTag);
+                        }
+                        if (mRouteDifficultyRadioGroup.getCheckedRadioButtonId() != -1) {
+                            int id = mRouteDifficultyRadioGroup.getCheckedRadioButtonId();
+                            mRouteDifficultyRadioBtn = findViewById(id);
+                            String difficultyTags = mRouteDifficultyRadioBtn.getText().toString();
+                            Log.d(TAG, "Difficulty is: " + difficultyTags);
+                            mTags.add(difficultyTags);
+                        }
+                        if (mRouteFavoriteRadioGroup.getCheckedRadioButtonId() != -1) {
+                            int id = mRouteFavoriteRadioGroup.getCheckedRadioButtonId();
+                            mRouteFavoriteRadioBtn = findViewById(id);
+                            if (mRouteFavoriteRadioBtn.isChecked()) {
+                                mFavorite = true;
+                            } else {
+                                mFavorite = false;
+                            }
+                        }
+
+                        //  Get and save the notes
+                        EditText editText = findViewById(R.id.notes_edit);
+                        mNotes = editText.getText().toString();
+                        Log.d(TAG, "Notes are: " + mNotes);
+
+
+                        Log.d(TAG, "Favorite is: " + mFavorite);
+
+                        mRouteName = routeName.getText().toString();
+                        mStartingPoint = startingPoint.getText().toString();
+
+                        // Determine how to end this activity
+                        handleDoneButtonClick();
                     }
-
-                    //  Get and save the notes
-                    EditText editText = findViewById(R.id.notes_edit);
-                    mNotes = editText.getText().toString();
-                    Log.d(TAG, "Notes are: " + mNotes);
-
-
-                    Log.d(TAG, "Favorite is: " + mFavorite);
-
-                    mRouteName = routeName.getText().toString();
-                    mStartingPoint = startingPoint.getText().toString();
-
-                    // Determine how to end this activity
-                    handleDoneButtonClick();
                 }
-            }
-        });
+            });
 
-        mCancelButton = findViewById(R.id.enter_walk_info_cancel_button);
-        // Register the cancel button
-        mCancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = getIntent();
-                String callerID = intent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
-                switch (callerID) {
-                    case WWRConstants.EXTRA_ROUTES_ACTIVITY_CALLER_ID:
-                        setResult(RESULT_CANCELED);
-                        finish();
-                        break;
-                    case WWRConstants.EXTRA_WALK_ACTIVITY_CALLER_ID:
-                        finish();
-                        break;
+            mCancelButton = findViewById(R.id.enter_walk_info_cancel_button);
+            // Register the cancel button
+            mCancelButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = getIntent();
+                    String callerID = intent.getStringExtra(WWRConstants.EXTRA_CALLER_ID_KEY);
+                    switch (callerID) {
+                        case WWRConstants.EXTRA_ROUTES_ACTIVITY_CALLER_ID:
+                            setResult(RESULT_CANCELED);
+                            finish();
+                            break;
+                        case WWRConstants.EXTRA_WALK_ACTIVITY_CALLER_ID:
+                            finish();
+                            break;
+                    }
+                    finish();
                 }
-                finish();
-            }
-        });
+            });
+        }
+
+
     }
 
     private void handleDoneButtonClick() {
@@ -239,6 +281,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 .setDurationOfLastWalk(duration)
                 .setOwnerName(mUser.getName())
                 .setOwnerEmail(mUser.getEmail())
+                .setOwnerColor(mUser.getColor())
                 .setWalkers(walkers)
                 .setFavoriters(favoriters)
                 .getRoute();
@@ -289,6 +332,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 .setDurationOfLastWalk(WWRConstants.EMPTY_STR)
                 .setOwnerName(mUser.getName())
                 .setOwnerEmail(mUser.getEmail())
+                .setOwnerColor(mUser.getColor())
                 .setFavoriters(favoriters)
                 .getRoute();
 
@@ -315,4 +359,8 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         finish();
     }
 
+
+    public static void disableUser(boolean disable){
+        testing = disable;
+    }
 }

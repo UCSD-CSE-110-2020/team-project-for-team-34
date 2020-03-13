@@ -101,6 +101,11 @@ public class RouteBuilder {
         return this;
     }
 
+    public RouteBuilder setOwnerColor(int color) {
+        route.setOwnerColor(color);
+        return this;
+    }
+
     public RouteBuilder setWalkers(Map<String, Walk> walkers) {
         route.setWalkers(walkers);
         return this;

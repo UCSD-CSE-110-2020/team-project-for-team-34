@@ -11,6 +11,7 @@ import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.example.wwrapp.activities.HomeScreenActivity;
+import com.example.wwrapp.activities.TeamActivity;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -38,13 +39,14 @@ public class TeamScreenTest {
     public static void initialize() {
         HomeScreenActivity.setIgnoreHeight(true);
         HomeScreenActivity.setEnableFitnessRunner(false);
+        HomeScreenActivity.disableUser(true);
+        TeamActivity.disableUser(true);
     }
 
     @Test
     public void teammateRouteTest() {
         ViewInteraction appCompatButton = onView(
-                allOf(withId(R.id.teamScreenButton), withText("Go To Team"),
-                        isDisplayed()));
+                allOf(withId(R.id.teamScreenButton)));
         appCompatButton.perform(click());
 
 

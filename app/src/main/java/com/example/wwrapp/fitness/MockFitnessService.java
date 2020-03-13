@@ -1,5 +1,6 @@
 package com.example.wwrapp.fitness;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -212,10 +213,6 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
         super.onDestroy();
     }
 
-    @Override
-    public int getRequestCode() {
-        return 0;
-    }
 
     @Override
     public void setup() {
@@ -248,6 +245,15 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
     }
 
     @Override
+    public void startFitnessService(Activity activity) {
+
+    }
+
+    @Override
+    public void stopFitnessService() {
+
+    }
+
     public void updateStepCount() {
         // Arbitrary step count increment
         // If the calendar day has changed, reset the step count

@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.TeamMember;
@@ -36,8 +36,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
     private TextView mMemberText;
     private String mInviterName;
     private FirebaseFirestore mFirestore;
-    private IUser mUser;
-    private IUser mInviter;
+    private AbstractUser mUser;
+    private AbstractUser mInviter;
 
     // For testing purposes
     private static boolean testInvite = false;
@@ -47,41 +47,10 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invite_member);
 
-        // Get the database instance
-        mFirestore = FirebaseFirestore.getInstance();
-
         // Set up display
         mMemberText = findViewById(R.id.team_member_name_text_view);
         mAcceptBtn = findViewById(R.id.invite_accept_button);
         mDeclineBtn = findViewById(R.id.invite_decline_button);
-
-        // get user and inviter
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-        assert mUser != null;
-        mInviterName = mUser.getInviterName();
-        String inviterEmail = mUser.getInviterEmail();
-        Log.d(TAG, "Inviter name is " + mInviterName);
-        Log.d(TAG, "Inviter email is " + inviterEmail);
-
-        // find inviter object in database
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(inviterEmail).get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                Log.d(TAG, "Got inviter data: " + document.getData());
-                                mInviter = (document.toObject(MockUser.class));
-                            } else {
-                                Log.d(TAG, "Couldn't find inviter");
-                            }
-                        } else {
-                            Log.d(TAG, "get failed with ", task.getException());
-                        }
-                    }
-                });
 
 
         // TODO: Fix this code to not have testInvite set
@@ -101,6 +70,37 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 }
             });
         } else {
+            // Get the database instance
+            mFirestore = FirebaseFirestore.getInstance();
+
+            // get user and inviter
+            mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            assert mUser != null;
+            mInviterName = mUser.getInviterName();
+            String inviterEmail = mUser.getInviterEmail();
+            Log.d(TAG, "Inviter name is " + mInviterName);
+            Log.d(TAG, "Inviter email is " + inviterEmail);
+
+            // find inviter object in database
+            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                    .document(inviterEmail).get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    Log.d(TAG, "Got inviter data: " + document.getData());
+                                    mInviter = (document.toObject(MockUser.class));
+                                } else {
+                                    Log.d(TAG, "Couldn't find inviter");
+                                }
+                            } else {
+                                Log.d(TAG, "get failed with ", task.getException());
+                            }
+                        }
+                    });
+
             // Find the users who have invited the invitee
             // TODO: Handle multiple inviters (not just 1)
             mMemberText.setText(mInviterName);
@@ -332,7 +332,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         // Reset invitee's inviter Email
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mUser.getEmail())
-                .update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT, MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT)
+                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -432,7 +432,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         // Reset invitee's inviter Email
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mUser.getEmail())
-                .update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT, MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT)
+                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -510,7 +510,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         // Reset invitee's inviter Email
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mUser.getEmail())
-                .update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT, MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT)
+                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -528,8 +528,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
     public void onInviterAndInviteeNotOnTeamDecline() {
         Log.d(TAG, "onInviterAndInviteeNotOnTeamDecline: ");
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail()).update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT,
-                MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT).addOnSuccessListener(new OnSuccessListener<Void>() {
+                .document(mUser.getEmail()).update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT,
+                AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Successfully reset invitee's inviter name and email");
@@ -562,8 +562,8 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
     public void onInviterOnTeamAndInviteeNotOnTeamDecline() {
         Log.d(TAG, "onInviterOnTeamAndInviteeNotOnTeamDecline: ");
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail()).update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT,
-                MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT).addOnSuccessListener(new OnSuccessListener<Void>() {
+                .document(mUser.getEmail()).update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT,
+                AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Successfully reset invitee's inviter name and email");
@@ -618,7 +618,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
         // Reset invitee's inviter email
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                 .document(mUser.getEmail())
-                .update(MockUser.FIELD_INVITER_NAME, MockUser.STRING_DEFAULT, MockUser.FIELD_INVITER_EMAIL, MockUser.STRING_DEFAULT)
+                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -652,4 +652,6 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 });
 
     }
+
+
 }

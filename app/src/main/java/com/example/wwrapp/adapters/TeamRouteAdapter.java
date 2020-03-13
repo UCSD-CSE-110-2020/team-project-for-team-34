@@ -1,5 +1,8 @@
 package com.example.wwrapp.adapters;
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +18,12 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.InitialsExtracter;
+import com.example.wwrapp.utils.RandomColorGenerator;
 import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.WWRConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -47,14 +51,14 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
     private LayoutInflater mInflater;
 
     private FirebaseFirestore mFirestore;
-    private IUser mUser;
+    private AbstractUser mUser;
 
     /**
      * Create a new RecyclerView adapter that listens to a Firestore Query.
      *
      * @param options
      */
-    public TeamRouteAdapter(@NonNull FirestoreRecyclerOptions<Route> options, IUser user) {
+    public TeamRouteAdapter(@NonNull FirestoreRecyclerOptions<Route> options, AbstractUser user) {
         super(options);
         Log.d(TAG, "in TeammateRouteAdapter constructor");
         mFirestore = FirebaseFirestore.getInstance();
@@ -188,6 +192,7 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
                 secondInitial = InitialsExtracter.getSecondInitial(ownerName);
             }
             String iconName = firstInitial + secondInitial;
+            int iconColor = model.getOwnerColor();
 
             // Set the owner's name
             holder.teammateName.setText(iconName);
@@ -199,6 +204,11 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
             {
                 holder.checkMark.setVisibility(View.GONE);
             }
+            // Set the owner's color
+            Drawable roundDrawable = holder.teammateIcon.getResources().getDrawable(R.drawable.button_background);
+            roundDrawable.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP);
+            holder.teammateIcon.setBackground(roundDrawable);
+            holder.teammateIcon.setText(iconName);
 
             // Listen for favorite changes
             holder.favoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -273,6 +283,7 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
         TextView teammateName;
         ToggleButton favoriteBtn;
         ImageView checkMark;
+        Button teammateIcon;
         View itemView;
 
         public TeammateRouteViewHolder(@NonNull View itemView) {
@@ -286,6 +297,10 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
             favoriteBtn = itemView.findViewById(R.id.favoriteBtn);
             checkMark = itemView.findViewById(R.id.check_mark);
             teammateName = itemView.findViewById(R.id.teammate_name);
+            teammateIcon = itemView.findViewById(R.id.teammate_icon);
+//            Drawable roundDrawable = teammateIcon.getResources().getDrawable(R.drawable.button_background);
+//            roundDrawable.setColorFilter(RandomColorGenerator.generateRandomNum(), PorterDuff.Mode.SRC_ATOP);
+//            teammateIcon.setBackground(roundDrawable);
             this.itemView = itemView;
 
             // Register this view to respond to clicks

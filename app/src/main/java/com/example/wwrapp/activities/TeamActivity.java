@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.adapters.TeamAdapter;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.TeamMember;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -32,6 +32,7 @@ public class TeamActivity extends AppCompatActivity {
 
     private static final int ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE = 1;
     private static final int INVITE_ACTIVITY_REQUEST_CODE = 2;
+    private static boolean disablemUser = false;
 
 
     private TeamAdapter mTeamAdapter;
@@ -41,7 +42,7 @@ public class TeamActivity extends AppCompatActivity {
     // Backend-related objects
     private FirebaseFirestore mFirestore;
     private Query mQuery;
-    private IUser mUser;
+    private AbstractUser mUser;
     private boolean mUserIsOnTeam;
 
     // For testing InviteMemberScreen
@@ -53,65 +54,79 @@ public class TeamActivity extends AppCompatActivity {
         setContentView(R.layout.activity_team);
         Log.d(TAG, "onCreate");
 
-        // Get the database
-        mFirestore = FirebaseFirestore.getInstance();
 
-        // Get this user
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-        Log.d(TAG, "inviter Email is " + mUser.getInviterEmail());
-
-        // Set up Firestore and query for the routes to display
-        initQuery();
-
-        // Render + button
-        mAddNewTeamBtn = findViewById(R.id.addNewTeamButton);
-        mAddNewTeamBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(TeamActivity.this, AddTeamMemberActivity.class);
-                final IUser user = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-                intent.putExtra(WWRConstants.EXTRA_USER_KEY, user);
-                startActivityForResult(intent, ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE);
-            }
-        });
-
-        // TODO: Remove this if-block For testing InviteMember
-        if (testInvite) {
-            Intent intent = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
-            startActivity(intent);
-        }
-
-        // Check if user received a team invite since the Home Screen
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        Log.d(TAG, "DocumentSnapshot data for invitee: " + document.getData());
-                        String newInviterName = document.getString(MockUser.FIELD_INVITER_NAME);
-                        String newInviterEmail = document.getString(MockUser.FIELD_INVITER_EMAIL);
-                        // If there a new inviter sent an invitation:
-                        if (!newInviterName.isEmpty()) {
-                            mUser.setInviterName(newInviterName);
-                            mUser.setInviterEmail(newInviterEmail);
-                            Intent intent = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
-                            intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
-                            startActivityForResult(intent, INVITE_ACTIVITY_REQUEST_CODE);
-                        }
-                    } else {
-                        Log.d(TAG, "Invitee doesn't have any new invites");
+        if(disablemUser){
+            if(testInvite){
+                Intent intent = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
+                startActivity(intent);
+            } else {
+                findViewById(R.id.addNewTeamButton).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(TeamActivity.this, AddTeamMemberActivity.class);
+                        startActivity(intent);
                     }
-
-                } else {
-                    Log.d(TAG, "get failed with ", task.getException());
-                }
+                });
             }
-        });
 
-        // Enable Firestore logging
-        FirebaseFirestore.setLoggingEnabled(true);
+
+        } else {
+            // Get the database
+            mFirestore = FirebaseFirestore.getInstance();
+
+            // Get this user
+            mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            Log.d(TAG, "user email is " + mUser.getEmail());
+            Log.d(TAG, "inviter Email is " + mUser.getInviterEmail());
+
+            // Set up Firestore and query for the routes to display
+            initQuery();
+
+            // Render + button
+            mAddNewTeamBtn = findViewById(R.id.addNewTeamButton);
+            mAddNewTeamBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(TeamActivity.this, AddTeamMemberActivity.class);
+                    final AbstractUser user = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, user);
+                    startActivityForResult(intent, ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE);
+                }
+            });
+
+
+            // Check if user received a team invite since the Home Screen
+            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                    .document(mUser.getEmail()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            Log.d(TAG, "DocumentSnapshot data for invitee: " + document.getData());
+                            String newInviterName = document.getString(MockUser.FIELD_INVITER_NAME);
+                            String newInviterEmail = document.getString(MockUser.FIELD_INVITER_EMAIL);
+                            // If there a new inviter sent an invitation:
+                            if (!newInviterName.isEmpty()) {
+                                mUser.setInviterName(newInviterName);
+                                mUser.setInviterEmail(newInviterEmail);
+                                Intent intent = new Intent(TeamActivity.this, InviteMemberScreenActivity.class);
+                                intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                                startActivityForResult(intent, INVITE_ACTIVITY_REQUEST_CODE);
+                            }
+                        } else {
+                            Log.d(TAG, "Invitee doesn't have any new invites");
+                        }
+
+                    } else {
+                        Log.d(TAG, "get failed with ", task.getException());
+                    }
+                }
+            });
+
+            // Enable Firestore logging
+            FirebaseFirestore.setLoggingEnabled(true);
+        }
     }
 
     @Override
@@ -212,7 +227,7 @@ public class TeamActivity extends AppCompatActivity {
                                 Log.d(TAG, "Pulled updated user data: " + document.getData());
                                 // TODO: Use a consolidated User class
                                 mUser = document.toObject(MockUser.class);
-                                mUser.setStatus("!!!!");
+                                mUser.setTeamStatus("!!!!");
                                 Intent returnIntent = new Intent();
                                 returnIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
                                 setResult(Activity.RESULT_OK, returnIntent);
@@ -238,6 +253,10 @@ public class TeamActivity extends AppCompatActivity {
 
     public static void mockInviteMemberScreen(boolean testInviteMember) {
         testInvite = testInviteMember;
+    }
+
+    public static void disableUser(Boolean disable){
+        disablemUser = disable;
     }
 
 

@@ -14,8 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
-import com.example.wwrapp.models.IUserFactory;
+import com.example.wwrapp.models.AbstractUser;
+import com.example.wwrapp.models.AbstractUserFactory;
 import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.TeamMember;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -49,8 +49,10 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 
     private FirebaseFirestore mFirestore;
 
-    private IUser mInviter;
-    private IUser mInvitee;
+    private AbstractUser mInviter;
+    private AbstractUser mInvitee;
+
+    private static boolean disablemUser = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,92 +60,119 @@ public class AddTeamMemberActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_member);
         Log.d(TAG, "in method onCreate");
 
-        // Display view elements
-        mNewMemberNameTextView = findViewById(R.id.add_member_name_text_view);
-        mNewMemberEmailTextView = findViewById(R.id.add_member_email_text_view);
-
-        mInviteeNameEditText = findViewById(R.id.member_name_edit_text);
-        mInviteeEmailEditText = findViewById(R.id.member_email_edit_text);
-
-        mInviteeName = mInviteeNameEditText.getText().toString();
-        mInviteeEmail = mInviteeEmailEditText.getText().toString();
-        mConfirmBtn = findViewById(R.id.add_member_button);
-        mCancelBtn = findViewById(R.id.add_member_cancel_button);
-
-        // Get database instance
-        mFirestore = FirebaseFirestore.getInstance();
-
-        // Retrieve this user
-        Intent intent = getIntent();
-        String userType = intent.getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
-        assert userType != null;
-        mInviter = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-
-        Log.i(TAG, "inviter  email is " + mInviter.getEmail());
-
-
-        mConfirmBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mInviteeName = mInviteeNameEditText.getText().toString();
-                mInviteeEmail = mInviteeEmailEditText.getText().toString();
-
-                // If either of the name or email is blank, don't allow this invite to send
-                if (mInviteeName.isEmpty() || mInviteeEmail.isEmpty()) {
-                    Toast.makeText(AddTeamMemberActivity.this,
-                            INVALID_NAME_OR_EMAIL_SUBMISSION_TOAST, Toast.LENGTH_SHORT)
-                            .show();
-                    return;
+        if(disablemUser){
+            findViewById(R.id.add_member_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
                 }
+            });
+            findViewById(R.id.add_member_cancel_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
+                }
+            });
+        } else {
 
-                Log.d(TAG, "Invitee name on click is: " + mInviteeName);
-                Log.d(TAG, "Invitee email on click is: " + mInviteeEmail);
-                TeamMember teamMember = new TeamMember(mInviteeEmail, FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING, mInviteeName);
+            // Display view elements
+            mNewMemberNameTextView = findViewById(R.id.add_member_name_text_view);
+            mNewMemberEmailTextView = findViewById(R.id.add_member_email_text_view);
 
-                // Save member_name and member_email to database and go to team screen.
+            mInviteeNameEditText = findViewById(R.id.member_name_edit_text);
+            mInviteeEmailEditText = findViewById(R.id.member_email_edit_text);
 
-                // check if invitee is on the firebase or not, if it is, pull it down, else create a new object
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                        .document(mInviteeEmail)
-                        .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                mInvitee = document.toObject(MockUser.class);
-                                Log.d(TAG, "DocumentSnapshot data for invitee: " + document.getData());
+            mInviteeName = mInviteeNameEditText.getText().toString();
+            mInviteeEmail = mInviteeEmailEditText.getText().toString();
+            mConfirmBtn = findViewById(R.id.add_member_button);
+            mCancelBtn = findViewById(R.id.add_member_cancel_button);
+
+
+            // Get database instance
+            mFirestore = FirebaseFirestore.getInstance();
+
+            // Retrieve this user
+            Intent intent = getIntent();
+            String userType = intent.getStringExtra(WWRConstants.EXTRA_USER_TYPE_KEY);
+            assert userType != null;
+            mInviter = (AbstractUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+
+            Log.i(TAG, "inviter  email is " + mInviter.getEmail());
+
+
+            mConfirmBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mInviteeName = mInviteeNameEditText.getText().toString();
+                    mInviteeEmail = mInviteeEmailEditText.getText().toString();
+
+                    // If either of the name or email is blank, don't allow this invite to send
+                    if (mInviteeName.isEmpty() || mInviteeEmail.isEmpty()) {
+                        Toast.makeText(AddTeamMemberActivity.this,
+                                INVALID_NAME_OR_EMAIL_SUBMISSION_TOAST, Toast.LENGTH_SHORT)
+                                .show();
+                        return;
+                    }
+
+                    Log.d(TAG, "Invitee name on click is: " + mInviteeName);
+                    Log.d(TAG, "Invitee email on click is: " + mInviteeEmail);
+                    TeamMember teamMember = new TeamMember(mInviteeEmail, FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING, mInviteeName);
+
+                    // Save member_name and member_email to database and go to team screen.
+
+                    // check if invitee is on the firebase or not, if it is, pull it down, else create a new object
+                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                            .document(mInviteeEmail)
+                            .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    mInvitee = document.toObject(MockUser.class);
+                                    Log.d(TAG, "DocumentSnapshot data for invitee: " + document.getData());
+                                } else {
+                                    mInvitee = AbstractUserFactory.createUser(WWRConstants.MOCK_USER_FACTORY_KEY,
+                                            mInviteeName,
+                                            mInviteeEmail,
+                                            FirestoreConstants.FIRESTORE_DEFAULT_TEAM_NAME,
+                                            FirestoreConstants.FIRESTORE_DEFAULT_WALK_STATUS);
+                                    onInviteeIsNotInFirestore();
+                                    Log.d(TAG, "No such document for invitee");
+                                }
+
+                                // TODO:
+                                onInviteeComplete(teamMember);
+
                             } else {
-                                mInvitee = IUserFactory.createUser(WWRConstants.MOCK_USER_FACTORY_KEY,
+                                // TODO: User factory
+                                mInvitee = AbstractUserFactory.createUser(WWRConstants.MOCK_USER_FACTORY_KEY,
                                         mInviteeName,
-                                        mInviteeEmail);
+                                        mInviteeEmail,
+                                        FirestoreConstants.FIRESTORE_DEFAULT_TEAM_NAME,
+                                        FirestoreConstants.FIRESTORE_DEFAULT_TEAM_STATUS);
                                 onInviteeIsNotInFirestore();
                                 Log.d(TAG, "No such document for invitee");
+                                Log.d(TAG, "get failed with ", task.getException());
                             }
-
-                            // TODO:
-                            onInviteeComplete(teamMember);
-
-                        } else {
-                            Log.d(TAG, "get failed with ", task.getException());
                         }
-                    }
-                });
+                    });
 
-                // Go to the Team screen
-                setResult(Activity.RESULT_OK);
-                finish();
-            }
-        });
+                    // Go to the Team screen
+                    setResult(Activity.RESULT_OK);
+                    finish();
+                }
+            });
 
-        mCancelBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // going back to previous screen
-                setResult(Activity.RESULT_CANCELED);
-                finish();
-            }
-        });
+            mCancelBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // going back to previous screen
+                    setResult(Activity.RESULT_CANCELED);
+                    finish();
+                }
+            });
+        }
     }
 
     /**
@@ -153,7 +182,7 @@ public class AddTeamMemberActivity extends AppCompatActivity {
         Log.d(TAG, "sequenceInviteeIsOnTeam: ");
         // if invitee does not exist on firebase, add it to the collection.
 
-        mInvitee.setStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING);
+        mInvitee.setTeamStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_PENDING);
         mInvitee.setInviterEmail(mInviter.getEmail());
         mInvitee.setInviterName(mInviter.getName());
 
@@ -202,8 +231,8 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                 // Add inviter to invitee's pending
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                         .document(mInviteeEmail)
-                        .update(MockUser.FIELD_INVITER_NAME, mInviter.getName(),
-                                MockUser.FIELD_INVITER_EMAIL, mInviter.getEmail())
+                        .update(AbstractUser.FIELD_INVITER_NAME, mInviter.getName(),
+                                AbstractUser.FIELD_INVITER_EMAIL, mInviter.getEmail())
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
@@ -244,8 +273,8 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 
                 // Update invitee (on team already) email
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                        .document(mInviteeEmail).update(MockUser.FIELD_INVITER_NAME, mInviter.getName(),
-                        MockUser.FIELD_INVITER_EMAIL, mInviter.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        .document(mInviteeEmail).update(AbstractUser.FIELD_INVITER_NAME, mInviter.getName(),
+                        AbstractUser.FIELD_INVITER_EMAIL, mInviter.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "Successfully updated invitee's email");
@@ -302,9 +331,9 @@ public class AddTeamMemberActivity extends AppCompatActivity {
 
                 // Set the inviter email
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                        .document(mInviteeEmail).update(MockUser.FIELD_INVITER_NAME,
+                        .document(mInviteeEmail).update(AbstractUser.FIELD_INVITER_NAME,
                         mInviter.getName(),
-                        MockUser.FIELD_INVITER_EMAIL, mInviter.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        AbstractUser.FIELD_INVITER_EMAIL, mInviter.getEmail()).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "Successfully set inviter name and email for invitee");
@@ -324,6 +353,10 @@ public class AddTeamMemberActivity extends AppCompatActivity {
                         .show();
             }
         }
+    }
+
+    public static void disableUser(boolean disable){
+        disablemUser = disable;
     }
 
 }

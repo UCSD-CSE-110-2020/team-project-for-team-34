@@ -37,6 +37,7 @@ public class Route implements Serializable {
     // Properties of Routes that relate to users
     private String ownerName;
     private String ownerEmail;
+    private int ownerColor;
     private Map<String, Walk> walkers; // maps emails of users to their walk stats for this Route
     private Map<String, Boolean> favoriters; // a set of people's emails who have favorited this Route
 
@@ -138,6 +139,10 @@ public class Route implements Serializable {
     public String getOwnerName() {
         return ownerName;
     }
+
+    public void setOwnerColor(int ownerColor) {this.ownerColor = ownerColor;}
+
+    public int getOwnerColor() {return ownerColor;}
 
     public Map<String, Walk> getWalkers() {
         return walkers;

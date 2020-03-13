@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -39,7 +39,7 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
     private OnRouteSelectedListener mOnRouteSelectedListener;
     private LayoutInflater mInflater;
     private FirebaseFirestore mFirestore;
-    private IUser mUser;
+    private AbstractUser mUser;
 
     /**
      * Create a new RecyclerView adapter that listens to a Firestore Query.  See {@link
@@ -48,7 +48,7 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
      * @param options
      * @param user
      */
-    public RouteAdapter(@NonNull FirestoreRecyclerOptions<Route> options, IUser user) {
+    public RouteAdapter(@NonNull FirestoreRecyclerOptions<Route> options, AbstractUser user) {
         super(options);
         Log.d(TAG, "in RouteAdapter constructor");
         mFirestore = FirebaseFirestore.getInstance();

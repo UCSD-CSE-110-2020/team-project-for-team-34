@@ -7,7 +7,6 @@ public class FirestoreConstants {
     public static final String PATH_SLASH_SEPARATOR = "/";
     public static final String DOT_STR = ".";
 
-
     // "users" branch
     public static final String FIRESTORE_COLLECTION_USERS_PATH = "users";
     public static final String FIRESTORE_COLLECTION_MY_ROUTES_PATH = "myRoutes"; // users/someUser/myRoutes
@@ -24,12 +23,24 @@ public class FirestoreConstants {
     public static final String FIRE_STORE_DOCUMENT_PROPOSED_WALK = "proposedWalkData";
 
     // Firestore user invite status constants
+
     public static final String FIRESTORE_TEAM_INVITE_ACCEPTED = "accepted";
     public static final String FIRESTORE_TEAM_INVITE_PENDING = "pending";
+
+    public static final String FIRESTORE_DEFAULT_TEAM_NAME = "";
+    public static final String FIRESTORE_DEFAULT_TEAM_STATUS = "";
+    public static final String FIRESTORE_DEFAULT_INVITER_NAME = "";
+    public static final String FIRESTORE_DEFAULT_INVITER_EMAIL = "";
+    public static final String FIRESTORE_DEFAULT_WALK_STATUS = "";
+
 
     // Attributes of a mock user
     public static final String MOCK_USER_NAME = "DD";
     public static final String MOCK_USER_EMAIL = "DD@";
+
+    public static final String WWR_USER_NAME = "WWR Name";
+    public static final String WWR_USER_EMAIL = "WWR Email";
+
 
     public static final String SECOND_MOCK_USER_NAME = "secondMockName";
     public static final String SECOND_MOCK_USER_EMAIL = "secondMockEmail";

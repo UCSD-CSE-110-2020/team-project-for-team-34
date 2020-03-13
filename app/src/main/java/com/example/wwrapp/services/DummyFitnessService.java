@@ -1,5 +1,6 @@
 package com.example.wwrapp.services;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -100,10 +101,7 @@ public class DummyFitnessService extends Service implements IFitnessService, IFi
         super.onDestroy();
     }
 
-    @Override
-    public int getRequestCode() {
-        return 0;
-    }
+
 
     @Override
     public void setup() {
@@ -111,8 +109,14 @@ public class DummyFitnessService extends Service implements IFitnessService, IFi
     }
 
     @Override
-    public void updateStepCount() {
-        Log.d(TAG, "In method updateStepCount");
+    public void startFitnessService(Activity activity) {
+        Log.d(TAG, "startFitnessService: ");
+    }
+
+    @Override
+    public void stopFitnessService() {
+        Log.d(TAG, "stopFitnessService: ");
+
     }
 
     @Override
