@@ -31,6 +31,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -105,6 +106,7 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                     ProposeWalk walk = new ProposeWalk(mRoute, mUser.getEmail(), mUser.getName());
+                                    subscribeToNotificationsTopicInvitation();
                                     walk.setStatus(FirestoreConstants.FIRESTORE_ROUTE_STATUS_PROPOSED);
                                     if (task.isSuccessful()) {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
@@ -234,5 +236,18 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
         else {
             return true;
         }
+    }
+
+    private void subscribeToNotificationsTopicInvitation(){
+        FirebaseMessaging.getInstance().subscribeToTopic(FirestoreConstants.NOTIFICATION_PROPOSE_WALK_INV)
+                .addOnCompleteListener(task -> {
+                            String msg = "Subscribed to notifications for propose walk acceptance";
+                            if (!task.isSuccessful()) {
+                                msg = "Subscribe to notifications failed";
+                            }
+                            Log.d(TAG, msg);
+                            Toast.makeText(ProposeWalkScreenActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        }
+                );
     }
 }
