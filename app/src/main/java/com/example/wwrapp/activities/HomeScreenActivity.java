@@ -186,11 +186,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 @Override
                 public void onClick(View v) {
                     Log.d(TAG, "user email is " + finalUser.getEmail());
-
                     Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
                     intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
                     startActivityForResult(intent, TEAM_ACTIVITY_REQUEST_CODE);
-
                 }
             });
 
@@ -234,9 +232,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                                     if (document.exists()) {
                                         ProposeWalk walk;
                                         walk = document.toObject(ProposeWalk.class);
-                                        Log.d(TAG, "Loaded walk " + walk.getRoute().getRouteName());
+                                        if(mUser.getEmail().equals(walk.getOwner())) {
+                                            startScheduleWalkActivity(walk);
+                                        }
                                         List<ProposeWalkUser> users = walk.getUsers();
-                                        Log.d(TAG, "current User " + mUser.getEmail());
                                         boolean userIsFound = false;
                                         for (ProposeWalkUser user : users) {
                                             String userEmail = user.getEmail();
@@ -413,12 +412,12 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         Intent intent = new Intent(HomeScreenActivity.this, ProposedWalkActivity.class);
         intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
         startActivity(intent);
+    }
 
-//        Intent routeIntent = new Intent(HomeScreenActivity.this, RoutesActivity.class);
-//        routeIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
-//                WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
-//        routeIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
-//        startActivity(routeIntent);
+    private void startScheduleWalkActivity(ProposeWalk walk) {
+        Intent intent = new Intent(HomeScreenActivity.this, ScheduleWalkScreenActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+        startActivity(intent);
     }
     /**
      * Starts the mocking activity
