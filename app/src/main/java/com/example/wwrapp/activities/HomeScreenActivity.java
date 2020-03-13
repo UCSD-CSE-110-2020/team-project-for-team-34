@@ -22,6 +22,10 @@ import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.AbstractUserFactory;
 import com.example.wwrapp.models.GoogleUser;
 import com.example.wwrapp.models.MockUser;
+import com.example.wwrapp.models.ProposeWalk;
+import com.example.wwrapp.models.ProposeWalkUser;
+import com.example.wwrapp.services.DummyFitnessServiceWrapper;
+import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.models.WWRUser;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
@@ -40,6 +44,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.List;
 
 /**
  * Home screen for the app
@@ -212,13 +218,59 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 }
             });
 
-            // Register the routes screen button
-            findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startRoutesActivity();
-                }
-            });
+        // Register the routes screen button
+        findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
+                        .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@androidx.annotation.NonNull Task<DocumentSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    DocumentSnapshot document = task.getResult();
+                                    if (document.exists()) {
+                                        ProposeWalk walk;
+                                        walk = document.toObject(ProposeWalk.class);
+                                        Log.d(TAG, "Loaded walk " + walk.getRoute().getRouteName());
+                                        List<ProposeWalkUser> users = walk.getUsers();
+                                        Log.d(TAG, "current User " + mUser.getEmail());
+                                        boolean userIsFound = false;
+                                        for (ProposeWalkUser user : users) {
+                                            String userEmail = user.getEmail();
+                                            Log.d(TAG, "trying to find " + user.getEmail());
+                                            Log.d(TAG, String.valueOf(mUser.getEmail().equals(userEmail)));
+                                            if(mUser.getEmail().equals(userEmail)) {
+                                                userIsFound = true;
+                                                if(user.getIsPending()) {
+                                                    Log.d(TAG, "USER IS PENDING");
+                                                    startProposedWalkActivity(walk);
+                                                }
+                                                else {
+                                                    Log.d(TAG, "Not pending invitation");
+                                                    startRoutesActivity();
+                                                }
+                                            }
+                                        }
+                                        if(!userIsFound) {
+                                            //IsOwnerOfProposedWalk
+                                            Log.d(TAG, "Owner of route Invitation");
+                                            startRoutesActivity();
+                                        }
+                                    } else {
+                                        Log.d(TAG, "No route");
+                                        startRoutesActivity();
+                                    }
+                                } else {
+                                    Log.d(TAG, "get failed with ", task.getException());
+                                }
+                            }
+                        });
+            }
+        });
+
 
             // Register the mock screen button
             findViewById(R.id.mockButton).setOnClickListener(new View.OnClickListener() {
@@ -357,6 +409,17 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         startActivity(intent);
     }
 
+    private void startProposedWalkActivity(ProposeWalk walk) {
+        Intent intent = new Intent(HomeScreenActivity.this, ProposedWalkActivity.class);
+        intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+        startActivity(intent);
+
+//        Intent routeIntent = new Intent(HomeScreenActivity.this, RoutesActivity.class);
+//        routeIntent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY,
+//                WWRConstants.EXTRA_HOME_SCREEN_ACTIVITY_CALLER_ID);
+//        routeIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+//        startActivity(routeIntent);
+    }
     /**
      * Starts the mocking activity
      */
@@ -402,22 +465,22 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
                             .document(mUser.getEmail())
                             .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@androidx.annotation.NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                if (document.exists()) {
-                                    Log.d(TAG, "Pulled updated user data: " + document.getData());
-                                    // TODO: Use a consolidated User class
-                                    mUser = document.toObject(MockUser.class);
-                                } else {
-                                    Log.d(TAG, "No such document");
+                                @Override
+                                public void onComplete(@androidx.annotation.NonNull Task<DocumentSnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        DocumentSnapshot document = task.getResult();
+                                        if (document.exists()) {
+                                            Log.d(TAG, "Pulled updated user data: " + document.getData());
+                                            // TODO: Use a consolidated User class
+                                            mUser = document.toObject(MockUser.class);
+                                        } else {
+                                            Log.d(TAG, "No such document");
+                                        }
+                                    } else {
+                                        Log.d(TAG, "get failed with ", task.getException());
+                                    }
                                 }
-                            } else {
-                                Log.d(TAG, "get failed with ", task.getException());
-                            }
-                        }
-                    });
+                            });
                 } else if (resultCode == Activity.RESULT_CANCELED) {
                     // If the user pressed the back button on the invite screen
                     Log.d(TAG, "Result is " + resultCode);

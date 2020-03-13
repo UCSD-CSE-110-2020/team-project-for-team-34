@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -78,6 +79,15 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
         // Set steps and miles
         holder.routeSteps.setText(String.valueOf(model.getSteps()));
         holder.routeMiles.setText(String.valueOf(model.getMiles()));
+
+        // Set checkMark
+        //TODO: implement the backend logic
+        boolean isWalked = true;
+        if(!isWalked)
+        {
+            holder.checkMark.setVisibility(View.GONE);
+        }
+
 
         // Set favorite
         boolean isFavorite = model.isFavorite();
@@ -212,6 +222,7 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
         TextView routeDate;
         TextView routeMiles;
         TextView routeSteps;
+        ImageView checkMark;
         ToggleButton favoriteBtn;
 
         public RouteViewHolder(@NonNull View itemView) {
@@ -222,6 +233,7 @@ public class RouteAdapter extends FirestoreRecyclerAdapter<Route, RouteAdapter.R
             routeDate = itemView.findViewById(R.id.route_date);
             routeMiles = itemView.findViewById(R.id.route_mile);
             routeSteps = itemView.findViewById(R.id.route_step);
+            checkMark = itemView.findViewById(R.id.check_mark);
             favoriteBtn = itemView.findViewById(R.id.favoriteBtn);
 
             // Register this view to respond to clicks

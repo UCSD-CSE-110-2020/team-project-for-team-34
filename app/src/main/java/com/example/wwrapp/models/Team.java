@@ -4,17 +4,20 @@ import java.util.Map;
 
 public class Team {
 
+    public static final ProposeWalk DEFAULT_PROPOSE_WALK = null;
     public static final String FIELD_EMAIL_MAP = "members";
 
     private String teamName;
 
     private Map<String, Boolean> members;
 
-    public Team() {
-    }
+    private ProposeWalk proposeWalk;
+
+    public Team() {}
 
     public Team(Map<String, Boolean> emailMap) {
         this.members = emailMap;
+        proposeWalk = DEFAULT_PROPOSE_WALK;
     }
 
     public String getTeamName() {
@@ -29,5 +32,9 @@ public class Team {
 
     public Map<String, Boolean> getMembers() {
         return members;
+    }
+
+    public ProposeWalk getProposeWalk(){
+        return proposeWalk;
     }
 }

@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="60dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/parent_layout">
 
     <ToggleButton
@@ -27,7 +28,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:text="@string/staring_point"
+        android:text="@string/startingPoint"
         android:id="@+id/starting_point"
         android:layout_toRightOf="@+id/route_name"
         android:textSize="20sp"
@@ -66,5 +67,14 @@
         android:id="@+id/route_step"
         android:textSize="15sp"
         android:paddingLeft="15dp"
+        />
+
+    <ImageView
+        android:id="@+id/check_mark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_check_on"
+        android:layout_below="@+id/route_name"
+        android:layout_alignParentRight="true"
         />
 </RelativeLayout>

@@ -1,6 +1,7 @@
 package com.example.wwrapp.models;
 
 import com.example.wwrapp.utils.FirestoreConstants;
+import com.example.wwrapp.utils.RandomColorGenerator;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ public abstract class AbstractUser implements Serializable {
     public static final String FIELD_TEAM_NAME = "teamName";
     public static final String FIELD_TEAM_STATUS = "teamStatus";
     public static final String FIELD_WALK_STATUS = "walkStatus";
+    public static final String FIELD_COLOR = "color";
+
 
 
 
@@ -32,6 +35,8 @@ public abstract class AbstractUser implements Serializable {
     private String teamName;
     private String teamStatus;
     private String walkStatus;
+    private int color;
+
 
     // Empty constructor, needed for Firestore
     public AbstractUser() {
@@ -43,6 +48,9 @@ public abstract class AbstractUser implements Serializable {
         this.email = email;
         this.teamName = teamName;
         this.teamStatus = teamStatus;
+
+        color = RandomColorGenerator.generateRandomNum();
+
 
         // Default values for un-set fields
         this.inviterName = FirestoreConstants.FIRESTORE_DEFAULT_INVITER_NAME;
@@ -104,6 +112,11 @@ public abstract class AbstractUser implements Serializable {
     public void setWalkStatus(String walkStatus) {
         this.walkStatus = walkStatus;
     }
+
+    public int getColor() {
+        return this.color;
+    }
+
 
     @Override
     public String toString() {
