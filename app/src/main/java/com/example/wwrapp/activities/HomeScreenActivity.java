@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.fitness.FitnessApplication;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
@@ -385,8 +386,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
         // Un-register this activity from the fitness service if it was registered
         if (mIsObserving) {
-            // The current value of the key tells us which fitness service we last started.
-            stopObservingFitnessService(mFitnessServiceKey);
+            stopObservingFitnessService();
         }
 
         // Save whatever data the fitness service had provided up until now
@@ -430,7 +430,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         fitnessService.startFitnessService(this);
     }
 
-    private void stopObservingFitnessService(String fitnessServiceKey) {
+    private void stopObservingFitnessService() {
         mIsObserving = false;
         IFitnessService fitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
         ((IFitnessSubject) fitnessService).removeObserver(this);
@@ -502,8 +502,12 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             case MOCK_ACTIVITY_REQUEST_CODE:
                 if (resultCode == Activity.RESULT_OK) {
                     // TODO: Implement mock screen with the new Dummy Service
-                    // Stop Google Fit
+                    // Stop listening to Google Fit
+                    stopObservingFitnessService();
+                    FitnessApplication.getGoogleFitnessServiceInstance().stopFitnessService();
+
                     // Start the mocking service
+                    startObservingFitnessService(WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY);
                 }
                 break;
 

@@ -32,11 +32,15 @@ public class DummyFitnessServiceWrapper implements IFitnessService, IFitnessObse
     // Whether this wrapper is bound to its service
     private boolean mIsBound;
 
+    private long mTimeMillis;
+    private boolean mIsMockingTime;
 
     public DummyFitnessServiceWrapper(Context context) {
         mIsActive = true;
         mContext = context;
         mFitnessObservers = new ArrayList<>();
+        mTimeMillis = System.currentTimeMillis();
+        mIsMockingTime = false;
 
         // Recover the steps from SharedPreferences
         SharedPreferences stepsSharedPreferences =
@@ -91,7 +95,29 @@ public class DummyFitnessServiceWrapper implements IFitnessService, IFitnessObse
         }
     }
 
+    @Override
+    public void addSteps(long steps) {
+        Log.d(TAG, "addSteps: ");
+        this.mSteps += steps;
+    }
 
+    @Override
+    public void setTime(long milliseconds) {
+        Log.d(TAG, "setTime: time is " + milliseconds);
+        mTimeMillis = milliseconds;
+        mIsMockingTime = true;
+    }
+
+    @Override
+    public long getTime() {
+        Log.d(TAG, "getTime: ");
+        return mTimeMillis;
+    }
+
+    @Override
+    public boolean isMockingTime() {
+        return mIsMockingTime;
+    }
 
     @Override
     public void setup() {

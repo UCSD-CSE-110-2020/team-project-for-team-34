@@ -254,6 +254,26 @@ public class MockFitnessService extends Service implements IFitnessService, IFit
 
     }
 
+    @Override
+    public void addSteps(long steps) {
+
+    }
+
+    @Override
+    public void setTime(long milliseconds) {
+
+    }
+
+    @Override
+    public long getTime() {
+        return 0;
+    }
+
+    @Override
+    public boolean isMockingTime() {
+        return false;
+    }
+
     public void updateStepCount() {
         // Arbitrary step count increment
         // If the calendar day has changed, reset the step count

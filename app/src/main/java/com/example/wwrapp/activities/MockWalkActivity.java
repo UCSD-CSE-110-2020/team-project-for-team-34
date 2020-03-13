@@ -14,14 +14,18 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.fitness.FitnessApplication;
+import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
 import com.example.wwrapp.utils.WWRConstants;
-import com.example.wwrapp.fitness.IFitnessObserver;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * TODO: Important: You MUST press the "stop and save changes" button before attempting to mock
+ */
 public class MockWalkActivity extends AppCompatActivity implements IFitnessObserver {
 
     private static final String TAG = "MockWalkActivity";
@@ -91,6 +95,8 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
                 returnToHomeActivity();
             }
         });
+
+        // TODO: Important
         mSetMsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,14 +109,16 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
                             , Toast.LENGTH_LONG).show();
                     mMockTime = -1;
                 }
+                FitnessApplication.getDummyFitnessServiceInstance().setTime(mMockTime);
             }
         });
 
+        // TODO: Important
         mAddStepsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Add 500 Steps button clicked");
-                mSteps += 500;
+                FitnessApplication.getDummyFitnessServiceInstance().addSteps(500);
                 saveData();
                 updateViews();
             }

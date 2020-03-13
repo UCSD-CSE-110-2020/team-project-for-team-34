@@ -120,6 +120,27 @@ public class DummyFitnessService extends Service implements IFitnessService, IFi
     }
 
     @Override
+    public void addSteps(long steps) {
+        Log.d(TAG, "addSteps: not implemented");
+    }
+
+    @Override
+    public void setTime(long milliseconds) {
+        Log.d(TAG, "setTime: not implemented");
+    }
+
+    @Override
+    public long getTime() {
+        Log.d(TAG, "getTime: ");
+        return -1;
+    }
+
+    @Override
+    public boolean isMockingTime() {
+        return false;
+    }
+
+    @Override
     public void registerObserver(IFitnessObserver fitnessObserver) {
         mFitnessObservers.add(fitnessObserver);
     }

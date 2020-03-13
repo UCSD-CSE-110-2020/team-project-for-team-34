@@ -94,6 +94,29 @@ public class GoogleFitnessServiceWrapper implements IFitnessService, IFitnessSub
         }
     }
 
+    @Override
+    public void addSteps(long steps) {
+        Log.d(TAG, "addSteps: ");
+        this.mSteps += steps;
+    }
+
+    @Override
+    public void setTime(long milliseconds) {
+        Log.d(TAG, "setTime:");
+    }
+
+    @Override
+    public long getTime() {
+        // TODO:
+        Log.d(TAG, "getTime: ");
+        return 0;
+    }
+
+    @Override
+    public boolean isMockingTime() {
+        return false;
+    }
+
 
     @Override
     public void update(long steps) {
