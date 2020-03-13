@@ -5,6 +5,9 @@ import com.example.wwrapp.utils.FirestoreConstants;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ */
 public class GoogleUser extends AbstractUser {
 
     private static final List<String> INVITEES_DEFAULT = new ArrayList<>();
