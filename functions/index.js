@@ -18,7 +18,7 @@ exports.sendNotificationsForWalkProposal = functions.firestore
        const owner = document.proposerName;
        var message = {
          notification: {
-           title: "Propose Walk Scheduled",
+           title: "Propose Walk Proposed",
            body: owner + " has proposed a walk"
          },
          topic: 'proposeWalk'
@@ -58,6 +58,60 @@ exports.sendNotificationsForWalkProposal = functions.firestore
      }
 
    });
+
+   exports.sendNotificationsForWalkScheduled = functions.firestore
+      .document('teams/team/proposedWalk/{proposeWalkId}')
+      .onUpdate((change,context) => {
+        // Get an object with the current document value.
+        // If the document does not exist, it has been deleted.
+        const document = change.after.data();
+
+        // if document exists, meaing it is newly added, we sent walk scheduled
+        if (document.status === "scheduled") {
+          const owner = document.proposerName;
+          var message = {
+            notification: {
+              title: "Propose Walk Scheduled",
+              body: owner + " has scheduled a walk"
+            },
+            topic: 'scheduleWalk'
+          };
+
+          return admin.messaging().send(message)
+            .then((response) => {
+              // Response is a message ID string.
+              console.log('Successfully sent message:', response);
+              return response;
+            })
+            .catch((error) => {
+              console.log('Error sending message:', error);
+              return error;
+            });
+        }
+        // else it means that it has been deleted, we sent walk withdrawn
+        else if(document === null){
+           var deletedMessage = {
+               notification: {
+                   title: "Scheduled Walk Withdrawn",
+                   body: "The owner has withdrawn the walk"
+               },
+              topic: 'scheduleWalk'
+           };
+
+          return admin.messaging().send(deletedMessage)
+            .then((deletedResponse) => {
+              // Response is a message ID string.
+              console.log('Successfully sent deleted message:', deletedResponse);
+              return deletedResponse;
+            })
+            .catch((deletedError) => {
+              console.log('Error sending message:', deletedError);
+              return deletedError;
+            });
+        }
+        return "document was null or emtpy";
+      });
+
 
 // This function handles when a user either accepts or declines the proposed walk
 // the user's status will change from either accepted or declined.
@@ -156,4 +210,3 @@ exports.sendNotificationsForAcceptance = functions.firestore
 
         return "document was null or emtpy";
     });
-
