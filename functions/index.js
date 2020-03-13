@@ -7,7 +7,7 @@ admin.initializeApp()
 // a new document (walk) will be added to the proposeWalk collection,
 // this function will detect that and send notification to everyone on the team.
 exports.sendNotificationsForWalkProposal = functions.firestore
-   .document('teams/team/proposeWalk/{proposeWalkId}')
+   .document('teams/team/proposedWalk/{proposeWalkId}')
    .onCreate((snap, context) => {
      // Get an object with the current document value.
      // If the document does not exist, it has been deleted.
@@ -44,10 +44,11 @@ exports.sendNotificationsForWalkProposal = functions.firestore
             },
            topic: 'proposeWalk'
         };
+
        return admin.messaging().send(deletedMessage)
          .then((deletedResponse) => {
            // Response is a message ID string.
-           console.log('Successfully sent message:', deletedResponse);
+           console.log('Successfully sent deleted message:', deletedResponse);
            return deletedResponse;
          })
          .catch((deletedError) => {
@@ -61,7 +62,7 @@ exports.sendNotificationsForWalkProposal = functions.firestore
 // This function handles when a user either accepts or declines the proposed walk
 // the user's status will change from either accepted or declined.
 exports.sendNotificationsForAcceptance = functions.firestore
-   .document('teams/team/proposeWalk/{proposeWalkId}')
+   .document('teams/team/proposedWalk/{proposeWalkId}')
     .onUpdate((change,context) => {
 
         // get the object that has been changed.
@@ -70,13 +71,13 @@ exports.sendNotificationsForAcceptance = functions.firestore
         // get the object that is before
         const proposeWalkBefore = change.before.data();
 
-        const user;
+        var user = null;
 
         // get the status field of that object
         const userArr = proposeWalk.users;
         const userBeforeArr = proposeWalkBefore.users;
-        for(int i = 0; i < userArr.length; i++){
-            if(userArr[i].isPending != userBeforeArr[i].isPending){
+        for(i = 0; i < userArr.length; i++){
+            if(userArr[i].isPending !== userBeforeArr[i].isPending){
                 user = userArr[i];
             }
         }
@@ -85,7 +86,7 @@ exports.sendNotificationsForAcceptance = functions.firestore
         if(!user.isPending){
 
             // if user's reason is 1,
-            if(user.reason == 1){
+            if(user.reason === 1){
                 var acceptMessage = {
                 notification : {
                     title: "Propose Walk Acceptance",
@@ -105,50 +106,49 @@ exports.sendNotificationsForAcceptance = functions.firestore
                     return acceptError;
                 });
             }
-            else if(user.reason == 2){
-                var acceptMessage = {
+            else if(user.reason === 2){
+                var declinedMessage1 = {
                     notification : {
-                        title: "Propose Walk Acceptance",
-                        body: user.email + " has accepted the walk"
+                        title: "Propose Walk Declined",
+                        body: user.email + " thinks this is a bad route"
                     },
                         // not sure what the topic is yet, will know as soon as I know what path the collection is.
                         topic: 'proposeWalkInvitation'
                     };
-                return admin.messaging().send(acceptMessage)
-                    .then((acceptResponse) => {
+                return admin.messaging().send(declinedMessage1)
+                    .then((declinedResponse1) => {
                         // Response is a message ID string.
-                        console.log('Successfully sent message:', acceptResponse);
-                        return acceptResponse;
+                        console.log('Successfully sent message:', declinedResponse1);
+                        return declinedResponse1;
                     })
-                .catch((acceptError) => {
-                    console.log('Error sending message:', acceptError);
-                    return acceptError;
+                .catch((declinedError1) => {
+                    console.log('Error sending message:', declinedError1);
+                    return declinedError1;
                 });
             }
-            else if(user.reason == 3){
+            else if(user.reason === 3){
+                var declinedMessage2 = {
+                    notification : {
+                        title: "Propose Walk Declined",
+                        body: user.email + " thinks this is a bad time"
+                    },
+                        // not sure what the topic is yet, will know as soon as I know what path the collection is.
+                        topic: 'proposeWalkInvitation'
+                    };
+                return admin.messaging().send(declinedMessage2)
+                    .then((declinedResponse2) => {
+                        // Response is a message ID string.
+                        console.log('Successfully sent message:', declinedResponse2);
+                        return declinedResponse2;
+                    })
+                .catch((declinedError2) => {
+                    console.log('Error sending message:', declinedError2);
+                    return declinedError2;
+                });
             }
 
-         }
-         else if(status == "Declined"){
-            var declinedMessage = {
-                notification : {
-                    title: "Propose Walk Delined",
-                    body: user.name + " has declined the walk"
-                },
-                // not sure what the topic is yet, will know as soon as I know what path the collection is.
-                topic: 'proposeWalkInvitation'
-            };
-            return admin.messaging().send(declinedMessage)
-            .then((declinedResponse) => {
-                // Response is a message ID string.
-                console.log('Successfully sent message:', declinedResponse);
-                return declinedResponse;
-            })
-            .catch((declinedError) => {
-                 console.log('Error sending message:', declinedError);
-                 return declinedError;
-            });
          }
 
         return "document was null or emtpy";
     });
+

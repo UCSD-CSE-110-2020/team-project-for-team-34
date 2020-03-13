@@ -9,6 +9,7 @@ import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
  * Provides global state for Fitness Services
  */
 public class FitnessApplication extends Application {
+    private static IFitnessService sCurrentFitnessService;
     private static IFitnessService sDummyFitnessService;
     private static IFitnessService sGoogleFitnessService;
 
@@ -28,5 +29,4 @@ public class FitnessApplication extends Application {
     public static IFitnessService getGoogleFitnessServiceInstance() {
         return sGoogleFitnessService;
     }
-
 }

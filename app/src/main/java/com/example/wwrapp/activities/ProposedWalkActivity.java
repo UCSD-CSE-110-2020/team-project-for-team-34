@@ -17,6 +17,7 @@ import com.example.wwrapp.models.Route;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -32,6 +33,13 @@ public class ProposedWalkActivity extends AppCompatActivity {
     private Button acceptButton;
     private Button badTimeButton;
     private Button badRouteButton;
+
+    private Button mWithdrawBtn;
+    private Button mScheduleBtn;
+
+
+    private TextView mTitleTextView;
+    private TextView mWalkStatusTextView;
 
     private ProposeWalk mWalk;
     private Route mRoute;
@@ -65,15 +73,41 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                     finish();
                                 }
                             });
+
+                            mRoute = mWalk.getRoute();
+                            Intent intent = getIntent();
+                            mUser = (AbstractUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+
+                            // Display UI elements
+
+                            // Title and status
+                            mTitleTextView = findViewById(R.id.route_detail_name);
+                            mTitleTextView.setText(mRoute.getRouteName());
+
+                            mWalkStatusTextView = findViewById(R.id.proposeOrScheduled);
+                            mWalkStatusTextView.setText(mWalk.getStatus());
+
+                            // Get UI elements for setting later
                             timeView = findViewById(R.id.proposedDateTextView);
                             dateView = findViewById(R.id.proposedTimeTextView);
                             acceptButton = findViewById(R.id.acceptBtn);
                             badTimeButton = findViewById(R.id.badTimeBtn);
                             badRouteButton = findViewById(R.id.badRouteBtn);
+                            mScheduleBtn = findViewById(R.id.scheduleBtn);
+                            mWithdrawBtn = findViewById(R.id.withdrawBtn);
 
-                            Intent intent = getIntent();
-                            mRoute = mWalk.getRoute();
-                            mUser = (AbstractUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+                            // If user is proposer
+                            if (mWalk.getProposerEmail().equals(mUser.getEmail())) {
+                                // Hide accept, decline buttons
+                                acceptButton.setVisibility(View.GONE);
+                                badRouteButton.setVisibility(View.GONE);
+                                badTimeButton.setVisibility(View.GONE);
+                            } else {
+                                // If user is invitee
+                                mScheduleBtn.setVisibility(View.GONE);
+                                mWithdrawBtn.setVisibility(View.GONE);
+                            }
+
 
                             TextView startingPointText = findViewById(R.id.starting_point_text_view);
                             startingPointText.setText(mRoute.getStartingPoint());
@@ -182,6 +216,55 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                             });
                                 }
                             });
+
+                            mScheduleBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    mWalk.setStatus(FirestoreConstants.FIRESTORE_ROUTE_STATUS_SCHEDULED);
+                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
+                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
+                                            .set(mWalk)
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@androidx.annotation.NonNull Task<Void> task) {
+                                                    Log.d(TAG, "Successfully updated route status to scheduled");
+                                                }
+                                            });
+                                    Intent intent = new Intent(ProposedWalkActivity.this, RoutesActivity.class);
+                                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                                    intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_SCHEDULE_WALK_ACTIVITY_CALLER_ID);
+                                    startActivity(intent);
+                                }
+                            });
+
+                            mWithdrawBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
+                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
+                                            .delete()
+                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    Log.d(TAG, "Deleted proposed walk!");
+                                                    finish();
+                                                }
+                                            })
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Log.w(TAG, "Error deleting document", e);
+                                                }
+                                            });
+                                }
+                            });
+
+
+
                         } else {
                             Log.d(TAG, "Cached get failed: ", task.getException());
                         }

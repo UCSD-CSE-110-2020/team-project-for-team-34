@@ -8,31 +8,34 @@ public class ProposeWalk implements Serializable {
 
     private Route route;
     private List<ProposeWalkUser> users;
-    private String owner;
+    private String proposerEmail; // email
     private String date;
     private String time;
+    private String proposerName;
+    private String status;
 
     public ProposeWalk() {}
 
-    public ProposeWalk(Route route, String owner) {
+    public ProposeWalk(Route route, String proposerEmail, String proposerName) {
         this.route = route;
-        this.owner = owner;
+        this.proposerEmail = proposerEmail;
+        this.proposerName = proposerName;
         users = new ArrayList<>();
     }
 
-    public String getOwner() {
-        return owner;
+    public String getProposerEmail() {
+        return proposerEmail;
     }
 
     public void addUser(String userEmail) {
-        if(userEmail.equals(owner)) {
+        if(!userEmail.equals(proposerEmail)) {
             ProposeWalkUser user = new ProposeWalkUser(userEmail);
             users.add(user);
         }
     }
 
     public void addUser(AbstractUser user) {
-        if(user.getEmail().equals(owner)) {
+        if(!user.getEmail().equals(proposerEmail)) {
             ProposeWalkUser propUser = new ProposeWalkUser(user);
             users.add(propUser);
         }
@@ -74,5 +77,21 @@ public class ProposeWalk implements Serializable {
 
     public List<ProposeWalkUser> getUsers() {
         return users;
+    }
+
+    public String getProposerName() {
+        return proposerName;
+    }
+
+    public void setProposerName(String proposerName) {
+        this.proposerName = proposerName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

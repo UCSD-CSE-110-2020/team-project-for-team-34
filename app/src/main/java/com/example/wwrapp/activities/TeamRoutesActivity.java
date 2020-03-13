@@ -230,6 +230,22 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
                         });
             } else {
                 Log.w(TAG, "Result code is not handled");
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                    }
+                                } else {
+                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                }
+                            }
+                        });
             }
         } else {
             Log.w(TAG, "Request code is not handled");

@@ -157,6 +157,27 @@ public class GoogleFitAdapterService extends Service implements IFitnessService,
 
     }
 
+    @Override
+    public void addSteps(long steps) {
+        Log.d(TAG, "addSteps: not implemented");
+    }
+
+    @Override
+    public void setTime(long milliseconds) {
+        Log.d(TAG, "setTime: ");
+    }
+
+    @Override
+    public long getTime() {
+        Log.d(TAG, "getTime: ");
+        return 0;
+    }
+
+    @Override
+    public boolean isMockingTime() {
+        return false;
+    }
+
     private void startRecording() {
         Log.d(TAG, "startRecording:");
         if (mAccount == null) {

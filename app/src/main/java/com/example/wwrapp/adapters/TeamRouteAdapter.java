@@ -1,6 +1,5 @@
 package com.example.wwrapp.adapters;
 
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -23,7 +22,6 @@ import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.InitialsExtracter;
-import com.example.wwrapp.utils.RandomColorGenerator;
 import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.WWRConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -35,14 +33,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * Adapter for the Route Recycler View
- * TODO:
- * TODO: IMPORTANT: Notes for Tony:
- * TODO: See part 3 for the general concept the FirestoreRecyclerAdapter: https://www.youtube.com/watch?v=lAGI6jGS4vs
- * TODO: See part 6 for click listeners: https://www.youtube.com/watch?v=3WR4QAiVuCw
+ * Code adapted from:
+ * https://www.youtube.com/watch?v=lAGI6jGS4vs
+ * https://www.youtube.com/watch?v=3WR4QAiVuCw
  */
 public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteAdapter.TeammateRouteViewHolder> {
     private static final String TAG = "TeammateRouteAdapter";
@@ -67,18 +65,16 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
 
     @Override
     protected void onBindViewHolder(@NonNull TeammateRouteViewHolder holder, int position, @NonNull Route model) {
-        Log.d(TAG, "in onBindViewHolder");
+        Log.d(TAG, "in onBindViewHolder with route: " + model.getRouteName());
 
         // Set name and starting point
         Log.d(TAG, "Owner email is: " + model.getOwnerEmail());
         Log.d(TAG, "Owner name is: " + model.getOwnerName());
-        Log.d(TAG, "Route model name is " + model.getRouteName());
-        Log.d(TAG, "Current user email is " + mUser.getEmail());
 
 
         // If a route belongs to the current user, hide it
         if (model.getOwnerEmail().equals(mUser.getEmail())) {
-            Log.d(TAG, "onBindViewHolder: ");
+            Log.d(TAG, "Hiding route ");
             holder.itemView.setVisibility(View.GONE);
             // Collapse the view into nothing
             holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
@@ -108,30 +104,48 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
                                     // Check which data can be substituted
 
                                     // If the user has their own rating, display that instead
-                                    Map<String, Boolean> favoriters = (Map<String, Boolean>) (document.get(Route.FIELD_FAVORITERS));
-                                    if (favoriters.containsKey(mUser.getEmail())) {
-                                        boolean isFavorite = favoriters.get(mUser.getEmail());
-                                        if (isFavorite) {
-                                            holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
-                                            holder.favoriteBtn.setChecked(true);
-                                        } else {
-                                            holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
-                                            holder.favoriteBtn.setChecked(false);
-                                        }
-                                        Log.d(TAG, "Current user " + mUser.getEmail() + " has favorited route " + model.getRouteName());
 
-                                    } else {
-                                        // If the user doesn't have their own rating, substitute the owner's.
-                                        Log.d(TAG, "Current user " + mUser.getEmail() + " has NOT favorited route " + model.getRouteName());
+                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                            .document(routeDocName)
+                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_FAVORITERS_PATH)
+                                            .document(mUser.getEmail())
+                                            .get()
+                                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                @Override
+                                                public void onComplete(@android.support.annotation.NonNull Task<DocumentSnapshot> task) {
+                                                    if (task.isSuccessful()) {
+                                                        DocumentSnapshot document = task.getResult();
+                                                        if (document.exists()) {
+                                                            // If the user has their own rating
+                                                            Log.d(TAG, "User has own rating for " + model.getRouteName());
+                                                            Map<String, Object> map = (Map<String, Object>) (document.getData());
+                                                            boolean isFavorite = (Boolean) (map.get(mUser.getEmail()));
+                                                            if (isFavorite) {
+                                                                holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
+                                                                holder.favoriteBtn.setChecked(true);
+                                                            } else {
+                                                                holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
+                                                                holder.favoriteBtn.setChecked(false);
+                                                            }
+                                                        } else {
+                                                            // User doesn't have their own rating
+                                                            Log.d(TAG, "User does not have own rating for " + model.getRouteName());
+                                                            boolean isOwnerFavorite = model.isFavorite();
+                                                            if (isOwnerFavorite) {
+                                                                holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
+                                                                holder.favoriteBtn.setChecked(true);
+                                                            } else {
+                                                                holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
+                                                            }
+                                                        }
+                                                    } else {
+                                                        Log.e(TAG, "get failed with ", task.getException());
+                                                    }
+                                                }
+                                            });
 
-                                        boolean isOwnerFavorite = model.isFavorite();
-                                        if (isOwnerFavorite) {
-                                            holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
-                                            holder.favoriteBtn.setChecked(true);
-                                        } else {
-                                            holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
-                                        }
-                                    }
 
                                     // If the user has walked this route before, display their stats
                                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
@@ -148,21 +162,22 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
                                                         DocumentSnapshot document = task.getResult();
                                                         if (document.exists()) {
                                                             // If user has walked before
-                                                            Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                                            Log.d(TAG, "User has walked this route before " + model.getRouteName());
                                                             Walk walk = document.toObject(Walk.class);
                                                             holder.routeSteps.setText(String.valueOf(walk.getSteps()));
                                                             holder.routeMiles.setText(String.valueOf(walk.getMiles()));
                                                             holder.routeDate.setText(walk.getDate());
-                                                            // TODO: Display a check mark if the user has walked this route
-                                                            Log.d(TAG, "Current user " + mUser.getEmail() + " has walked route " + model.getRouteName());
+                                                            holder.checkMark.setVisibility(View.VISIBLE);
+
                                                         } else {
                                                             // If user has not walked before
-                                                            Log.d(TAG, "No such document");
+                                                            Log.d(TAG, "Current user has NOT walked route before " + model.getRouteName());
                                                             // Substitute the owner's stats
                                                             holder.routeSteps.setText(String.valueOf(model.getSteps()));
                                                             holder.routeMiles.setText(String.valueOf(model.getMiles()));
                                                             holder.routeDate.setText(model.getDateOfLastWalk());
-                                                            Log.d(TAG, "Current user " + mUser.getEmail() + " has NOT walked route " + model.getRouteName());
+                                                            holder.checkMark.setVisibility(View.GONE);
+
                                                         }
                                                     } else {
                                                         Log.d(TAG, "get failed with ", task.getException());
@@ -179,8 +194,7 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
                         }
                     });
 
-
-            // TODO: Set the icon of the owner with initials
+            // Set the user icons
             String ownerName = model.getOwnerName();
             String firstInitial = null;
             String secondInitial = null;
@@ -197,65 +211,66 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
             // Set the owner's name
             holder.teammateName.setText(iconName);
 
-            // Set the checkMark
-            // TODO: implement backend logic
-            boolean isWalked = true;
-            if(!isWalked)
-            {
-                holder.checkMark.setVisibility(View.GONE);
-            }
             // Set the owner's color
             Drawable roundDrawable = holder.teammateIcon.getResources().getDrawable(R.drawable.button_background);
             roundDrawable.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP);
             holder.teammateIcon.setBackground(roundDrawable);
             holder.teammateIcon.setText(iconName);
 
+
             // Listen for favorite changes
             holder.favoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    String nestedFieldName = RouteDocumentNameUtils.getNestedFieldName(Route.FIELD_FAVORITERS, mUser.getEmail());
                     if (isChecked) {
                         holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_on));
                         // Update favorite rating for this user only
 
+                        Map<String, Boolean> map = new HashMap<>();
+                        map.put(mUser.getEmail(), true);
                         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
                                 .document(routeDocName)
-                                .update(nestedFieldName, true)
+                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_FAVORITERS_PATH)
+                                .document(mUser.getEmail())
+                                .set(map)
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
-                                        Log.d(TAG, "Successfully updated user as route favoriter in team collection");
+                                        Log.d(TAG, "Successfully updated user as route favoriter");
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        Log.w(TAG, "Error writing favoriter to team collection", e);
+                                        Log.w(TAG, "Error writing favoriter", e);
                                     }
                                 });
 
                     } else {
                         holder.favoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(mInflater.getContext(), R.drawable.ic_star_off));
                         // Update favorite rating for this user only
+                        Map<String, Boolean> map = new HashMap<>();
+                        map.put(mUser.getEmail(), false);
 
                         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
                                 .document(routeDocName)
-                                .update(nestedFieldName, false)
+                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_FAVORITERS_PATH)
+                                .document(mUser.getEmail())
+                                .set(map)
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
-                                        Log.d(TAG, "Successfully updated user as route favoriter in team collection");
+                                        Log.d(TAG, "Successfully updated user as un-favoriter");
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        Log.w(TAG, "Error writing favoriter to team collection", e);
+                                        Log.w(TAG, "Error writing un-favoriter", e);
                                     }
                                 });
                     }

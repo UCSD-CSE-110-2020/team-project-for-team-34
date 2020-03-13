@@ -16,8 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.wwrapp.R;
 import com.example.wwrapp.adapters.TeamAdapter;
 import com.example.wwrapp.models.AbstractUser;
-import com.example.wwrapp.models.MockUser;
-import com.example.wwrapp.models.TeamMember;
+import com.example.wwrapp.models.WWRUser;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -42,7 +41,7 @@ public class TeamActivity extends AppCompatActivity {
     // Backend-related objects
     private FirebaseFirestore mFirestore;
     private Query mQuery;
-    private AbstractUser mUser;
+    private WWRUser mUser;
     private boolean mUserIsOnTeam;
 
     // For testing InviteMemberScreen
@@ -75,7 +74,7 @@ public class TeamActivity extends AppCompatActivity {
             mFirestore = FirebaseFirestore.getInstance();
 
             // Get this user
-            mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            mUser = (WWRUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
             Log.d(TAG, "user email is " + mUser.getEmail());
             Log.d(TAG, "inviter Email is " + mUser.getInviterEmail());
 
@@ -88,8 +87,7 @@ public class TeamActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(TeamActivity.this, AddTeamMemberActivity.class);
-                    final AbstractUser user = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, user);
+                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
                     startActivityForResult(intent, ADD_TEAM_MEMBER_ACTIVITY_REQUEST_CODE);
                 }
             });
@@ -104,8 +102,8 @@ public class TeamActivity extends AppCompatActivity {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
                             Log.d(TAG, "DocumentSnapshot data for invitee: " + document.getData());
-                            String newInviterName = document.getString(MockUser.FIELD_INVITER_NAME);
-                            String newInviterEmail = document.getString(MockUser.FIELD_INVITER_EMAIL);
+                            String newInviterName = document.getString(AbstractUser.FIELD_INVITER_NAME);
+                            String newInviterEmail = document.getString(AbstractUser.FIELD_INVITER_EMAIL);
                             // If there a new inviter sent an invitation:
                             if (!newInviterName.isEmpty()) {
                                 mUser.setInviterName(newInviterName);
@@ -158,8 +156,8 @@ public class TeamActivity extends AppCompatActivity {
         if (mUser.getTeamName().isEmpty()) {
             Log.d(TAG, "user is not on a team");
             mQuery = mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                    .document(mUser.getEmail()).collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH);
-
+                    .document(mUser.getEmail())
+                    .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH);
         } else {
             // If the user is on a team, display "team members" from the team members documents
             Log.d(TAG, "user is on team: " + mUser.getTeamName());
@@ -182,9 +180,9 @@ public class TeamActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "Query is not null");
             // Set up adapter
-            FirestoreRecyclerOptions<TeamMember> options =
-                    new FirestoreRecyclerOptions.Builder<TeamMember>()
-                            .setQuery(mQuery, TeamMember.class)
+            FirestoreRecyclerOptions<WWRUser> options =
+                    new FirestoreRecyclerOptions.Builder<WWRUser>()
+                            .setQuery(mQuery, WWRUser.class)
                             .build();
             mTeamAdapter = new TeamAdapter(options, mUser);
 
@@ -226,7 +224,7 @@ public class TeamActivity extends AppCompatActivity {
                             if (document.exists()) {
                                 Log.d(TAG, "Pulled updated user data: " + document.getData());
                                 // TODO: Use a consolidated User class
-                                mUser = document.toObject(MockUser.class);
+                                mUser = document.toObject(WWRUser.class);
                                 mUser.setTeamStatus("!!!!");
                                 Intent returnIntent = new Intent();
                                 returnIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);

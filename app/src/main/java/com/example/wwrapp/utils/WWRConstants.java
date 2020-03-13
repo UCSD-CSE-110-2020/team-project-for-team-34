@@ -36,6 +36,9 @@ public final class WWRConstants {
     public static final String EXTRA_TEAM_ROUTE_DETAIL_ACTIVITY_CALLER_ID =
             "com.example.wwrapp.EXTRA_ROUTE_ACTIVITY";
 
+    public static final String EXTRA_SCHEDULE_WALK_ACTIVITY_CALLER_ID =
+            "com.example.wwrapp.SCHEDULE_WALK_ACTIVITY_CALLER_ID";
+
     public static final String EXTRA_SET_USER_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_SET_USER_ACTIVITY";
 
     // Keys
@@ -121,7 +124,6 @@ public final class WWRConstants {
 
     // User Factory keys/types
     public static final String GOOGLE_USER_FACTORY_KEY = "com.example.wwrapp.GOOGLE_USER_FACTORY_KEY";
-    public static final String MOCK_USER_FACTORY_KEY = "com.example.wwrapp.MOCK_USER_FACTORY_KEY";
     public static final String WWR_USER_FACTORY_KEY = "com.example.wwrapp.WWR_USER_FACTORY_KEY";
 
 

@@ -7,84 +7,61 @@
     tools:context=".activities.RouteDetailActivity">
 
     <TextView
+        android:id="@+id/tagID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
         android:text="@string/tags"
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.125" />
+        app:layout_constraintTop_toBottomOf="@+id/route_detail_date" />
 
     <TextView
+        android:id="@+id/noteID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
         android:text="@string/notes"
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.005"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.611" />
+        app:layout_constraintTop_toBottomOf="@+id/tag_layout" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
         android:text="@string/date"
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintEnd_toStartOf="@+id/route_detail_date"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.083" />
+        app:layout_constraintTop_toBottomOf="@+id/stepID" />
 
     <TextView
         android:id="@+id/route_detail_date"
         android:layout_width="363dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
-        android:layout_marginTop="112dp"
         android:textSize="@dimen/route_detail"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mileID"  />
 
     <TextView
         android:id="@+id/miles_text_view"
-        android:layout_width="148dp"
+        android:layout_width="160dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
         android:text=""
         android:textSize="@dimen/route_detail"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.992"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.041" />
+        app:layout_constraintStart_toEndOf="@id/mileID"
+        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view" />
 
     <TextView
         android:id="@+id/steps_text_view"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
         android:text=""
         android:textSize="@dimen/route_detail"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.225"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.041" />
+        app:layout_constraintStart_toEndOf="@+id/stepID"
+        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/routeToolbar"
@@ -113,7 +90,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:background="@color/fui_transparent"
-            android:textSize="32dp"
+            android:textSize="32sp"
             android:text="@string/x" />
 
         <ToggleButton
@@ -128,112 +105,77 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
         android:text="@string/starting_Point"
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/starting_point_text_view"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@id/routeToolbar" />
 
     <TextView
         android:id="@+id/starting_point_text_view"
-        android:layout_width="275dp"
+        android:layout_width="280dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
         android:text=""
         android:textSize="@dimen/route_detail"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.985"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@id/routeToolbar"  />
 
     <TextView
         android:id="@+id/notes_text_view"
-        android:layout_width="409dp"
-        android:layout_height="200dp"
+        android:layout_width="412dp"
+        android:layout_height="142dp"
         android:text=""
         android:textSize="@dimen/route_detail"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.903" />
+        app:layout_constraintTop_toBottomOf="@+id/noteID" />
 
     <TextView
+        android:id="@+id/stepID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
         android:text="@string/steps"
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.041" />
+        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view"  />
 
     <TextView
+        android:id="@+id/mileID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="58dp"
         android:text="@string/miles"
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.575"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.041" />
+        app:layout_constraintStart_toEndOf="@id/steps_text_view"
+        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view" />
 
     <Button
         android:id="@+id/start_existing_walk_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="300dp"
-        android:layout_marginTop="680dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="3dp"
         android:text="@string/start_walk"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
-        android:id="@+id/acceptBtn"
+        android:id="@+id/proposeBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="680dp"
-        android:layout_marginEnd="323dp"
-        android:layout_marginBottom="3dp"
-        android:text="@string/edit"
+        android:text="@string/propose_walk"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
+        android:id="@+id/tag_layout"
         android:layout_width="409dp"
-        android:layout_height="285dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginTop="166dp"
-        android:layout_marginBottom="280dp"
+        android:layout_height="105dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintTop_toBottomOf="@+id/tagID">
 
         <TextView
             android:id="@+id/tag1"

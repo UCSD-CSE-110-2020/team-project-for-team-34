@@ -12,11 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.ScheduleWalkScreenActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+        <activity
+            android:name=".activities.ProposedWalkActivity"
+            android:screenOrientation="portrait"
 
-        </activity>
-        <activity android:name=".activities.ProposedWalkActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activities.ProposeWalkScreenActivity"
@@ -31,10 +30,7 @@
             android:name=".services.DummyFitnessService"
             android:enabled="true"
             android:exported="true" />
-        <service
-            android:name=".fitness.MockFitnessService"
-            android:enabled="true"
-            android:exported="true" />
+
 
         <service android:name=".services.MyFirebaseMessagingService">
             <intent-filter>
@@ -44,8 +40,7 @@
 
         <activity
             android:name=".activities.SetUserActivity"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"></activity>
 
 
         <activity

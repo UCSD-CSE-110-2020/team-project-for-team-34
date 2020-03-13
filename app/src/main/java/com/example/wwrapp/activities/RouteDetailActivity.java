@@ -303,7 +303,7 @@ public class RouteDetailActivity extends AppCompatActivity {
                 route.setDateOfLastWalk(mWalk.getDate());
 
                 // Update the walkers for the route
-                route.putWalker(mUser.getEmail(), mWalk);
+                route.setWalked(true);
 
                 // Return data to the routes activity
                 returnToRoutesActivity(route);

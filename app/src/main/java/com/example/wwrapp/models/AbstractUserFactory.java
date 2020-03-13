@@ -11,10 +11,6 @@ public abstract class AbstractUserFactory {
                                           String teamStatus) {
         AbstractUser user = null;
         switch(type) {
-            case WWRConstants.MOCK_USER_FACTORY_KEY:
-                user = new MockUser(name, email);
-                break;
-
             case WWRConstants.GOOGLE_USER_FACTORY_KEY:
                 user = new GoogleUser(name,email);
                 break;
