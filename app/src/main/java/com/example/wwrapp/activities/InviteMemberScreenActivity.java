@@ -13,9 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.AbstractUser;
-import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.Route;
-import com.example.wwrapp.models.TeamMember;
+import com.example.wwrapp.models.WWRUser;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.WWRConstants;
@@ -36,7 +35,7 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
     private TextView mMemberText;
     private String mInviterName;
     private FirebaseFirestore mFirestore;
-    private AbstractUser mUser;
+    private AbstractUser mInvitee;
     private AbstractUser mInviter;
 
     // For testing purposes
@@ -74,24 +73,26 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
             mFirestore = FirebaseFirestore.getInstance();
 
             // get user and inviter
-            mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-            assert mUser != null;
-            mInviterName = mUser.getInviterName();
-            String inviterEmail = mUser.getInviterEmail();
+            mInvitee = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+            assert mInvitee != null;
+            mInviterName = mInvitee.getInviterName();
+            String inviterEmail = mInvitee.getInviterEmail();
             Log.d(TAG, "Inviter name is " + mInviterName);
             Log.d(TAG, "Inviter email is " + inviterEmail);
 
             // find inviter object in database
             mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                    .document(inviterEmail).get()
+                    .document(inviterEmail)
+                    .get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                             if (task.isSuccessful()) {
                                 DocumentSnapshot document = task.getResult();
                                 if (document.exists()) {
-                                    Log.d(TAG, "Got inviter data: " + document.getData());
-                                    mInviter = (document.toObject(MockUser.class));
+                                    mInviter = (document.toObject(WWRUser.class));
+                                    Log.d(TAG, "Got inviter data:\n" + mInviter.toString());
+
                                 } else {
                                     Log.d(TAG, "Couldn't find inviter");
                                 }
@@ -101,24 +102,24 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                         }
                     });
 
-            // Find the users who have invited the invitee
-            // TODO: Handle multiple inviters (not just 1)
+            // Set name of inviter on display
             mMemberText.setText(mInviterName);
 
             mAcceptBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // If both the inviter and invitee are not on a team
-                    if (mUser.getTeamName().isEmpty() && mInviter.getTeamName().isEmpty()) {
+                    // Case 1: If both the inviter and invitee are not on a team
+                    if (mInvitee.getTeamName().isEmpty() && mInviter.getTeamName().isEmpty()) {
                         onInviterAndInviteeNotOnTeamAccept();
-                        // If the inviter is on a team and the invitee is not on a team
-                    } else if (mUser.getTeamName().isEmpty()) {
+                        // Case 2: If the inviter is on a team and the invitee is not on a team
+                    } else if (mInvitee.getTeamName().isEmpty()) {
                         onInviterOnTeamAndInviteeNotOnTeamAccept();
-                        // if the inviter is not on a team and the invitee is on a team
-                    } else if (!mUser.getTeamName().isEmpty()) {
+                        // Case 3: if the inviter is not on a team and the invitee is on a team
+                    } else if (!mInvitee.getTeamName().isEmpty()) {
                         onInviterNotOnTeamAndInviteeOnTeamAccept();
                     } else {
-                        Log.w(TAG, "Unhandled in 4 cases");
+                        // Case 4
+                        Log.w(TAG, "Both inviter and invitee are on team! This SHOULD NOT HAPPEN!");
                     }
 
                     // Return to Team screen
@@ -134,13 +135,13 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     // If both the inviter and invitee are not on a team
-                    if (mUser.getTeamName().isEmpty() && mInviter.getTeamName().isEmpty()) {
+                    if (mInvitee.getTeamName().isEmpty() && mInviter.getTeamName().isEmpty()) {
                         onInviterAndInviteeNotOnTeamDecline();
                         // If the inviter is on a team and the invitee is not on a team
-                    } else if (mUser.getTeamName().isEmpty()) {
+                    } else if (mInvitee.getTeamName().isEmpty()) {
                         onInviterOnTeamAndInviteeNotOnTeamDecline();
                         // if the inviter is not on a team and the invitee is on a team
-                    } else if (!mUser.getTeamName().isEmpty()) {
+                    } else if (!mInvitee.getTeamName().isEmpty()) {
                         onInviterNotOnTeamAndInviteeOnTeamDecline();
                     } else {
                         Log.w(TAG, "Unhandled in 4 cases");
@@ -163,259 +164,91 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
 
     public void onInviterAndInviteeNotOnTeamAccept() {
         Log.d(TAG, "onInviterAndInviteeNotOnTeam: ");
+        // Here mUser is the invitee
 
         // Set team name
-        mUser.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
+        mInvitee.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
+        mInvitee.setTeamStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
         mInviter.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
-
-        // Create team members
-        TeamMember inviterTeamMember = new TeamMember(mInviter.getEmail(),
-                FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED,
-                mInviter.getName());
-
-        TeamMember inviteeTeamMember = new TeamMember(mUser.getEmail(),
-                FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED,
-                mUser.getName());
-
-        // Store team members
-
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
-                .document(mInviter.getEmail())
-                .set(inviterTeamMember)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Successfully added inviter to team!");
-
-                Log.d(TAG, "Adding inviter's routes to team");
-
-
-                // Add this team member's routes to the team
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                        .document(mInviter.getEmail())
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, document.getId() + " => " + document.getData());
-                                        Route route = document.toObject(Route.class);
-
-                                        String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mInviter.getEmail(), route.getRouteName());
-                                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                                                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
-                                                .document(routeDocName)
-                                                .set(route)
-                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                            @Override
-                                            public void onSuccess(Void aVoid) {
-                                                Log.d(TAG, "Successfully added route to team collection!");
-                                            }
-                                        })
-                                                .addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        Log.w(TAG, "Error writing document", e);
-                                                    }
-                                                });
-                                    }
-                                } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
-                                }
-                            }
-                        });
-
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
-
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
-                .document(mUser.getEmail())
-                .set(inviteeTeamMember).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Successfully added invitee to team!");
-
-                Log.d(TAG, "Adding invitee's routes to team");
-
-                // Add this team member's routes to the team
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                        .document(mUser.getEmail())
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, document.getId() + " => " + document.getData());
-                                        Route route = document.toObject(Route.class);
-
-                                        String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mUser.getEmail(), route.getRouteName());
-                                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                                                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
-                                                .document(routeDocName)
-                                                .set(route)
-                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                    @Override
-                                                    public void onSuccess(Void aVoid) {
-                                                        Log.d(TAG, "Successfully added route to team collection!");
-                                                    }
-                                                })
-                                                .addOnFailureListener(new OnFailureListener() {
-                                                    @Override
-                                                    public void onFailure(@NonNull Exception e) {
-                                                        Log.w(TAG, "Error writing document", e);
-                                                    }
-                                                });
-                                    }
-                                } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
-                                }
-                            }
-                        });
-
-
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
-
-        // Update the team name in Firestore
-
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail()).set(mUser).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Successfully updated invitee's team name");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
-
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mInviter.getEmail()).set(mInviter).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Successfully updated inviter's team name");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
-
+        mInviter.setTeamStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
 
         // Reset invitee's inviter Email
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail())
-                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Successfully reset invitee's inviter name and email");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
+        resetUserInviterAndInviteeEmail(mInvitee);
 
+        // Remove invitee from inviter's list of invitees
+        removeInviteeFromInviterList(mInvitee, mInviter);
+
+        // Add team members
+        writeUserAndRoutesToTeam(mInvitee);
+        writeUserAndRoutesToTeam(mInviter);
+
+        // Update individual users
+        writeUserToUsersCollection(mInvitee);
+        writeUserToUsersCollection(mInviter);
     }
 
 
     public void onInviterOnTeamAndInviteeNotOnTeamAccept() {
         Log.d(TAG, "onInviterAndInviteeNotOnTeam: ");
 
-        // Update invitee's member status
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
-                .document(mUser.getEmail()).update(TeamMember.FIELD_STATUS, FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Invitee status successfully updated!");
+        mInvitee.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
+        mInvitee.setTeamStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
 
-                        // Add this team member's routes to the team
-                        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                                .document(mUser.getEmail())
-                                .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
-                                .get()
-                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                        if (task.isSuccessful()) {
-                                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                                Route route = document.toObject(Route.class);
+        // mInviter teamName is already set
+        mInviter.setTeamStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
 
-                                                String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mUser.getEmail(), route.getRouteName());
-                                                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                                                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
-                                                        .document(routeDocName)
-                                                        .set(route)
-                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                            @Override
-                                                            public void onSuccess(Void aVoid) {
-                                                                Log.d(TAG, "Successfully added route to team collection!");
-                                                            }
-                                                        })
-                                                        .addOnFailureListener(new OnFailureListener() {
-                                                            @Override
-                                                            public void onFailure(@NonNull Exception e) {
-                                                                Log.w(TAG, "Error writing document", e);
-                                                            }
-                                                        });
-                                            }
-                                        } else {
-                                            Log.d(TAG, "Error getting documents: ", task.getException());
-                                        }
-                                    }
-                                });
+        // Reset invitee's inviter Email
+        resetUserInviterAndInviteeEmail(mInvitee);
 
+        // Update invitee and routes in team
+        writeUserAndRoutesToTeam(mInvitee);
+        // Update invitee in users
+        writeUserToUsersCollection(mInvitee);
+    }
 
+    public void onInviterNotOnTeamAndInviteeOnTeamAccept() {
+        // Reset invitee's inviter Email
+        resetUserInviterAndInviteeEmail(mInvitee);
 
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error updating document", e);
-                    }
-                });
+        // Update inviter's team member status
+        mInviter.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
+        mInviter.setTeamStatus(FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED);
 
-        // Update team name on the "user"
-        mUser.setTeamName(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH);
+        // Add inviter and routes to team
+        writeUserAndRoutesToTeam(mInviter);
+        writeUserToUsersCollection(mInviter);
 
+        // Delete invitee from inviter's list
+        removeInviteeFromInviterList(mInvitee, mInviter);
+    }
+
+    public void onInviterAndInviteeNotOnTeamDecline() {
+        Log.d(TAG, "onInviterAndInviteeNotOnTeamDecline: ");
+
+        // Reset invitee's inviter info
+        resetUserInviterAndInviteeEmail(mInvitee);
+
+        // Delete invitee from inviter's list
+        removeInviteeFromInviterList(mInvitee, mInviter);
+    }
+
+    public void onInviterOnTeamAndInviteeNotOnTeamDecline() {
+        Log.d(TAG, "onInviterOnTeamAndInviteeNotOnTeamDecline: ");
+        resetUserInviterAndInviteeEmail(mInvitee);
+        removeUserFromTeamMembers(mInvitee);
+    }
+
+    public void onInviterNotOnTeamAndInviteeOnTeamDecline() {
+        Log.d(TAG, "onInviterNotOnTeamAndInviteeOnTeamDecline: ");
+        removeUserFromTeamMembers(mInviter);
+        resetUserInviterAndInviteeEmail(mInvitee);
+        removeInviteeFromInviterList(mInvitee, mInviter);
+    }
+
+    private void writeUserToUsersCollection(AbstractUser user) {
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail()).set(mUser).addOnSuccessListener(new OnSuccessListener<Void>() {
+                .document(user.getEmail())
+                .set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Successfully updated invitee's team name");
@@ -428,50 +261,38 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                     }
                 });
 
-
-        // Reset invitee's inviter Email
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail())
-                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Successfully reset invitee's inviter name and email");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
     }
 
-    public void onInviterNotOnTeamAndInviteeOnTeamAccept() {
-        // Update inviter's team member status
+    private void writeUserAndRoutesToTeam(AbstractUser user) {
+        Log.d(TAG, "writeInviteeAndRoutesToFirestore: ");
+
+        // Add invitee and routes to team
+        // Add invitee
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
-                .document(mInviter.getEmail()).update(TeamMember.FIELD_STATUS, FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED)
+                .document(user.getEmail())
+                .set(user)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Successfully updated inviter status in invitee's team members collection");
+                        Log.d(TAG, "Successfully added user to team!");
 
                         // Add this team member's routes to the team
                         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                                .document(mInviter.getEmail())
+                                .document(user.getEmail())
                                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_ROUTES_PATH)
                                 .get()
                                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                         if (task.isSuccessful()) {
+                                            Log.d(TAG, "Adding user's routes to team");
                                             for (QueryDocumentSnapshot document : task.getResult()) {
                                                 Log.d(TAG, document.getId() + " => " + document.getData());
                                                 Route route = document.toObject(Route.class);
 
-                                                String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(mInviter.getEmail(), route.getRouteName());
+                                                String routeDocName = RouteDocumentNameUtils.getRouteDocumentName(user.getEmail(), route.getRouteName());
                                                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                                         .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                                         .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
@@ -493,28 +314,32 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                                         } else {
                                             Log.d(TAG, "Error getting documents: ", task.getException());
                                         }
-                                    }
+                                    } // end onComplete
                                 });
-
-
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
+                        Log.w(TAG, "Error writing invitee", e);
                     }
                 });
+    }
 
+    private void resetUserInviterAndInviteeEmail(AbstractUser user) {
+        user.setInviterName(AbstractUser.STRING_DEFAULT);
+        user.setInviterEmail(AbstractUser.STRING_DEFAULT);
 
-        // Reset invitee's inviter Email
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail())
-                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
+                .document(user.getEmail())
+                .update(AbstractUser.FIELD_INVITER_NAME,
+                        AbstractUser.STRING_DEFAULT,
+                        AbstractUser.FIELD_INVITER_EMAIL,
+                        AbstractUser.STRING_DEFAULT)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Successfully reset invitee's inviter name and email");
+                        Log.d(TAG, "Successfully reset user's inviter name and email");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -525,133 +350,44 @@ public class InviteMemberScreenActivity extends AppCompatActivity {
                 });
     }
 
-    public void onInviterAndInviteeNotOnTeamDecline() {
-        Log.d(TAG, "onInviterAndInviteeNotOnTeamDecline: ");
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail()).update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT,
-                AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Successfully reset invitee's inviter name and email");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
-
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mInviter.getEmail()).collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH)
-                .document(mUser.getEmail()).delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Deleted invitee from inviter's list");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error deleting document", e);
-                    }
-                });
-    }
-
-    public void onInviterOnTeamAndInviteeNotOnTeamDecline() {
-        Log.d(TAG, "onInviterOnTeamAndInviteeNotOnTeamDecline: ");
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail()).update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT,
-                AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Successfully reset invitee's inviter name and email");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
-
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
-                .document(mUser.getEmail())
-                .delete()
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Deleted invitee from team members map!");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error deleting document", e);
-                    }
-                });
-
-    }
-
-    public void onInviterNotOnTeamAndInviteeOnTeamDecline() {
-        Log.d(TAG, "onInviterNotOnTeamAndInviteeOnTeamDecline: ");
-        // Delete inviter from team members
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
-                .document(mInviter.getEmail()).delete() .addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Deleted invitee from team members map!");
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error deleting document", e);
-                    }
-                });
-
-        // Reset invitee's inviter email
-        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mUser.getEmail())
-                .update(AbstractUser.FIELD_INVITER_NAME, AbstractUser.STRING_DEFAULT, AbstractUser.FIELD_INVITER_EMAIL, AbstractUser.STRING_DEFAULT)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "Successfully reset invitee's inviter name and email");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
-
+    private void removeInviteeFromInviterList(AbstractUser invitee, AbstractUser inviter) {
         // Remove invitee from inviter's sub-collection
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
-                .document(mInviter.getEmail())
+                .document(inviter.getEmail())
                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_MY_INVITEES_PATH)
-                .document(mUser.getEmail())
+                .document(invitee.getEmail())
                 .delete()
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Deleted invitee from inviter's list");
-            }
-        })
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Deleted invitee from inviter's list");
+                    }
+                })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error deleting document", e);
                     }
                 });
-
     }
 
-
+    private void removeUserFromTeamMembers(AbstractUser user) {
+        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
+                .document(user.getEmail())
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Deleted user from team members map!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error deleting document", e);
+                    }
+                });
+    }
 }

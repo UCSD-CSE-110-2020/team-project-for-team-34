@@ -11,32 +11,31 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.AbstractUser;
-import com.example.wwrapp.models.TeamMember;
+import com.example.wwrapp.models.WWRUser;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 
-public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember, TeamAdapter.TeamViewHolder> {
+public class TeamAdapter extends FirestoreRecyclerAdapter<WWRUser, TeamAdapter.TeamViewHolder> {
 
     private static final String TAG = "TeamAdapter";
 
     private LayoutInflater mInflater;
 
-    private FirestoreRecyclerOptions<TeamMember> mOptions;
+    private FirestoreRecyclerOptions<WWRUser> mOptions;
 
-    private AbstractUser mUser;
+    private WWRUser mUser;
 
-    public TeamAdapter(@NonNull FirestoreRecyclerOptions<TeamMember> options, AbstractUser User) {
+    public TeamAdapter(@NonNull FirestoreRecyclerOptions<WWRUser> options, WWRUser user) {
         super(options);
-        mUser = User;
+        mUser = user;
         mOptions = options;
         Log.d(TAG, "in TeamAdapter constructor");
     }
 
 
     @Override
-    public void onBindViewHolder(@NonNull TeamViewHolder holder, int position, @NonNull TeamMember model) {
+    public void onBindViewHolder(@NonNull TeamViewHolder holder, int position, @NonNull WWRUser model) {
         Log.d(TAG, "onBindViewHolder: called");
         Log.d(TAG, "TeamMember email is " + model.getEmail());
         if (model.getEmail().equals(mUser.getEmail())) {
@@ -47,8 +46,11 @@ public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember, TeamAdapte
             Log.d(TAG, "Displaying user: " + model.getEmail());
 
             holder.teammateName.setText(model.getName());
-            String status = model.getStatus();
-            if (status.equals(FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED)) {
+            String status = model.getTeamStatus();
+            // If the invitee has accepted AND the user is on a team, then we
+            // know both are on a team
+            if (FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED.equals(status) &&
+                    !mUser.getTeamName().isEmpty()) {
                 holder.teammateName.setTextColor(Color.BLACK);
             } else {
                 holder.teammateName.setTextColor(Color.GRAY);

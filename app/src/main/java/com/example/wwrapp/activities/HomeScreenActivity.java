@@ -21,7 +21,6 @@ import com.example.wwrapp.fitness.IFitnessSubject;
 import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.AbstractUserFactory;
 import com.example.wwrapp.models.GoogleUser;
-import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.ProposeWalk;
 import com.example.wwrapp.models.ProposeWalkUser;
 import com.example.wwrapp.models.WWRUser;
@@ -43,6 +42,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
 import java.util.Map;
@@ -118,7 +119,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         clearHeightSharedPreferences();
 
         if (disablemUser) {
-            mUser = new MockUser(FirestoreConstants.MOCK_USER_NAME, FirestoreConstants.MOCK_USER_EMAIL);
+            mUser = AbstractUserFactory.createUser(WWRConstants.WWR_USER_FACTORY_KEY,
+                    FirestoreConstants.MOCK_USER_NAME, FirestoreConstants.MOCK_USER_EMAIL,
+                    FirestoreConstants.FIRESTORE_DEFAULT_TEAM_NAME,
+                    FirestoreConstants.FIRESTORE_DEFAULT_TEAM_STATUS);
             findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -143,6 +147,25 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         } else {
             // Initialize the database
             mFirestore = FirebaseFirestore.getInstance();
+
+            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                    .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                    .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                }
+                            } else {
+                                Log.d(TAG, "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+
+
 
             if (false) {
                 String routeDocName = RouteDocumentNameUtils.getRouteDocumentName
@@ -172,9 +195,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                             }
                         });
             }
-
-
-
 
 
             // Check if the user has already logged in by checking SharedPreferences:
@@ -215,11 +235,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
                     intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
                     startActivityForResult(intent, TEAM_ACTIVITY_REQUEST_CODE);
-
                 }
             });
 
@@ -504,8 +522,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                                         DocumentSnapshot document = task.getResult();
                                         if (document.exists()) {
                                             Log.d(TAG, "Pulled updated user data: " + document.getData());
-                                            // TODO: Use a consolidated User class
-                                            mUser = document.toObject(MockUser.class);
+                                            mUser = document.toObject(WWRUser.class);
                                         } else {
                                             Log.d(TAG, "No such document");
                                         }

@@ -51,7 +51,6 @@ public abstract class AbstractUser implements Serializable {
 
         color = RandomColorGenerator.generateRandomNum();
 
-
         // Default values for un-set fields
         this.inviterName = FirestoreConstants.FIRESTORE_DEFAULT_INVITER_NAME;
         this.inviterEmail = FirestoreConstants.FIRESTORE_DEFAULT_INVITER_EMAIL;
