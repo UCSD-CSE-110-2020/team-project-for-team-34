@@ -38,10 +38,9 @@ import java.util.Map;
 
 /**
  * Adapter for the Route Recycler View
- * TODO:
- * TODO: IMPORTANT: Notes for Tony:
- * TODO: See part 3 for the general concept the FirestoreRecyclerAdapter: https://www.youtube.com/watch?v=lAGI6jGS4vs
- * TODO: See part 6 for click listeners: https://www.youtube.com/watch?v=3WR4QAiVuCw
+ * Code adapted from:
+ * https://www.youtube.com/watch?v=lAGI6jGS4vs
+ * https://www.youtube.com/watch?v=3WR4QAiVuCw
  */
 public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteAdapter.TeammateRouteViewHolder> {
     private static final String TAG = "TeammateRouteAdapter";
@@ -195,31 +194,27 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
                         }
                     });
 
-
-            // TODO: Set the icon of the owner with initials
-            if (false) {
-                String ownerName = model.getOwnerName();
-                String firstInitial = null;
-                String secondInitial = null;
-                if (InitialsExtracter.hasOnlyOneInitial(ownerName)) {
-                    firstInitial = InitialsExtracter.getFirstInitial(ownerName);
-                    secondInitial = WWRConstants.EMPTY_STR;
-                } else {
-                    firstInitial = InitialsExtracter.getFirstInitial(ownerName);
-                    secondInitial = InitialsExtracter.getSecondInitial(ownerName);
-                }
-                String iconName = firstInitial + secondInitial;
-                int iconColor = model.getOwnerColor();
-
-                // Set the owner's name
-                holder.teammateName.setText(iconName);
-
-                // Set the owner's color
-                Drawable roundDrawable = holder.teammateIcon.getResources().getDrawable(R.drawable.button_background);
-                roundDrawable.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP);
-                holder.teammateIcon.setBackground(roundDrawable);
-                holder.teammateIcon.setText(iconName);
+            String ownerName = model.getOwnerName();
+            String firstInitial = null;
+            String secondInitial = null;
+            if (InitialsExtracter.hasOnlyOneInitial(ownerName)) {
+                firstInitial = InitialsExtracter.getFirstInitial(ownerName);
+                secondInitial = WWRConstants.EMPTY_STR;
+            } else {
+                firstInitial = InitialsExtracter.getFirstInitial(ownerName);
+                secondInitial = InitialsExtracter.getSecondInitial(ownerName);
             }
+            String iconName = firstInitial + secondInitial;
+            int iconColor = model.getOwnerColor();
+
+            // Set the owner's name
+            holder.teammateName.setText(iconName);
+
+            // Set the owner's color
+            Drawable roundDrawable = holder.teammateIcon.getResources().getDrawable(R.drawable.button_background);
+            roundDrawable.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP);
+            holder.teammateIcon.setBackground(roundDrawable);
+            holder.teammateIcon.setText(iconName);
 
 
             // Listen for favorite changes

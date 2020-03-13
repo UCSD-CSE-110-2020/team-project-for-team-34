@@ -36,7 +36,6 @@ import java.util.Map;
 
 /**
  * Detailed information page for a Route
- * TODO: Using RouteDetailActivity as a reference, correct this class
  */
 public class TeamRouteDetailActivity extends AppCompatActivity {
     private static final String TAG = "TeamRouteDetailActivity";
@@ -98,8 +97,6 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
 
         TextView startingPointText = findViewById(R.id.starting_point_text_view);
         startingPointText.setText(mRoute.getStartingPoint());
-
-        // TODO: Substitute route stats if applicable
 
         Context currentContext = this;
         TextView routeDateText = findViewById(R.id.route_detail_date);
@@ -192,7 +189,6 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
                                                         routeMilesText.setText(String.valueOf(walk.getMiles()));
                                                         routeStepsText.setText(String.valueOf(walk.getSteps()));
                                                         routeDateText.setText(walk.getDate());
-                                                        // TODO: Display a check mark if the user has walked this route
                                                         Log.d(TAG, "Current user " + mUser.getEmail() + " has walked route before");
                                                     } else {
                                                         // If user has not walked before
@@ -219,7 +215,6 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
                 });
 
 
-        // TODO: Respond to changes
         mFavoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
