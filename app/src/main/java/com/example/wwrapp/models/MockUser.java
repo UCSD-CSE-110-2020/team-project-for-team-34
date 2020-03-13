@@ -1,6 +1,7 @@
 package com.example.wwrapp.models;
 
 import com.example.wwrapp.utils.FirestoreConstants;
+import com.example.wwrapp.utils.RandomColorGenerator;
 
 import java.util.List;
 
@@ -17,6 +18,7 @@ public class MockUser extends AbstractUser {
     private List<String> invitees;
     private List<Route> routes;
     private String status;
+    private int color;
 
     public MockUser() {
     }
@@ -26,6 +28,7 @@ public class MockUser extends AbstractUser {
 
         this.name = name;
         this.email = email;
+        color = RandomColorGenerator.generateRandomNum();
         status = FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED;
         inviterName = STRING_DEFAULT;
         inviterEmail = STRING_DEFAULT;
@@ -33,7 +36,6 @@ public class MockUser extends AbstractUser {
         invitees = INVITEES_DEFAULT;
         routes = ROUTES_DEFAULT;
     }
-
 
 
 

@@ -46,6 +46,7 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
     private Query mQuery;
     private AbstractUser mUser;
     private static boolean mEmpty;
+    private static boolean disablemUser =false;
 
     // For testing purposes
     private static boolean testTeammateRoute = false;
@@ -56,6 +57,10 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
         setContentView(R.layout.activity_teammate_route);
 
         Log.d(TAG, "in onCreate");
+
+        if(disablemUser){
+            finish();
+        }
 
         // Get the user
         mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
@@ -235,5 +240,8 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
 
     public static void setTestTeammateRoute(boolean testTeamRoute) {
         testTeammateRoute = testTeamRoute;
+    }
+    public static void disableUser(boolean disable){
+        disablemUser = disable;
     }
 }

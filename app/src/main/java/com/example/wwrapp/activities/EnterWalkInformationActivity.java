@@ -281,6 +281,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 .setDurationOfLastWalk(duration)
                 .setOwnerName(mUser.getName())
                 .setOwnerEmail(mUser.getEmail())
+                .setOwnerColor(mUser.getColor())
                 .setWalkers(walkers)
                 .setFavoriters(favoriters)
                 .getRoute();
@@ -331,6 +332,7 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 .setDurationOfLastWalk(WWRConstants.EMPTY_STR)
                 .setOwnerName(mUser.getName())
                 .setOwnerEmail(mUser.getEmail())
+                .setOwnerColor(mUser.getColor())
                 .setFavoriters(favoriters)
                 .getRoute();
 

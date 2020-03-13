@@ -1,6 +1,7 @@
 package com.example.wwrapp.models;
 
 import com.example.wwrapp.utils.FirestoreConstants;
+import com.example.wwrapp.utils.RandomColorGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ public class GoogleUser extends AbstractUser {
     private String teamName;
 
     private String status;
+    private int color;
 
     public GoogleUser() {
     }
@@ -28,20 +30,22 @@ public class GoogleUser extends AbstractUser {
 
         this.name = name;
         this.email = email;
+        color = RandomColorGenerator.generateRandomNum();
         status = FirestoreConstants.FIRESTORE_TEAM_INVITE_ACCEPTED;
         inviter = STRING_DEFAULT;
         teamName = STRING_DEFAULT;
     }
 
 
-    @Override
-    public boolean equals(Object o) {
-        if ((o instanceof AbstractUser)) {
-            AbstractUser user = (AbstractUser) o;
-            return name.equals(user.getName());
-        } else {
-            return false;
+        @Override
+        public boolean equals (Object o){
+            if ((o instanceof AbstractUser)) {
+                AbstractUser user = (AbstractUser) o;
+                return name.equals(user.getName());
+            } else {
+                return false;
+            }
         }
     }
-}
+
 
