@@ -81,6 +81,9 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
         } else {
             // Bind data to the view
 
+
+
+
             // Route name and starting point are the same for all users
             holder.routeName.setText(model.getRouteName());
             holder.routeStartingPoint.setText(model.getStartingPoint());

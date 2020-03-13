@@ -154,8 +154,8 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
 
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
-        checkIfEmpty();
-        hideOrShowEmptyString();
+        // checkIfEmpty();
+        // hideOrShowEmptyString();
         if (mQuery == null) {
             Log.w(TAG, "No query!!!");
         } else {

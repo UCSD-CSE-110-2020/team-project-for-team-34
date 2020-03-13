@@ -1,6 +1,7 @@
 package com.example.wwrapp.activities;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -97,6 +98,9 @@ public class ProposedWalkActivity extends AppCompatActivity {
                             mWalkStatusTextView = findViewById(R.id.proposeOrScheduled);
                             mWalkStatusTextView.setText(mWalk.getStatus());
 
+
+
+
                             // Get UI elements for setting later
                             timeView = findViewById(R.id.proposedDateTextView);
                             dateView = findViewById(R.id.proposedTimeTextView);
@@ -142,6 +146,24 @@ public class ProposedWalkActivity extends AppCompatActivity {
 
                             TextView startingPointText = findViewById(R.id.starting_point_text_view);
                             startingPointText.setText(mRoute.getStartingPoint());
+
+
+                            // For scheduled walks, enable Google Maps
+                            if (mWalk.getStatus().equals(FirestoreConstants.FIRESTORE_ROUTE_STATUS_SCHEDULED)) {
+                                startingPointText.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        // Open starting location on google maps
+                                        String startingPoint = startingPointText.getText().toString();
+                                        Log.d(TAG, "Transfer over to Google Maps with query of " + startingPoint );
+                                        Uri query = Uri.parse("geo:0,0?q=" + startingPoint );
+                                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, query);
+                                        mapIntent.setPackage("com.google.android.apps.maps");
+                                        startActivity(mapIntent);
+                                    }
+                                });
+
+                            }
 
                             TextView routeDateText = findViewById(R.id.route_detail_date);
                             routeDateText.setText(mRoute.getDateOfLastWalk());
@@ -356,6 +378,18 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                                 public void onComplete(@androidx.annotation.NonNull Task<Void> task) {
                                                     Log.d(TAG, "Successfully updated route status to scheduled");
                                                     mWalkStatusTextView.setText(FirestoreConstants.FIRESTORE_ROUTE_STATUS_SCHEDULED);
+                                                    startingPointText.setOnClickListener(new View.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(View v) {
+                                                            // Open starting location on google maps
+                                                            String startingPoint = startingPointText.getText().toString();
+                                                            Log.d(TAG, "Transfer over to Google Maps with query of " + startingPoint );
+                                                            Uri query = Uri.parse("geo:0,0?q=" + startingPoint );
+                                                            Intent mapIntent = new Intent(Intent.ACTION_VIEW, query);
+                                                            mapIntent.setPackage("com.google.android.apps.maps");
+                                                            startActivity(mapIntent);
+                                                        }
+                                                    });
                                                 }
                                             });
                                 }
