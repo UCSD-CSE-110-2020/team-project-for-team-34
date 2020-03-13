@@ -63,10 +63,17 @@ public class GoogleFitnessServiceWrapper implements IFitnessService, IFitnessSub
         }
     };
 
-    public void startGoogleService(Activity activity) {
+
+    @Override
+    public void setup() {
+        Log.d(TAG, "In method setup()");
+    }
+
+    @Override
+    public void startFitnessService(Activity activity) {
         // Save the activity
         this.mActivity = activity;
-        Log.d(TAG, "In method startDummyService()");
+        Log.d(TAG, "In method startFitnessService()");
         if (!mIsBound) {
             Log.d(TAG, "Binding service");
             Intent intent = new Intent(mContext, GoogleFitAdapterService.class);
@@ -75,8 +82,9 @@ public class GoogleFitnessServiceWrapper implements IFitnessService, IFitnessSub
         }
     }
 
-    public void stopGoogleService() {
-        Log.d(TAG, "In method stopDummyService()");
+    @Override
+    public void stopFitnessService() {
+        Log.d(TAG, "In method stopGoogleService()");
         if (mIsBound) {
             Log.d(TAG, "Unbinding service");
             Intent intent = new Intent(mContext, GoogleFitAdapterService.class);
@@ -86,20 +94,6 @@ public class GoogleFitnessServiceWrapper implements IFitnessService, IFitnessSub
         }
     }
 
-    @Override
-    public int getRequestCode() {
-        return 0;
-    }
-
-    @Override
-    public void setup() {
-        Log.d(TAG, "In method setup()");
-    }
-
-    @Override
-    public void updateStepCount() {
-        Log.d(TAG, "In method updateStepCount");
-    }
 
     @Override
     public void update(long steps) {

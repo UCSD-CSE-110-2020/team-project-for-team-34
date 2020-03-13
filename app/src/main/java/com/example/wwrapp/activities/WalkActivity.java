@@ -17,12 +17,10 @@ import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
 import com.example.wwrapp.fitness.IFitnessSubject;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.models.WalkBuilder;
-import com.example.wwrapp.services.DummyFitnessServiceWrapper;
-import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
 import com.example.wwrapp.utils.WWRConstants;
 
@@ -66,7 +64,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
     private boolean mIsObserving;
 
     private LocalDateTime mDateTime;
-    private IUser mUser;
+    private AbstractUser mUser;
     private String mFitnessServiceKey;
 
     @Override
@@ -76,7 +74,7 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         setContentView(R.layout.activity_walk);
 
         // Get the user
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
         // Get the service type
         mFitnessServiceKey = getIntent().getStringExtra(WWRConstants.EXTRA_FITNESS_SERVICE_TYPE_KEY);
 
@@ -409,14 +407,15 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
     private void startObservingFitnessService(String fitnessServiceKey) {
         mIsObserving = true;
+
         // Provide a default implementation if key is null
         if (fitnessServiceKey == null) {
             // If the factory key is null, use the DummyFitnessService by default:
-            IFitnessService dummyFS = FitnessServiceFactory.createFitnessService(WWRConstants.DEFAULT_FITNESS_SERVICE_FACTORY_KEY);
+            IFitnessService defaultFitnessService = FitnessServiceFactory.createFitnessService(WWRConstants.DEFAULT_FITNESS_SERVICE_FACTORY_KEY);
 
             // Down-cast the fitness service so we can add observers to it and start it.
-            ((IFitnessSubject) dummyFS).registerObserver(this);
-            ((DummyFitnessServiceWrapper) dummyFS).startDummyService();
+            ((IFitnessSubject) defaultFitnessService).registerObserver(this);
+            defaultFitnessService.startFitnessService(this);
 
             // Provide a value for the key so that we know in onResume() that we've already started
             // the service
@@ -424,37 +423,16 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
             return;
         }
 
-        switch (fitnessServiceKey) {
-            case WWRConstants.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY:
-                IFitnessService googleFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
-                ((IFitnessSubject) googleFitnessService).registerObserver(this);
-                ((GoogleFitnessServiceWrapper) googleFitnessService).startGoogleService(this);
-                break;
-            case WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY:
-                IFitnessService dummyFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
-                ((IFitnessSubject) dummyFitnessService).registerObserver(this);
-                ((DummyFitnessServiceWrapper) dummyFitnessService).startDummyService();
-                break;
-            default:
-                Log.w(TAG, "fitnessServiceKey not recognized: " + mFitnessServiceKey);
-        }
+        IFitnessService fitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
+        ((IFitnessSubject) fitnessService).registerObserver(this);
+        fitnessService.startFitnessService(this);
+
     }
 
     private void stopObservingFitnessService(String fitnessServiceKey) {
+        IFitnessService fitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
+        ((IFitnessSubject) fitnessService).removeObserver(this);
         mIsObserving = false;
-
-        switch (fitnessServiceKey) {
-            case WWRConstants.GOOGLE_FIT_FITNESS_SERVICE_FACTORY_KEY:
-                Log.d(TAG, "Unregistering Google Fitness Service");
-                IFitnessService googleFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
-                ((IFitnessSubject) googleFitnessService).removeObserver(this);
-                break;
-            case WWRConstants.DUMMY_FITNESS_SERVICE_FACTORY_KEY:
-                Log.d(TAG, "Unregistering Dummy Fitness Service");
-                IFitnessService dummyFitnessService = FitnessServiceFactory.createFitnessService(mFitnessServiceKey);
-                ((IFitnessSubject) dummyFitnessService).removeObserver(this);
-                break;
-        }
 
     }
 

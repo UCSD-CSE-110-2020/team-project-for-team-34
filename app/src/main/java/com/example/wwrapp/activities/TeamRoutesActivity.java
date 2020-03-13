@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.adapters.TeamRouteAdapter;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -44,7 +44,7 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
 
     private FirebaseFirestore mFirestore;
     private Query mQuery;
-    private IUser mUser;
+    private AbstractUser mUser;
     private static boolean mEmpty;
     private static boolean disablemUser =false;
 
@@ -63,7 +63,7 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
         }
 
         // Get the user
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
         if (IS_TESTING_EMPTY) {
             mEmpty = true;

@@ -17,7 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
@@ -50,14 +50,14 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
     private LayoutInflater mInflater;
 
     private FirebaseFirestore mFirestore;
-    private IUser mUser;
+    private AbstractUser mUser;
 
     /**
      * Create a new RecyclerView adapter that listens to a Firestore Query.
      *
      * @param options
      */
-    public TeamRouteAdapter(@NonNull FirestoreRecyclerOptions<Route> options, IUser user) {
+    public TeamRouteAdapter(@NonNull FirestoreRecyclerOptions<Route> options, AbstractUser user) {
         super(options);
         Log.d(TAG, "in TeammateRouteAdapter constructor");
         mFirestore = FirebaseFirestore.getInstance();

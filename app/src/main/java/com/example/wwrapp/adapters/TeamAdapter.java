@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.TeamMember;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
@@ -25,9 +25,9 @@ public class TeamAdapter extends FirestoreRecyclerAdapter<TeamMember, TeamAdapte
 
     private FirestoreRecyclerOptions<TeamMember> mOptions;
 
-    private IUser mUser;
+    private AbstractUser mUser;
 
-    public TeamAdapter(@NonNull FirestoreRecyclerOptions<TeamMember> options, IUser User) {
+    public TeamAdapter(@NonNull FirestoreRecyclerOptions<TeamMember> options, AbstractUser User) {
         super(options);
         mUser = User;
         mOptions = options;

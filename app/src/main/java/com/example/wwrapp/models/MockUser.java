@@ -3,24 +3,12 @@ package com.example.wwrapp.models;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.RandomColorGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * A mock user for testing
  */
-public class MockUser implements IUser {
-
-    public static final String FIELD_NAME = "name";
-    public static final String FIELD_EMAIL = "email";
-    public static final String FIELD_INVITE_STATUS = "inviteStatus";
-    public static final String FIELD_INVITER_NAME = "inviterName";
-    public static final String FIELD_INVITER_EMAIL = "inviterEmail";
-    public static final String FIELD_TEAM_NAME = "teamName";
-
-    private static final List<String> INVITEES_DEFAULT = new ArrayList<>();
-    private static final List<Route> ROUTES_DEFAULT = new ArrayList<>();
-    public static final String STRING_DEFAULT = "";
+public class MockUser extends AbstractUser {
 
     private String name;
     private String email;
@@ -36,6 +24,7 @@ public class MockUser implements IUser {
     }
 
     public MockUser(String name, String email) {
+        super();
 
         this.name = name;
         this.email = email;
@@ -48,66 +37,13 @@ public class MockUser implements IUser {
         routes = ROUTES_DEFAULT;
     }
 
-    @Override
-    public int getColor() {
-        return color;
-    }
 
-    @Override
-    public String getStatus() {
-        return status;
-    }
-
-    @Override
-    public void setInviterName(String inviterName) {
-        this.inviterName = inviterName;
-    }
-
-    @Override
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getEmail() {
-        return email;
-    }
-
-    @Override
-    public String getInviterName() {
-        return inviterName;
-    }
-
-    @Override
-    public String getInviterEmail() {
-        return inviterEmail;
-    }
-
-    @Override
-    public String getTeamName() {
-        return teamName;
-    }
-
-    @Override
-    public void setInviterEmail(String newInviter) {
-        inviterEmail = newInviter;
-    }
-
-    @Override
-    public void setTeamName(String newTeamName) {
-        teamName = newTeamName;
-    }
 
 
     @Override
     public boolean equals(Object o) {
-        if ((o instanceof IUser)) {
-            IUser user = (IUser) o;
+        if ((o instanceof AbstractUser)) {
+            AbstractUser user = (AbstractUser) o;
             return name.equals(user.getName());
         } else {
             return false;
