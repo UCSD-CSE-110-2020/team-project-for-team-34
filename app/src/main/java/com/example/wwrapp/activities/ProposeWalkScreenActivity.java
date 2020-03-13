@@ -21,6 +21,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.ProposeWalk;
+import com.example.wwrapp.models.ProposeWalkUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
@@ -110,7 +111,9 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
                                             Log.d(TAG, "Document data -> " + document.getData());
                                             if(!document.get(AbstractUser.FIELD_TEAM_NAME).toString().isEmpty()) {
                                                 Log.d(TAG, document.get("email") + " added to route");
-                                                walk.addUser((String)(document.get("email")));
+                                                String name = document.getString(ProposeWalkUser.FIELD_NAME);
+                                                String email = document.getString(ProposeWalkUser.FIELD_EMAIL);
+                                                walk.addUser(email, name);
                                             }
                                         }
                                         walk.setDate(dateShow.getText().toString());

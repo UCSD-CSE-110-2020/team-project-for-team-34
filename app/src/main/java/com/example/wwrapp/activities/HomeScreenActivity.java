@@ -116,7 +116,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
 
-//        clearLoginSharedPreferences();
+        clearLoginSharedPreferences();
 //        clearLastWalkSharedPreferences();
 //        clearHeightSharedPreferences();
 
@@ -348,7 +348,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
             Log.d(TAG, " daily steps = " + mDailyTotalSteps);
         }
-
     }
 
     @Override

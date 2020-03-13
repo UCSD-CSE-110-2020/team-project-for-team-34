@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,8 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.ProposeWalk;
+import com.example.wwrapp.models.ProposeWalkUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.utils.FirestoreConstants;
+import com.example.wwrapp.utils.ProposedWalkStatusCodeUtils;
 import com.example.wwrapp.utils.WWRConstants;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -40,6 +44,9 @@ public class ProposedWalkActivity extends AppCompatActivity {
 
     private TextView mTitleTextView;
     private TextView mWalkStatusTextView;
+
+    private LinearLayout mInviteeLinearLayout;
+    private int mIndexOfCurrentUser;
 
     private ProposeWalk mWalk;
     private Route mRoute;
@@ -95,6 +102,27 @@ public class ProposedWalkActivity extends AppCompatActivity {
                             badRouteButton = findViewById(R.id.badRouteBtn);
                             mScheduleBtn = findViewById(R.id.scheduleBtn);
                             mWithdrawBtn = findViewById(R.id.withdrawBtn);
+                            mInviteeLinearLayout = findViewById(R.id.response_Layout);
+
+                            // Set invitees
+                            List<ProposeWalkUser> invitees = mWalk.getUsers();
+                            for (int i = 0; i < invitees.size(); i++) {
+                                ProposeWalkUser invitee = invitees.get(i);
+
+                                // If current user matches a person on the invitee list,
+                                // save their index so we can update it later
+                                if (mUser.getEmail().equals(invitee.getEmail())) {
+                                    mIndexOfCurrentUser = i;
+                                }
+
+                                TextView userTextView = new TextView(ProposedWalkActivity.this);
+                                String userAndStatus = ProposedWalkStatusCodeUtils.
+                                        getUserAndStatusDisplay(invitee.getName(), invitee.getReason());
+                                userTextView.setText(userAndStatus);
+                                userTextView.setLayoutParams(new ViewGroup.LayoutParams
+                                        (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                                mInviteeLinearLayout.addView(userTextView);
+                            }
 
                             // If user is proposer
                             if (mWalk.getProposerEmail().equals(mUser.getEmail())) {
@@ -170,12 +198,18 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
-                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(mWalk)
+                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
+                                            .set(mWalk)
                                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {
                                                     Log.d(TAG, "Status set to accept");
-                                                    finish();
+                                                    View userTextView = mInviteeLinearLayout.getChildAt(mIndexOfCurrentUser);
+                                                    String userAndStatus =
+                                                            ProposedWalkStatusCodeUtils
+                                                                    .getUserAndStatusDisplay(mUser.getName(),
+                                                                            WWRConstants.PROPOSED_WALK_ACCEPT_STATUS);
+                                                    ((TextView) (userTextView)).setText(userAndStatus);
                                                 }
                                             });
                                 }
@@ -193,8 +227,13 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {
                                                     Log.d(TAG, "Status set to bad time");
-                                                    finish();
-                                                }
+                                                    View userTextView = mInviteeLinearLayout.getChildAt(mIndexOfCurrentUser);
+
+                                                    String userAndStatus =
+                                                            ProposedWalkStatusCodeUtils
+                                                                    .getUserAndStatusDisplay(mUser.getName(),
+                                                                            WWRConstants.PROPOSED_WALK_BAD_TIME_STATUS);
+                                                    ((TextView) (userTextView)).setText(userAndStatus);                                                }
                                             });
                                 }
                             });
@@ -211,8 +250,13 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onSuccess(Void aVoid) {
                                                     Log.d(TAG, "Status set to bad route");
-                                                    finish();
-                                                }
+                                                    View userTextView = mInviteeLinearLayout.getChildAt(mIndexOfCurrentUser);
+
+                                                    String userAndStatus =
+                                                            ProposedWalkStatusCodeUtils
+                                                                    .getUserAndStatusDisplay(mUser.getName(),
+                                                                            WWRConstants.PROPOSED_WALK_BAD_ROUTE_STATUS);
+                                                    ((TextView) (userTextView)).setText(userAndStatus);                                                    }
                                             });
                                 }
                             });
@@ -230,12 +274,9 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onComplete(@androidx.annotation.NonNull Task<Void> task) {
                                                     Log.d(TAG, "Successfully updated route status to scheduled");
+                                                    mWalkStatusTextView.setText(FirestoreConstants.FIRESTORE_ROUTE_STATUS_SCHEDULED);
                                                 }
                                             });
-                                    Intent intent = new Intent(ProposedWalkActivity.this, RoutesActivity.class);
-                                    intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
-                                    intent.putExtra(WWRConstants.EXTRA_CALLER_ID_KEY, WWRConstants.EXTRA_SCHEDULE_WALK_ACTIVITY_CALLER_ID);
-                                    startActivity(intent);
                                 }
                             });
 
@@ -262,7 +303,6 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                             });
                                 }
                             });
-
 
 
                         } else {

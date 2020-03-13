@@ -74,6 +74,18 @@ public class RouteDetailActivity extends AppCompatActivity {
             }
         });
 
+        // Register the "propose" walk button
+        Button proposeWalkBtn = findViewById(R.id.proposeBtn);
+        proposeWalkBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(RouteDetailActivity.this, ProposeWalkScreenActivity.class);
+                intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+                intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                startActivity(intent);
+            }
+        });
+
         // Set up the display
         TextView routeNameText = findViewById(R.id.route_detail_name);
         routeNameText.setText(route.getRouteName());

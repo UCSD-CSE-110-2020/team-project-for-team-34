@@ -132,6 +132,7 @@ public final class WWRConstants {
     public static final long NO_MOCK_TIME = -1;
 
     // Reasons for proposed walk
+    public static final int PROPOSED_WALK_PENDING_STATUS = 0;
     public static final int PROPOSED_WALK_ACCEPT_STATUS = 1;
     public static final int PROPOSED_WALK_BAD_ROUTE_STATUS = 2;
     public static final int PROPOSED_WALK_BAD_TIME_STATUS = 3;
