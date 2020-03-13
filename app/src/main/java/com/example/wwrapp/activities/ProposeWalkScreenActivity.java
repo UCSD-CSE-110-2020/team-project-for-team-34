@@ -3,6 +3,7 @@ package com.example.wwrapp.activities;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
@@ -102,7 +103,8 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
                             .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                    ProposeWalk walk = new ProposeWalk(mRoute, mUser.getEmail());
+                                    ProposeWalk walk = new ProposeWalk(mRoute, mUser.getEmail(), mUser.getName());
+                                    walk.setStatus(FirestoreConstants.FIRESTORE_ROUTE_STATUS_PROPOSED);
                                     if (task.isSuccessful()) {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                             Log.d(TAG, "Document data -> " + document.getData());
@@ -122,6 +124,12 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
                                                     @Override
                                                     public void onSuccess(Void aVoid) {
                                                         Log.d(TAG, "Team Proposed Walk Updated");
+                                                        Intent outgoingIntent =
+                                                                new Intent(ProposeWalkScreenActivity.this,
+                                                                        ProposedWalkActivity.class);
+                                                        outgoingIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                                                        outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                        startActivity(outgoingIntent);
                                                         finish();
                                                     }
                                                 });

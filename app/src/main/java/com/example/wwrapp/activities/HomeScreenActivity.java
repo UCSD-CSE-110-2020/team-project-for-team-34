@@ -293,7 +293,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                                         if (document.exists()) {
                                             ProposeWalk walk;
                                             walk = document.toObject(ProposeWalk.class);
-                                            if (mUser.getEmail().equals(walk.getOwner())) {
+                                            if (mUser.getEmail().equals(walk.getProposerEmail())) {
                                                 startScheduleWalkActivity(walk);
                                             } else {
                                                 List<ProposeWalkUser> users = walk.getUsers();

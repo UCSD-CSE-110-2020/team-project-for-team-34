@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.ProposeWalk;
+import com.example.wwrapp.models.Route;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,6 +35,7 @@ public class ScheduleWalkScreenActivity extends AppCompatActivity {
     private FirebaseFirestore mFirestore;
 
     private ProposeWalk mWalk;
+    private Route mRoute;
     private TextView timeView;
     private TextView dateView;
 
@@ -45,7 +47,6 @@ public class ScheduleWalkScreenActivity extends AppCompatActivity {
         scheduleButton = findViewById(R.id.scheduleBtn);
         withdrawButton = findViewById(R.id.withdrawBtn);
         mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
-
 
         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
@@ -69,29 +70,26 @@ public class ScheduleWalkScreenActivity extends AppCompatActivity {
 
                             timeView = findViewById(R.id.proposedDateTextView_schedule);
                             dateView = findViewById(R.id.proposedTimeTextView_scheduled);
-                            acceptButton = findViewById(R.id.acceptBtn);
-                            badTimeButton = findViewById(R.id.badTimeBtn);
-                            badRouteButton = findViewById(R.id.badRouteBtn);
 
                             Intent intent = getIntent();
                             mRoute = mWalk.getRoute();
                             mUser = (AbstractUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
-                            TextView startingPointText = findViewById(R.id.starting_point_text_view);
+                            TextView startingPointText = findViewById(R.id.starting_point_text_view_schedule);
                             startingPointText.setText(mRoute.getStartingPoint());
 
-                            TextView routeDateText = findViewById(R.id.route_detail_date);
+                            TextView routeDateText = findViewById(R.id.route_detail_date_schedule);
                             routeDateText.setText(mRoute.getDateOfLastWalk());
 
                             double miles = mRoute.getMiles();
-                            TextView routeMilesText = findViewById(R.id.miles_text_view);
+                            TextView routeMilesText = findViewById(R.id.miles_text_view_schedule);
                             routeMilesText.setText(String.valueOf(miles));
 
                             long steps = mRoute.getSteps();
-                            TextView routeStepsText = findViewById(R.id.steps_text_view);
+                            TextView routeStepsText = findViewById(R.id.steps_text_view_schedule);
                             routeStepsText.setText(String.valueOf(steps));
 
-                            TextView noteText = findViewById(R.id.notes_text_view);
+                            TextView noteText = findViewById(R.id.notes_text_view_schedule);
                             noteText.setText(mRoute.getNotes());
 
                             // Display the tags
@@ -130,68 +128,9 @@ public class ScheduleWalkScreenActivity extends AppCompatActivity {
 
                             timeView.setText(mWalk.getTime());
                             dateView.setText(mWalk.getDate());
-
-                            acceptButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    mWalk.setUserReason(mUser, WWRConstants.PROPOSED_WALK_ACCEPT_STATUS);
-                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
-                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(mWalk)
-                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    Log.d(TAG, "Status set to accept");
-                                                    finish();
-                                                }
-                                            });
-                                }
-                            });
-
-                            badTimeButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    mWalk.setUserReason(mUser, WWRConstants.PROPOSED_WALK_BAD_TIME_STATUS);
-                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
-                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(mWalk)
-                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    Log.d(TAG, "Status set to bad time");
-                                                    finish();
-                                                }
-                                            });
-                                }
-                            });
-
-                            badRouteButton.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    mWalk.setUserReason(mUser, WWRConstants.PROPOSED_WALK_BAD_ROUTE_STATUS);
-                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
-                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(mWalk)
-                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    Log.d(TAG, "Status set to bad route");
-                                                    finish();
-                                                }
-                                            });
-                                }
-                            });
-                        } else {
-                            Log.d(TAG, "Cached get failed: ", task.getException());
                         }
                     }
                 });
-
-
-
 
         scheduleButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -227,3 +166,4 @@ public class ScheduleWalkScreenActivity extends AppCompatActivity {
         });
     }
 }
+

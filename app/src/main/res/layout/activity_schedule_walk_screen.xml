@@ -13,7 +13,7 @@
         android:text=""
         android:textSize="@dimen/route_detail"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/notes_text_view" />
+        app:layout_constraintTop_toBottomOf="@+id/notes_text_view_schedule" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -22,7 +22,7 @@
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/notes_text_view" />
+        app:layout_constraintTop_toBottomOf="@+id/notes_text_view_schedule" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -50,7 +50,7 @@
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/route_detail_date" />
+        app:layout_constraintTop_toBottomOf="@+id/route_detail_date_schedule" />
 
     <TextView
         android:id="@+id/noteID"
@@ -68,12 +68,12 @@
         android:text="@string/date"
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
-        app:layout_constraintEnd_toStartOf="@+id/route_detail_date"
+        app:layout_constraintEnd_toStartOf="@+id/route_detail_date_schedule"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/stepID" />
 
     <TextView
-        android:id="@+id/route_detail_date"
+        android:id="@+id/route_detail_date_schedule"
         android:layout_width="363dp"
         android:layout_height="wrap_content"
         android:textSize="@dimen/route_detail"
@@ -81,23 +81,23 @@
         app:layout_constraintTop_toBottomOf="@+id/mileID" />
 
     <TextView
-        android:id="@+id/miles_text_view"
+        android:id="@+id/miles_text_view_schedule"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:text=""
         android:textSize="@dimen/route_detail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/mileID"
-        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view" />
+        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view_schedule" />
 
     <TextView
-        android:id="@+id/steps_text_view"
+        android:id="@+id/steps_text_view_schedule"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:text=""
         android:textSize="@dimen/route_detail"
         app:layout_constraintStart_toEndOf="@+id/stepID"
-        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view" />
+        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view_schedule" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/routeToolbar"
@@ -137,13 +137,13 @@
         android:text="@string/starting_Point"
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
-        app:layout_constraintEnd_toStartOf="@+id/starting_point_text_view"
+        app:layout_constraintEnd_toStartOf="@+id/starting_point_text_view_schedule"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/routeToolbar" />
 
     <TextView
-        android:id="@+id/starting_point_text_view"
+        android:id="@+id/starting_point_text_view_schedule"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:text=""
@@ -152,11 +152,12 @@
         app:layout_constraintTop_toBottomOf="@id/routeToolbar" />
 
     <TextView
-        android:id="@+id/notes_text_view"
+        android:id="@+id/notes_text_view_schedule"
         android:layout_width="409dp"
         android:layout_height="200dp"
         android:text=""
         android:textSize="@dimen/route_detail"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/noteID" />
@@ -169,7 +170,7 @@
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view" />
+        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view_schedule" />
 
     <TextView
         android:id="@+id/mileID"
@@ -178,8 +179,8 @@
         android:text="@string/miles"
         android:textColor="#000"
         android:textSize="@dimen/route_detail"
-        app:layout_constraintStart_toEndOf="@id/steps_text_view"
-        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view" />
+        app:layout_constraintStart_toEndOf="@id/steps_text_view_schedule"
+        app:layout_constraintTop_toBottomOf="@id/starting_point_text_view_schedule" />
 
     <Button
         android:id="@+id/scheduleBtn"
