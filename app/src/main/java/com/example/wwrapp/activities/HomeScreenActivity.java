@@ -26,7 +26,6 @@ import com.example.wwrapp.models.ProposeWalk;
 import com.example.wwrapp.models.ProposeWalkUser;
 import com.example.wwrapp.models.WWRUser;
 import com.example.wwrapp.utils.FirestoreConstants;
-import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
 import com.example.wwrapp.utils.WWRConstants;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -47,7 +46,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Home screen for the app
@@ -66,7 +64,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     public static final String NO_LAST_WALK_TIME_TEXT = "No last walk time available";
     public static final String NO_PROPOSED_WALKS_TOAST_TEXT = "There are no proposed walks for your team.";
     public static final String USER_IS_NOT_ON_TEAM_TOAST_TEXT = "You aren't on a team.";
-
 
 
     // True to enable the FitnessRunner, false otherwise
@@ -170,37 +167,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                         }
                     });
 
-
-            if (false) {
-                String routeDocName = RouteDocumentNameUtils.getRouteDocumentName
-                        ("A", "A Route 4");
-                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
-                        .document(routeDocName)
-                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_FAVORITERS_PATH)
-                        .document("A@")
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                if (task.isSuccessful()) {
-                                    DocumentSnapshot document = task.getResult();
-                                    if (document.exists()) {
-                                        Log.e(TAG, "DocumentSnapshot data: " + document.getData());
-                                        Map<String, Object> map = (Map<String, Object>) (document.getData());
-                                        Log.e(TAG, "onComplete:, " + map.get("A@"));
-                                    } else {
-                                        Log.e(TAG, "No such document");
-                                    }
-                                } else {
-                                    Log.e(TAG, "get failed with ", task.getException());
-                                }
-                            }
-                        });
-            }
-
-
             // Check if the user has already logged in by checking SharedPreferences:
             SharedPreferences loginSharedPreferences =
                     getSharedPreferences(WWRConstants.SHARED_PREFERENCES_USER_INFO_FILE_NAME, MODE_PRIVATE);
@@ -291,34 +257,30 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                                     if (task.isSuccessful()) {
                                         DocumentSnapshot document = task.getResult();
                                         if (document.exists()) {
-                                            ProposeWalk walk;
-                                            walk = document.toObject(ProposeWalk.class);
-                                            if (mUser.getEmail().equals(walk.getProposerEmail())) {
-                                                startScheduleWalkActivity(walk);
+                                            ProposeWalk walk = document.toObject(ProposeWalk.class);
+
+                                            // Check if user is proposer
+                                            if (walk.getProposerEmail().equals(mUser.getEmail())) {
+                                                startProposedWalkActivity();
                                             } else {
                                                 List<ProposeWalkUser> users = walk.getUsers();
-                                                boolean userIsFound = false;
+                                                boolean userIsOnTeam = false;
                                                 for (ProposeWalkUser user : users) {
                                                     String userEmail = user.getEmail();
                                                     Log.d(TAG, "trying to find " + user.getEmail());
                                                     Log.d(TAG, String.valueOf(mUser.getEmail().equals(userEmail)));
                                                     if (mUser.getEmail().equals(userEmail)) {
-                                                        userIsFound = true;
-                                                        if (user.getIsPending()) {
-                                                            Log.d(TAG, "USER IS PENDING");
-                                                            startProposedWalkActivity(walk);
-                                                        } else {
-                                                            Log.d(TAG, "Not pending invitation");
-                                                            startRoutesActivity();
-                                                        }
+                                                        userIsOnTeam = true;
+                                                        startProposedWalkActivity();
                                                     }
                                                 }
-                                                if (!userIsFound) {
+                                                if (!userIsOnTeam) {
                                                     Toast.makeText(HomeScreenActivity.this,
                                                             USER_IS_NOT_ON_TEAM_TOAST_TEXT,
                                                             Toast.LENGTH_SHORT).show();
                                                 }
                                             }
+
 
                                         } else {
                                             Log.d(TAG, "No route");
@@ -328,9 +290,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                                     } else {
                                         Log.d(TAG, "get failed with ", task.getException());
                                     }
-                                }
+                                } // onComplete
                             });
-                }
+                } // on click
             });
 
 
@@ -470,14 +432,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         startActivity(intent);
     }
 
-    private void startProposedWalkActivity(ProposeWalk walk) {
+    private void startProposedWalkActivity() {
         Intent intent = new Intent(HomeScreenActivity.this, ProposedWalkActivity.class);
-        intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
-        startActivity(intent);
-    }
-
-    private void startScheduleWalkActivity(ProposeWalk walk) {
-        Intent intent = new Intent(HomeScreenActivity.this, ScheduleWalkScreenActivity.class);
         intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
         startActivity(intent);
     }
