@@ -1,17 +1,13 @@
 package com.example.wwrapp.models;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Builder pattern for Route objects
  */
 public class RouteBuilder {
     private Route route; // route to build
-    private Map<String, Walk> walkers;
-    private Map<String, Boolean> favoriters;
     private List<String> tags;
 
     private static final String DEFAULT_STRING_FIELD_VALUE = "";
@@ -19,13 +15,7 @@ public class RouteBuilder {
     public RouteBuilder() {
         // Initialize an empty route: fields will be added later
         route = new Route();
-
-        walkers = new HashMap<>();
-        favoriters = new HashMap<>();
         tags = new ArrayList<>();
-
-        route.setWalkers(walkers);
-        route.setFavoriters(favoriters);
         route.setTags(tags);
     }
 
@@ -80,6 +70,11 @@ public class RouteBuilder {
         return this;
     }
 
+    public RouteBuilder setWalked(boolean walked) {
+        route.setWalked(walked);
+        return this;
+    }
+
     public RouteBuilder setNotes(String notes) {
         route.setNotes(notes);
         return this;
@@ -106,15 +101,15 @@ public class RouteBuilder {
         return this;
     }
 
-    public RouteBuilder setWalkers(Map<String, Walk> walkers) {
-        route.setWalkers(walkers);
-        return this;
-    }
-
-    public RouteBuilder setFavoriters(Map<String, Boolean> favoriters) {
-        route.setFavoriters(favoriters);
-        return this;
-    }
+//    public RouteBuilder setWalkers(Map<String, Walk> walkers) {
+//        route.setWalkers(walkers);
+//        return this;
+//    }
+//
+//    public RouteBuilder setFavoriters(Map<String, Boolean> favoriters) {
+//        route.setFavoriters(favoriters);
+//        return this;
+//    }
 
     public RouteBuilder setDurationOfLastWalk(String duration) {
         route.setDurationOfLastWalk(duration);

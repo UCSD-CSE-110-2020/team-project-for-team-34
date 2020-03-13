@@ -278,12 +278,11 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 .setTags(mTags)
                 .setNotes(mNotes)
                 .setFavorite(mFavorite)
+                .setWalked(true)
                 .setDurationOfLastWalk(duration)
                 .setOwnerName(mUser.getName())
                 .setOwnerEmail(mUser.getEmail())
                 .setOwnerColor(mUser.getColor())
-                .setWalkers(walkers)
-                .setFavoriters(favoriters)
                 .getRoute();
 
         Log.d(TAG, "Route date is " + route.getDateOfLastWalk());
@@ -329,11 +328,11 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
                 .setNotes(mNotes)
                 .setTags(mTags)
                 .setFavorite(mFavorite)
+                .setWalked(false)
                 .setDurationOfLastWalk(WWRConstants.EMPTY_STR)
                 .setOwnerName(mUser.getName())
                 .setOwnerEmail(mUser.getEmail())
                 .setOwnerColor(mUser.getColor())
-                .setFavoriters(favoriters)
                 .getRoute();
 
         returnIntent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);

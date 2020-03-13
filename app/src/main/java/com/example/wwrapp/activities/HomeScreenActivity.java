@@ -24,10 +24,9 @@ import com.example.wwrapp.models.GoogleUser;
 import com.example.wwrapp.models.MockUser;
 import com.example.wwrapp.models.ProposeWalk;
 import com.example.wwrapp.models.ProposeWalkUser;
-import com.example.wwrapp.services.DummyFitnessServiceWrapper;
-import com.example.wwrapp.services.GoogleFitnessServiceWrapper;
 import com.example.wwrapp.models.WWRUser;
 import com.example.wwrapp.utils.FirestoreConstants;
+import com.example.wwrapp.utils.RouteDocumentNameUtils;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
 import com.example.wwrapp.utils.WWRConstants;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -46,6 +45,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Home screen for the app
@@ -65,7 +65,8 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     // True to enable the FitnessRunner, false otherwise
     private static boolean sEnableFitnessRunner = false;
-    private static boolean sIgnoreHeight = false;
+    // TODO: Reset to true
+    private static boolean sIgnoreHeight = true;
 
     public static boolean IS_MOCKING = true;
 
@@ -112,6 +113,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
 
+        clearLoginSharedPreferences();
+        clearLastWalkSharedPreferences();
+        clearHeightSharedPreferences();
+
         if (disablemUser) {
             mUser = new MockUser(FirestoreConstants.MOCK_USER_NAME, FirestoreConstants.MOCK_USER_EMAIL);
             findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
@@ -139,9 +144,38 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             // Initialize the database
             mFirestore = FirebaseFirestore.getInstance();
 
-//        clearLoginSharedPreferences();
-//        clearLastWalkSharedPreferences();
-//        clearHeightSharedPreferences();
+            if (false) {
+                String routeDocName = RouteDocumentNameUtils.getRouteDocumentName
+                        ("A", "A Route 4");
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                        .document(routeDocName)
+                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_FAVORITERS_PATH)
+                        .document("A@")
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    DocumentSnapshot document = task.getResult();
+                                    if (document.exists()) {
+                                        Log.e(TAG, "DocumentSnapshot data: " + document.getData());
+                                        Map<String, Object> map = (Map<String, Object>) (document.getData());
+                                        Log.e(TAG, "onComplete:, " + map.get("A@"));
+                                    } else {
+                                        Log.e(TAG, "No such document");
+                                    }
+                                } else {
+                                    Log.e(TAG, "get failed with ", task.getException());
+                                }
+                            }
+                        });
+            }
+
+
+
+
 
             // Check if the user has already logged in by checking SharedPreferences:
             SharedPreferences loginSharedPreferences =
@@ -177,15 +211,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 }
             }
 
-
-            // We need this alias to access the user from inner classes
-            AbstractUser finalUser = mUser;
-
             // Register the team screen button
             findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(TAG, "user email is " + finalUser.getEmail());
 
                     Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
                     intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
@@ -222,6 +251,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         findViewById(R.id.routeScreenButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                startRoutesActivity();
+                if (true) {
+                    return;
+                }
                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                         .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                         .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)

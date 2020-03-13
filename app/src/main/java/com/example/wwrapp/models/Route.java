@@ -4,7 +4,6 @@ import com.google.firebase.firestore.IgnoreExtraProperties;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a route that the user has walked
@@ -17,6 +16,8 @@ public class Route implements Serializable {
     public static final String FIELD_STEPS = "steps";
     public static final String FIELD_MILES = "miles";
     public static final String FIELD_FAVORITE = "favorite";
+    public static final String FIELD_WALKED = "walked";
+
 
     public static final String FIELD_WALKERS = "walkers";
     public static final String FIELD_FAVORITERS = "favoriters";
@@ -32,14 +33,15 @@ public class Route implements Serializable {
     // Additional Route characteristics
     private List<String> tags;
     private boolean isFavorite;
+    private boolean walked;
     private String notes;
 
     // Properties of Routes that relate to users
     private String ownerName;
     private String ownerEmail;
     private int ownerColor;
-    private Map<String, Walk> walkers; // maps emails of users to their walk stats for this Route
-    private Map<String, Boolean> favoriters; // a set of people's emails who have favorited this Route
+//    private Map<String, Walk> walkers; // maps emails of users to their walk stats for this Route
+//    private Map<String, Boolean> favoriters; // a set of people's emails who have favorited this Route
 
     // Not required, but informative
     private String durationOfLastWalk;
@@ -114,6 +116,14 @@ public class Route implements Serializable {
         isFavorite = favorite;
     }
 
+    public boolean isWalked() {
+        return walked;
+    }
+
+    public void setWalked(boolean walked) {
+        this.walked = walked;
+    }
+
     public String getNotes() {
         return notes;
     }
@@ -144,29 +154,29 @@ public class Route implements Serializable {
 
     public int getOwnerColor() {return ownerColor;}
 
-    public Map<String, Walk> getWalkers() {
-        return walkers;
-    }
-
-    public void setWalkers(Map<String, Walk> walkers) {
-        this.walkers = walkers;
-    }
-
-    public void putWalker(String email, Walk walk) {
-        walkers.put(email, walk);
-    }
-
-    public Map<String, Boolean> getFavoriters() {
-        return favoriters;
-    }
-
-    public void putFavoriter(String email, Boolean rating) {
-        favoriters.put(email, rating);
-    }
-
-    public void setFavoriters(Map<String, Boolean> favoriters) {
-        this.favoriters = favoriters;
-    }
+//    public Map<String, Walk> getWalkers() {
+//        return walkers;
+//    }
+//
+//    public void setWalkers(Map<String, Walk> walkers) {
+//        this.walkers = walkers;
+//    }
+//
+//    public void putWalker(String email, Walk walk) {
+//        walkers.put(email, walk);
+//    }
+//
+//    public Map<String, Boolean> getFavoriters() {
+//        return favoriters;
+//    }
+//
+//    public void putFavoriter(String email, Boolean rating) {
+//        favoriters.put(email, rating);
+//    }
+//
+//    public void setFavoriters(Map<String, Boolean> favoriters) {
+//        this.favoriters = favoriters;
+//    }
 
     // Extra getters/setters
     public String getDurationOfLastWalk() {
