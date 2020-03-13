@@ -77,7 +77,10 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
         proposeWalkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO : implement propose walk
+                Intent intent = new Intent(TeamRouteDetailActivity.this, ProposeWalkScreenActivity.class);
+                intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, mRoute);
+                intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                startActivity(intent);
             }
         });
 

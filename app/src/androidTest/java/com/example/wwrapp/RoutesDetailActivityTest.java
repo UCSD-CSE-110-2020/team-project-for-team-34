@@ -122,7 +122,7 @@ public class RoutesDetailActivityTest {
         textView11.check(matches(withText("Notes: ")));
 
         ViewInteraction button = onView(
-                allOf(withId(R.id.editBtn),
+                allOf(withId(R.id.acceptBtn),
                         isDisplayed()));
         button.check(matches(isDisplayed()));
 

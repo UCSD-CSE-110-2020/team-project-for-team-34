@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -196,6 +197,13 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
             // Set the owner's name
             holder.teammateName.setText(iconName);
 
+            // Set the checkMark
+            // TODO: implement backend logic
+            boolean isWalked = true;
+            if(!isWalked)
+            {
+                holder.checkMark.setVisibility(View.GONE);
+            }
             // Set the owner's color
             Drawable roundDrawable = holder.teammateIcon.getResources().getDrawable(R.drawable.button_background);
             roundDrawable.setColorFilter(iconColor, PorterDuff.Mode.SRC_ATOP);
@@ -274,6 +282,7 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
         TextView routeSteps;
         TextView teammateName;
         ToggleButton favoriteBtn;
+        ImageView checkMark;
         Button teammateIcon;
         View itemView;
 
@@ -286,6 +295,7 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
             routeMiles = itemView.findViewById(R.id.route_mile);
             routeSteps = itemView.findViewById(R.id.route_step);
             favoriteBtn = itemView.findViewById(R.id.favoriteBtn);
+            checkMark = itemView.findViewById(R.id.check_mark);
             teammateName = itemView.findViewById(R.id.teammate_name);
             teammateIcon = itemView.findViewById(R.id.teammate_icon);
 //            Drawable roundDrawable = teammateIcon.getResources().getDrawable(R.drawable.button_background);

@@ -62,7 +62,6 @@
     <string name="start_walk">Start Walk</string>
     <string name="edit">Edit</string>
     <string name="stop">stop</string>
-    <string name="staring_point">staring_point</string>
     <string name="sample_time">2000/01/01</string>
     <string name="sample_miles">Miles: 000.0</string>
     <string name="sample_step">Steps: 000000</string>
@@ -97,6 +96,16 @@
     <string name="new_name">new name</string>
     <string name="teammate_name">Teammate Name</string>
     <string name="propose">Propose</string>
+    <string name="propose_walk">Propose Walk</string>
+    <string name="time">Time:</string>
+
+    <!-- For Propose Walk Screen -->
+    <string name="propose_date">Select Date</string>
+    <string name="propose_time">Select Time</string>
+    <string name="propose_date_input">Click Here to select Date</string>
+    <string name="propose_time_input">Click Here to select Time</string>
+    <string name="startingPoint">starting point</string>
+    <string name="proposed_walk">Proposed Walk</string>
 
 
 </resources>

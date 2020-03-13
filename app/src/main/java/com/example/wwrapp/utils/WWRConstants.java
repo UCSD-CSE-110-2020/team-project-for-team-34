@@ -129,4 +129,10 @@ public final class WWRConstants {
     public static final String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";
     public static final long NO_MOCK_TIME = -1;
 
+    // Reasons for proposed walk
+    public static final int PROPOSED_WALK_ACCEPT_STATUS = 1;
+    public static final int PROPOSED_WALK_BAD_ROUTE_STATUS = 2;
+    public static final int PROPOSED_WALK_BAD_TIME_STATUS = 3;
+
+    public static final String EXTRA_PROPOSED_WALK = "EXTRA_PROPOSED_WALK";
 }

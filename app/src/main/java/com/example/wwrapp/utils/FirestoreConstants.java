@@ -19,6 +19,8 @@ public class FirestoreConstants {
     public static final String FIRESTORE_COLLECTION_TEAM_ROUTES_PATH = "teamRoutes"; // teams/team/teamRoutes
 
     public static final String FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH = "walkers"; // teams/team/teamRoutes/someRoute/walkers
+    public static final String FIRESTORE_COLLECTION_PROPOSED_WALK_PATH = "proposedWalk";
+    public static final String FIRE_STORE_DOCUMENT_PROPOSED_WALK = "proposedWalkData";
 
     // Firestore user invite status constants
 
