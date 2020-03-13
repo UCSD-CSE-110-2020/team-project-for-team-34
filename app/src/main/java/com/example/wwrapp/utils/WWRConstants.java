@@ -121,7 +121,6 @@ public final class WWRConstants {
 
     // User Factory keys/types
     public static final String GOOGLE_USER_FACTORY_KEY = "com.example.wwrapp.GOOGLE_USER_FACTORY_KEY";
-    public static final String MOCK_USER_FACTORY_KEY = "com.example.wwrapp.MOCK_USER_FACTORY_KEY";
     public static final String WWR_USER_FACTORY_KEY = "com.example.wwrapp.WWR_USER_FACTORY_KEY";
 
 

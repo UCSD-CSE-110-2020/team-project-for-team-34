@@ -18,10 +18,10 @@ public class Route implements Serializable {
     public static final String FIELD_FAVORITE = "favorite";
     public static final String FIELD_WALKED = "walked";
 
-
     public static final String FIELD_WALKERS = "walkers";
     public static final String FIELD_FAVORITERS = "favoriters";
 
+    public static final String FIELD_STATUS = "status"; // for proposed walk
 
     // Basic information that a Route should store
     private String routeName;
@@ -40,8 +40,11 @@ public class Route implements Serializable {
     private String ownerName;
     private String ownerEmail;
     private int ownerColor;
-//    private Map<String, Walk> walkers; // maps emails of users to their walk stats for this Route
-//    private Map<String, Boolean> favoriters; // a set of people's emails who have favorited this Route
+
+    private String proposerName;
+    private String proposerEmail;
+    private String proposedDateTime;
+    private String status;
 
     // Not required, but informative
     private String durationOfLastWalk;
@@ -150,33 +153,45 @@ public class Route implements Serializable {
         return ownerName;
     }
 
-    public void setOwnerColor(int ownerColor) {this.ownerColor = ownerColor;}
+    public void setOwnerColor(int ownerColor) {
+        this.ownerColor = ownerColor;
+    }
 
-    public int getOwnerColor() {return ownerColor;}
+    public int getOwnerColor() {
+        return ownerColor;
+    }
 
-//    public Map<String, Walk> getWalkers() {
-//        return walkers;
-//    }
-//
-//    public void setWalkers(Map<String, Walk> walkers) {
-//        this.walkers = walkers;
-//    }
-//
-//    public void putWalker(String email, Walk walk) {
-//        walkers.put(email, walk);
-//    }
-//
-//    public Map<String, Boolean> getFavoriters() {
-//        return favoriters;
-//    }
-//
-//    public void putFavoriter(String email, Boolean rating) {
-//        favoriters.put(email, rating);
-//    }
-//
-//    public void setFavoriters(Map<String, Boolean> favoriters) {
-//        this.favoriters = favoriters;
-//    }
+    public String getProposerName() {
+        return proposerName;
+    }
+
+    public void setProposerName(String proposerName) {
+        this.proposerName = proposerName;
+    }
+
+    public String getProposerEmail() {
+        return proposerEmail;
+    }
+
+    public void setProposerEmail(String proposerEmail) {
+        this.proposerEmail = proposerEmail;
+    }
+
+    public String getProposedDateTime() {
+        return proposedDateTime;
+    }
+
+    public void setProposedDateTime(String proposedDateTime) {
+        this.proposedDateTime = proposedDateTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     // Extra getters/setters
     public String getDurationOfLastWalk() {

@@ -213,7 +213,6 @@ public class MockWalkActivity extends AppCompatActivity implements IFitnessObser
         });
     }
 
-
     private void updateViews() {
         Log.d(TAG, "updateViews called");
         mStepsView.setText(Long.toString(mTotalSteps));

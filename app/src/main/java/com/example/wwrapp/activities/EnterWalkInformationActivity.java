@@ -15,10 +15,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.AbstractUser;
-import com.example.wwrapp.models.MockUser;
+import com.example.wwrapp.models.AbstractUserFactory;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.RouteBuilder;
 import com.example.wwrapp.models.Walk;
+import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 
 import java.time.LocalDateTime;
@@ -72,7 +73,11 @@ public class EnterWalkInformationActivity extends AppCompatActivity {
         // Get the user
 
         if(testing){
-            mUser = new MockUser("test", "testing@gmail.com");
+            mUser = AbstractUserFactory.createUser(WWRConstants.WWR_USER_FACTORY_KEY,
+                    FirestoreConstants.WWR_USER_NAME,
+                    FirestoreConstants.WWR_USER_EMAIL,
+                    FirestoreConstants.FIRESTORE_DEFAULT_TEAM_NAME,
+                    FirestoreConstants.FIRESTORE_DEFAULT_TEAM_STATUS);
 
             final EditText routeName = findViewById(R.id.route_name_edit_text);
             final EditText startingPoint = findViewById(R.id.starting_point_edit_text);

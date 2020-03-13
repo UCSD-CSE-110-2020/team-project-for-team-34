@@ -22,6 +22,14 @@ public class FirestoreConstants {
     public static final String FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH = "walkers"; // teams/team/teamRoutes/someRoute/walkers
     public static final String FIRESTORE_COLLECTION_ROUTES_FAVORITERS_PATH = "favoriters"; // teams/team/teamRoutes/someRoute/favoriters
 
+    // proposed-scheduled related
+    public static final String FIRESTORE_ROUTE_STATUS_PROPOSED = "proposed";
+    public static final String FIRESTORE_ROUTE_STATUS_SCHEDULED = "scheduled";
+
+    public static final String FIRESTORE_ROUTE_INVITEE_STATUS_ACCEPTED = "accepted";
+    public static final String FIRESTORE_ROUTE_INVITEE_STATUS_DECLINED_NOT_A_GOOD_ROUTE = "declined (not a good route for me)";
+    public static final String FIRESTORE_ROUTE_INVITEE_STATUS_DECLINED_BAD_TIME = "declined (bad time)";
+
     public static final String FIRESTORE_COLLECTION_PROPOSED_WALK_PATH = "proposedWalk";
     public static final String FIRE_STORE_DOCUMENT_PROPOSED_WALK = "proposedWalkData";
 
