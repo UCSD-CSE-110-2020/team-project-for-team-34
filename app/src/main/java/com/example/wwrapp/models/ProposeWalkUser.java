@@ -15,7 +15,7 @@ public class ProposeWalkUser implements Serializable {
 
     public ProposeWalkUser(){}
 
-    public ProposeWalkUser(IUser user) {
+    public ProposeWalkUser(AbstractUser user) {
         email = user.getEmail();
         isPending = DEFAULT_PENDING;
         reason = DEFAULT_REASON;

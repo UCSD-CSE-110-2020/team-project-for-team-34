@@ -1,7 +1,5 @@
 package com.example.wwrapp.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,10 +8,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.ProposeWalk;
-import com.example.wwrapp.models.ProposeWalkUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
@@ -36,7 +35,7 @@ public class ProposedWalkActivity extends AppCompatActivity {
 
     private ProposeWalk mWalk;
     private Route mRoute;
-    private IUser mUser;
+    private AbstractUser mUser;
     private FirebaseFirestore mFirestore;
 
 
@@ -74,7 +73,7 @@ public class ProposedWalkActivity extends AppCompatActivity {
 
                             Intent intent = getIntent();
                             mRoute = mWalk.getRoute();
-                            mUser = (IUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+                            mUser = (AbstractUser) (intent.getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
                             TextView startingPointText = findViewById(R.id.starting_point_text_view);
                             startingPointText.setText(mRoute.getStartingPoint());

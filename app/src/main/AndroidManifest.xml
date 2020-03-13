@@ -21,7 +21,6 @@
             android:name=".activities.ProposeWalkScreenActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".activities.SetUserActivity" />
 
         <service
             android:name=".services.GoogleFitAdapterService"

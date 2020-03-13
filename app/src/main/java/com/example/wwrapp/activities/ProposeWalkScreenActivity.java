@@ -1,9 +1,5 @@
 package com.example.wwrapp.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentActivity;
-
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
@@ -18,22 +14,21 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+
 import com.example.wwrapp.R;
-import com.example.wwrapp.models.IUser;
-import com.example.wwrapp.models.MockUser;
+import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.ProposeWalk;
 import com.example.wwrapp.models.Route;
-import com.example.wwrapp.models.Team;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firestore.v1.FirestoreGrpc;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -55,7 +50,7 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
     private static TextView timeShow;
     private Button sendButton;
 
-    private IUser mUser;
+    private AbstractUser mUser;
     private Route mRoute;
     private FirebaseFirestore mFirestore;
 
@@ -79,7 +74,7 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
         sendButton = findViewById(R.id.send_button);
 
         mRoute = (Route) (getIntent().getSerializableExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY));
-        mUser = (IUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
 
         dateInput.setOnClickListener(new View.OnClickListener() {
             @Override

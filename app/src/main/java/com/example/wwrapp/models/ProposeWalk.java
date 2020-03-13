@@ -1,13 +1,8 @@
 package com.example.wwrapp.models;
 
-import android.util.Log;
-
-import com.example.wwrapp.utils.WWRConstants;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 public class ProposeWalk implements Serializable {
 
@@ -36,7 +31,7 @@ public class ProposeWalk implements Serializable {
         }
     }
 
-    public void addUser(IUser user) {
+    public void addUser(AbstractUser user) {
         if(user.getEmail().equals(owner)) {
             ProposeWalkUser propUser = new ProposeWalkUser(user);
             users.add(propUser);
@@ -55,7 +50,7 @@ public class ProposeWalk implements Serializable {
         this.route = route;
     }
 
-    public void setUserReason(IUser user, int reason) {
+    public void setUserReason(AbstractUser user, int reason) {
         for( int i = 0; i < users.size() ; i++ ) {
             ProposeWalkUser propUser = users.get(i);
             if(propUser.getEmail().equals(user.getEmail())) {
