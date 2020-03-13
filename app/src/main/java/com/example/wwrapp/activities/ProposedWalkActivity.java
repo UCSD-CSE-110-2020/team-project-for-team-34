@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -31,6 +32,8 @@ import java.util.List;
 
 public class ProposedWalkActivity extends AppCompatActivity {
     public static String TAG = "ProposedWalkActivity";
+
+    private static String ROUTE_DELETED_IN_MEANTIME_TOAST_TEXT = "This route has been withdrawn by the proposer";
 
     private TextView timeView;
     private TextView dateView;
@@ -195,21 +198,45 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(View v) {
                                     mWalk.setUserReason(mUser, WWRConstants.PROPOSED_WALK_ACCEPT_STATUS);
+
                                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
                                             .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
-                                            .set(mWalk)
-                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            .get()
+                                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                                 @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    Log.d(TAG, "Status set to accept");
-                                                    View userTextView = mInviteeLinearLayout.getChildAt(mIndexOfCurrentUser);
-                                                    String userAndStatus =
-                                                            ProposedWalkStatusCodeUtils
-                                                                    .getUserAndStatusDisplay(mUser.getName(),
-                                                                            WWRConstants.PROPOSED_WALK_ACCEPT_STATUS);
-                                                    ((TextView) (userTextView)).setText(userAndStatus);
+                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                    if (task.isSuccessful()) {
+                                                        DocumentSnapshot document = task.getResult();
+                                                        if (document.exists()) {
+
+                                                            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                                                    .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                                                    .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
+                                                                    .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
+                                                                    .set(mWalk)
+                                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                        @Override
+                                                                        public void onSuccess(Void aVoid) {
+                                                                            Log.d(TAG, "Status set to accept");
+                                                                            View userTextView = mInviteeLinearLayout.getChildAt(mIndexOfCurrentUser);
+                                                                            String userAndStatus =
+                                                                                    ProposedWalkStatusCodeUtils
+                                                                                            .getUserAndStatusDisplay(mUser.getName(),
+                                                                                                    WWRConstants.PROPOSED_WALK_ACCEPT_STATUS);
+                                                                            ((TextView) (userTextView)).setText(userAndStatus);
+                                                                        }
+                                                                    });
+                                                            Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                                        } else {
+                                                            Log.w(TAG, "Document was deleted in meantime");
+                                                            Toast.makeText(ProposedWalkActivity.this, ROUTE_DELETED_IN_MEANTIME_TOAST_TEXT,
+                                                                    Toast.LENGTH_LONG).show();
+                                                        }
+                                                    } else {
+                                                        Log.d(TAG, "get failed with ", task.getException());
+                                                    }
                                                 }
                                             });
                                 }
@@ -219,22 +246,48 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(View v) {
                                     mWalk.setUserReason(mUser, WWRConstants.PROPOSED_WALK_BAD_TIME_STATUS);
+
+
                                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
-                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(mWalk)
-                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
+                                            .get()
+                                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                                 @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    Log.d(TAG, "Status set to bad time");
-                                                    View userTextView = mInviteeLinearLayout.getChildAt(mIndexOfCurrentUser);
+                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                    if (task.isSuccessful()) {
+                                                        DocumentSnapshot document = task.getResult();
+                                                        if (document.exists()) {
+                                                            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                                                    .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                                                    .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
+                                                                    .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(mWalk)
+                                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                        @Override
+                                                                        public void onSuccess(Void aVoid) {
+                                                                            Log.d(TAG, "Status set to bad time");
+                                                                            View userTextView = mInviteeLinearLayout.getChildAt(mIndexOfCurrentUser);
 
-                                                    String userAndStatus =
-                                                            ProposedWalkStatusCodeUtils
-                                                                    .getUserAndStatusDisplay(mUser.getName(),
-                                                                            WWRConstants.PROPOSED_WALK_BAD_TIME_STATUS);
-                                                    ((TextView) (userTextView)).setText(userAndStatus);                                                }
+                                                                            String userAndStatus =
+                                                                                    ProposedWalkStatusCodeUtils
+                                                                                            .getUserAndStatusDisplay(mUser.getName(),
+                                                                                                    WWRConstants.PROPOSED_WALK_BAD_TIME_STATUS);
+                                                                            ((TextView) (userTextView)).setText(userAndStatus);
+                                                                        }
+                                                                    });
+                                                        } else {
+                                                            Log.w(TAG, "Document was deleted in meantime");
+                                                            Toast.makeText(ProposedWalkActivity.this, ROUTE_DELETED_IN_MEANTIME_TOAST_TEXT,
+                                                                    Toast.LENGTH_LONG).show();
+                                                        }
+                                                    } else {
+                                                        Log.d(TAG, "get failed with ", task.getException());
+                                                    }
+                                                }
                                             });
+
+
                                 }
                             });
 
@@ -242,22 +295,50 @@ public class ProposedWalkActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(View v) {
                                     mWalk.setUserReason(mUser, WWRConstants.PROPOSED_WALK_BAD_ROUTE_STATUS);
+
+
                                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
-                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(mWalk)
-                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
+                                            .get()
+                                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                                 @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    Log.d(TAG, "Status set to bad route");
-                                                    View userTextView = mInviteeLinearLayout.getChildAt(mIndexOfCurrentUser);
+                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                    if (task.isSuccessful()) {
+                                                        DocumentSnapshot document = task.getResult();
+                                                        if (document.exists()) {
 
-                                                    String userAndStatus =
-                                                            ProposedWalkStatusCodeUtils
-                                                                    .getUserAndStatusDisplay(mUser.getName(),
-                                                                            WWRConstants.PROPOSED_WALK_BAD_ROUTE_STATUS);
-                                                    ((TextView) (userTextView)).setText(userAndStatus);                                                    }
+
+                                                            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                                                    .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                                                    .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
+                                                                    .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(mWalk)
+                                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                        @Override
+                                                                        public void onSuccess(Void aVoid) {
+                                                                            Log.d(TAG, "Status set to bad route");
+                                                                            View userTextView = mInviteeLinearLayout.getChildAt(mIndexOfCurrentUser);
+
+                                                                            String userAndStatus =
+                                                                                    ProposedWalkStatusCodeUtils
+                                                                                            .getUserAndStatusDisplay(mUser.getName(),
+                                                                                                    WWRConstants.PROPOSED_WALK_BAD_ROUTE_STATUS);
+                                                                            ((TextView) (userTextView)).setText(userAndStatus);
+                                                                        }
+                                                                    });
+                                                        } else {
+                                                            Log.w(TAG, "Document was deleted in meantime");
+                                                            Toast.makeText(ProposedWalkActivity.this, ROUTE_DELETED_IN_MEANTIME_TOAST_TEXT,
+                                                                    Toast.LENGTH_LONG).show();
+                                                        }
+                                                    } else {
+                                                        Log.d(TAG, "get failed with ", task.getException());
+                                                    }
+                                                }
                                             });
+
+
                                 }
                             });
 
@@ -311,5 +392,4 @@ public class ProposedWalkActivity extends AppCompatActivity {
                     }
                 });
     }
-
 }
