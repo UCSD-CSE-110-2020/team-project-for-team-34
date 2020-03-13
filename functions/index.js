@@ -79,6 +79,11 @@ exports.sendNotificationsForAcceptance = functions.firestore
         for(i = 0; i < userArr.length; i++){
             if(userArr[i].isPending !== userBeforeArr[i].isPending){
                 user = userArr[i];
+                break;
+            }
+            if(userArr[i].reason !== userBeforeArr[i].reason){
+                user = userArr[i];
+                break;
             }
         }
 
