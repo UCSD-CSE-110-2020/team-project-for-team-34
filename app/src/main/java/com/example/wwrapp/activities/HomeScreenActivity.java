@@ -44,6 +44,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.List;
 
@@ -111,6 +112,40 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
+
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+
+
+        Log.d(TAG, "Intent: " + intent.toString());
+        if (intent.getExtras() != null) {
+            Log.d(TAG, "Extras: " + intent.getExtras().toString());
+            Log.d(TAG, "Extras Keyset: " + intent.getExtras().keySet().toString());
+        }
+        if (intent != null) {
+            String intentStringExtra = intent.getStringExtra(Intent.EXTRA_TEXT);
+            if (intentStringExtra != null) {
+                Log.d(TAG, "intentStringExtra: " + intentStringExtra);
+            }
+        }
+        if (bundle != null) {
+            for (String key : bundle.keySet()) {
+                if (bundle.get(key) != null) {
+                    Log.d(TAG, "key: " + key + ", value: " + bundle.get(key).toString());
+                    // here we will determine which notification the user tap on.
+
+                    // if propose walk invitation notification is clicked, go to
+                    // TODO: I do not know what screen it goes to trigger the invitation screen. (like we go to TeamActivity to trigger invitation to team)
+                    if(bundle.get(key).toString().equals(FirestoreConstants.NOTIFICATION_PROPOSE_WALK_KEY)){
+
+                    }
+
+                    // if someone hits accept/decline walk invitation
+                } else {
+                    Log.d(TAG, "key: " + key + ", value: None");
+                }
+            }
+        }
 
         if (disablemUser) {
             mUser = new MockUser(FirestoreConstants.MOCK_USER_NAME, FirestoreConstants.MOCK_USER_EMAIL);
@@ -185,7 +220,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             findViewById(R.id.teamScreenButton).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(TAG, "user email is " + finalUser.getEmail());
+                    Log.d(TAG, "user email is " + mUser.getEmail());
 
                     Intent intent = new Intent(HomeScreenActivity.this, TeamActivity.class);
                     intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
@@ -821,6 +856,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                                 mUser = document.toObject(WWRUser.class);
                                 Log.d(TAG, "Fetched user is\n" + mUser.toString());
 
+                                // Subscribe to both propose walk and propose walk invitation
+                                if(!mUser.getTeamName().isEmpty()){
+                                    subscribeToNotificationsTopic();
+                                }
                             } else {
                                 // If the user doesn't exist on FireStore
                                 Log.i(TAG, "User doesn't exist on Firestore, creating now ...");
@@ -863,6 +902,10 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                             mUser = document.toObject(WWRUser.class);
                             Log.d(TAG, "User is\n" + mUser.toString());
 
+                            if(!mUser.getTeamName().isEmpty()){
+                                subscribeToNotificationsTopic();
+                            }
+
                         } else {
                             Log.d(TAG, "get failed with ", task.getException());
                         }
@@ -893,6 +936,33 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
 
     public static void disableUser(Boolean disable){
         disablemUser = disable;
+    }
+
+
+    private void subscribeToNotificationsTopic() {
+        FirebaseMessaging.getInstance().subscribeToTopic(FirestoreConstants.NOTIFICATION_PROPOSE_WALK)
+                .addOnCompleteListener(task -> {
+                            String msg = "Subscribed to notifications for propose walk";
+                            if (!task.isSuccessful()) {
+                                msg = "Subscribe to notifications failed";
+                            }
+                            Log.d(TAG, msg);
+                            Toast.makeText(HomeScreenActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        }
+                );
+
+        // TODO: this should be moved to when the owner of the proposed walk is assigned, since
+        // only the owner should be able to get notification if a member accepts/declines.
+        FirebaseMessaging.getInstance().subscribeToTopic(FirestoreConstants.NOTIFICATION_PROPOSE_WALK_INV)
+                .addOnCompleteListener(task -> {
+                            String msg = "Subscribed to notifications for propose walk acceptance";
+                            if (!task.isSuccessful()) {
+                                msg = "Subscribe to notifications failed";
+                            }
+                            Log.d(TAG, msg);
+                            Toast.makeText(HomeScreenActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        }
+                );
     }
 } // end class
 
