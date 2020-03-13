@@ -194,6 +194,7 @@ public class TeamRouteAdapter extends FirestoreRecyclerAdapter<Route, TeamRouteA
                         }
                     });
 
+            // Set the user icons
             String ownerName = model.getOwnerName();
             String firstInitial = null;
             String secondInitial = null;
