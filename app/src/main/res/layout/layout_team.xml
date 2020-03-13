@@ -10,8 +10,6 @@
         android:layout_height="40dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="10dp"
         android:background="@drawable/button_background"
         android:text="lol"
         android:textSize="@dimen/route_detail" />
@@ -19,9 +17,11 @@
 
     <TextView
         android:id="@+id/team_member_name_team_activity"
+        android:layout_alignParentLeft="true"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:paddingLeft="15dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:text="name"
         android:textColor="#000"
         android:textSize="30sp"
@@ -31,8 +31,10 @@
         android:id="@+id/team_member_email_team_activity"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:paddingLeft="15dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:text="email"
+        android:layout_toRightOf="@+id/team_member_name_team_activity"
         android:textColor="#000"
         android:textSize="30sp"
         android:textStyle="bold" />
