@@ -55,12 +55,27 @@ public final class WWRConstants {
     public static final String EXTRA_USER_EMAIL_KEY = "com.example.wwrapp.EXTRA_USER_EMAIL_KEY";
     public static final String EXTRA_USER_NAME_KEY = "com.example.wwrapp.EXTRA_USER_NAME_KEY";
 
+    // Value will be true if we are requesting a sign-in, false if we just want to mock
+    public static final String EXTRA_IS_SIGNING_IN_KEY = "com.example.wwrapp.EXTRA_IS_SIGINING_IN_KEY";
+
+
     // Firestore Keys
     public static final String EXTRA_ROUTE_ID_KEY = "com.example.wwrapp.EXTRA_ROUTE_ID_KEY";
     public static final String EXTRA_ROUTE_PATH_KEY = "com.example.wwrapp.EXTRA_ROUTE_PATH_KEY";
 
 
     // SharedPreferences constants
+
+    // User login info
+    public static final String SHARED_PREFERENCES_USER_INFO_FILE_NAME =
+            "com.example.wwrapp.SHARED_PREFERENCES_USER_INFO_FILE_NAME";
+
+    public static final String SHARED_PREFERENCES_USER_INFO_NAME_KEY =
+            "com.example.wwrapp.SHARED_PREFERENCES_USER_INFO_NAME_KEY";
+
+    public static final String SHARED_PREFERENCES_USER_INFO_EMAIL_KEY =
+            "com.example.wwrapp.SHARED_PREFERENCES_USER_INFO_EMAIL_KEY";
+
 
     // Height file
     public static final String SHARED_PREFERENCES_HEIGHT_FILE_NAME = "com.example.wwrapp.SHARED_PREFERENCES_HEIGHT_FILE_NAME";
@@ -107,6 +122,8 @@ public final class WWRConstants {
     // User Factory keys/types
     public static final String GOOGLE_USER_FACTORY_KEY = "com.example.wwrapp.GOOGLE_USER_FACTORY_KEY";
     public static final String MOCK_USER_FACTORY_KEY = "com.example.wwrapp.MOCK_USER_FACTORY_KEY";
+    public static final String WWR_USER_FACTORY_KEY = "com.example.wwrapp.WWR_USER_FACTORY_KEY";
+
 
     // Mocks
     public static final String MOCK_FITNESS_SERVICE_VERSION = "com.example.wwrapp.MOCK_FITNESS_SERVICE_VERSION";

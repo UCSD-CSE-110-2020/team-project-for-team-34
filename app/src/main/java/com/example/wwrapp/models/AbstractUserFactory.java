@@ -5,10 +5,11 @@ import com.example.wwrapp.utils.WWRConstants;
 /**
  * Factory class for User objects
  */
-public class IUserFactory {
+public abstract class AbstractUserFactory {
 
-    public static IUser createUser(String type, String name, String email) {
-        IUser user = null;
+    public static AbstractUser createUser(String type, String name, String email, String teamName,
+                                          String teamStatus) {
+        AbstractUser user = null;
         switch(type) {
             case WWRConstants.MOCK_USER_FACTORY_KEY:
                 user = new MockUser(name, email);
@@ -16,6 +17,9 @@ public class IUserFactory {
 
             case WWRConstants.GOOGLE_USER_FACTORY_KEY:
                 user = new GoogleUser(name,email);
+                break;
+            case WWRConstants.WWR_USER_FACTORY_KEY:
+                user = new WWRUser(name, email, teamName, teamStatus);
                 break;
 
         };

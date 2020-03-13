@@ -1,5 +1,6 @@
 package com.example.wwrapp.services;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -63,7 +64,8 @@ public class DummyFitnessServiceWrapper implements IFitnessService, IFitnessObse
         }
     };
 
-    public void startDummyService() {
+    @Override
+    public void startFitnessService(Activity activity) {
         Log.d(TAG, "In method startDummyService()");
 
         // Only start the service if binding hasn't already happened
@@ -75,7 +77,8 @@ public class DummyFitnessServiceWrapper implements IFitnessService, IFitnessObse
         }
     }
 
-    public void stopDummyService() {
+    @Override
+    public void stopFitnessService() {
         Log.d(TAG, "In method stopDummyService()");
 
         // Only stop the service if binding already happened
@@ -88,20 +91,13 @@ public class DummyFitnessServiceWrapper implements IFitnessService, IFitnessObse
         }
     }
 
-    @Override
-    public int getRequestCode() {
-        return 0;
-    }
+
 
     @Override
     public void setup() {
         Log.d(TAG, "In method setup()");
     }
 
-    @Override
-    public void updateStepCount() {
-        Log.d(TAG, "In method updateStepCount");
-    }
 
     @Override
     public void update(long steps) {
