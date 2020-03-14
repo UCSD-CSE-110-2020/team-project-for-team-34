@@ -43,9 +43,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-
 
 import java.util.List;
 
@@ -118,44 +115,13 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
 
-//
+
 //        clearHeightSharedPreferences();
 //        clearLastWalkSharedPreferences();
 //        clearLoginSharedPreferences();
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-
-
-        Log.d(TAG, "Intent: " + intent.toString());
-        if (intent.getExtras() != null) {
-            Log.d(TAG, "Extras: " + intent.getExtras().toString());
-            Log.d(TAG, "Extras Keyset: " + intent.getExtras().keySet().toString());
-        }
-        if (intent != null) {
-            String intentStringExtra = intent.getStringExtra(Intent.EXTRA_TEXT);
-            if (intentStringExtra != null) {
-                Log.d(TAG, "intentStringExtra: " + intentStringExtra);
-            }
-        }
-        if (bundle != null) {
-            for (String key : bundle.keySet()) {
-                if (bundle.get(key) != null) {
-                    Log.d(TAG, "key: " + key + ", value: " + bundle.get(key).toString());
-                    // here we will determine which notification the user tap on.
-
-                    // if propose walk invitation notification is clicked, go to
-                    // TODO: I do not know what screen it goes to trigger the invitation screen. (like we go to TeamActivity to trigger invitation to team)
-                    if(bundle.get(key).toString().equals(FirestoreConstants.NOTIFICATION_PROPOSE_WALK_KEY)){
-
-                    }
-
-                    // if someone hits accept/decline walk invitation
-                } else {
-                    Log.d(TAG, "key: " + key + ", value: None");
-                }
-            }
-        }
 
         if (disablemUser) {
             mUser = AbstractUserFactory.createUser(WWRConstants.WWR_USER_FACTORY_KEY,
@@ -187,22 +153,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
             // Initialize the database
             mFirestore = FirebaseFirestore.getInstance();
 
-            mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
-                    .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
-                    .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
-                    .get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(TAG, document.getId() + " => " + document.getData());
-                                }
-                            } else {
-                                Log.d(TAG, "Error getting documents: ", task.getException());
-                            }
-                        }
-                    });
+
 
             // Check if the user has already logged in by checking SharedPreferences:
             SharedPreferences loginSharedPreferences =
@@ -227,6 +178,38 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                 // The user has signed in before OR we have their login info locally:
                 // Just pull user data
                 readUserFromFireStore(userEmail);
+            }
+
+            Log.d(TAG, "Intent: " + intent.toString());
+            if (intent.getExtras() != null) {
+                Log.d(TAG, "Extras: " + intent.getExtras().toString());
+                Log.d(TAG, "Extras Keyset: " + intent.getExtras().keySet().toString());
+            }
+            if (intent != null) {
+                String intentStringExtra = intent.getStringExtra(Intent.EXTRA_TEXT);
+                if (intentStringExtra != null) {
+                    Log.d(TAG, "intentStringExtra: " + intentStringExtra);
+                }
+            }
+            if (bundle != null) {
+                for (String key : bundle.keySet()) {
+                    if (bundle.get(key) != null) {
+                        Log.d(TAG, "key: " + key + ", value: " + bundle.get(key).toString());
+                        // here we will determine which notification the user tap on.
+
+                        // if propose walk invitation notification is clicked, go to
+                        if(bundle.get(key).toString().equals(FirestoreConstants.NOTIFICATION_PROPOSE_WALK_KEY)){
+                            assert mUser != null;
+                            Intent outgoingIntent = new Intent();
+                            outgoingIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                            startActivity(outgoingIntent);
+                        }
+
+                        // if someone hits accept/decline walk invitation
+                    } else {
+                        Log.d(TAG, "key: " + key + ", value: None");
+                    }
+                }
             }
 
 

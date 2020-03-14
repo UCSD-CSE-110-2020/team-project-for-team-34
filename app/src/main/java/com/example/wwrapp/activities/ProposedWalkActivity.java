@@ -398,22 +398,36 @@ public class ProposedWalkActivity extends AppCompatActivity {
                             mWithdrawBtn.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+
+
+                                    mWalk.setStatus(FirestoreConstants.FIRESTORE_ROUTE_STATUS_WITHDRAWN);
                                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
                                             .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
-                                            .delete()
-                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            .set(mWalk)
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    Log.d(TAG, "Deleted proposed walk!");
-                                                    finish();
-                                                }
-                                            })
-                                            .addOnFailureListener(new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-                                                    Log.w(TAG, "Error deleting document", e);
+                                                public void onComplete(@androidx.annotation.NonNull Task<Void> task) {
+                                                    Log.d(TAG, "Successfully updated route status to withdrawn");
+                                                    mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                                            .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
+                                                            .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
+                                                            .delete()
+                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                @Override
+                                                                public void onSuccess(Void aVoid) {
+                                                                    Log.d(TAG, "Deleted proposed walk!");
+                                                                    finish();
+                                                                }
+                                                            })
+                                                            .addOnFailureListener(new OnFailureListener() {
+                                                                @Override
+                                                                public void onFailure(@NonNull Exception e) {
+                                                                    Log.w(TAG, "Error deleting document", e);
+                                                                }
+                                                            });
                                                 }
                                             });
                                 }

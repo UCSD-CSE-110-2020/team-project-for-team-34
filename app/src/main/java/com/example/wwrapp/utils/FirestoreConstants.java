@@ -25,6 +25,8 @@ public class FirestoreConstants {
     // proposed-scheduled related
     public static final String FIRESTORE_ROUTE_STATUS_PROPOSED = "proposed";
     public static final String FIRESTORE_ROUTE_STATUS_SCHEDULED = "scheduled";
+    public static final String FIRESTORE_ROUTE_STATUS_WITHDRAWN = "withdrawn";
+
 
     public static final String FIRESTORE_ROUTE_INVITEE_STATUS_PENDING = "pending";
     public static final String FIRESTORE_ROUTE_INVITEE_STATUS_ACCEPTED = "accepted";
