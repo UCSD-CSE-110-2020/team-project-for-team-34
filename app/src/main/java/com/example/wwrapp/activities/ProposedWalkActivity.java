@@ -440,6 +440,9 @@ public class ProposedWalkActivity extends AppCompatActivity {
                         }
                     });
         }
+        else {
+            setContentView(R.layout.activity_proposed_walk);
+        }
 
     }
 }

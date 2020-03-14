@@ -1,5 +1,9 @@
 package com.example.wwrapp;
 
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -15,16 +19,24 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
+import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @Config(sdk = 28)
 public class ProposedWalkActivityUnitTest {
 
+    private Button withDrawButton;
+    private Button acceptButton;
+    private Button badTimeButton;
+    private Button badRouteButton;
+
+    private TextView timeView;
+    private TextView dateView;
+
     @BeforeClass
     public static void disableFirestore() {
         ProposedWalkActivity.MOCKING = true;
-
     }
 
     @Rule
@@ -43,32 +55,30 @@ public class ProposedWalkActivityUnitTest {
     }
 
     private void init(ProposedWalkActivity proposedWalkActivity) {
-
+        RouteBuilder routeBuilder = new RouteBuilder();
+        withDrawButton = proposedWalkActivity.findViewById(R.id.withdrawBtn);
+        timeView = proposedWalkActivity.findViewById(R.id.proposedDateTextView);
+        dateView = proposedWalkActivity.findViewById(R.id.proposedTimeTextView);
+        acceptButton = proposedWalkActivity.findViewById(R.id.acceptBtn);
+        badTimeButton = proposedWalkActivity.findViewById(R.id.badTimeBtn);
+        badRouteButton = proposedWalkActivity.findViewById(R.id.badRouteBtn);
     }
 
     @Test
-    public void testEnterWalkInformationActivity() {
+    public void testTimeAndDateTextViewsVisible() {
         scenario.onActivity(proposedWalkActivity -> {
             init(proposedWalkActivity);
-            assertTrue(true);
-            RouteBuilder routeBuilder = new RouteBuilder();
-//            mRoute = routeBuilder.setRouteName("route name")
-//                    .setStartingPoint("starting point")
-//                    .setFavorite(true)
-//                    .setWalked(true)
-//                    .setStatus("proposed")
-//                    .setSteps(100)
-//                    .setDateOfLastWalk("March 13")
-//                    .getRoute();
-//            mWalk = new ProposeWalk(mRoute, "proposerEmail", "proposerName");
-//            ProposeWalkUser user1 = new ProposeWalkUser("email1", "name1");
-//            ProposeWalkUser user2 = new ProposeWalkUser("email2", "name2");
-//
-//            mWalk.addUser("email1", "name1");
-//            mWalk.addUser("email2", "name2");
-
+            assertTrue(dateView != null);
+            assertTrue(timeView != null);
         });
     }
 
-
+    @Test
+    public void testWithDrawButton() {
+        scenario.onActivity(proposedWalkActivity -> {
+            init(proposedWalkActivity);
+            assertTrue(withDrawButton != null && withDrawButton.getVisibility() == View.VISIBLE);
+            assertEquals("Withdraw Walk", withDrawButton.getText());
+        });
+    }
 }
