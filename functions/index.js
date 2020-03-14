@@ -16,9 +16,11 @@ exports.sendNotificationsForWalkProposal = functions.firestore
      // if document exists, meaing it is newly added, we sent walk scheduled
      if (document) {
        const owner = document.proposerName;
+       const routeName = document.route.routeName;
+       const date = document.date;
        var message = {
          notification: {
-           title: "Propose Walk Proposed",
+           title: routeName + ": " + date,
            body: owner + " has proposed a walk"
          },
          topic: 'proposeWalk'
@@ -66,30 +68,8 @@ exports.sendNotificationsForWalkProposal = functions.firestore
         // If the document does not exist, it has been deleted.
         const document = change.after.data();
 
-        // if document exists, meaing it is newly added, we sent walk scheduled
-        if (document.status === "scheduled") {
-          const owner = document.proposerName;
-          var message = {
-            notification: {
-              title: "Propose Walk Scheduled",
-              body: owner + " has scheduled a walk"
-            },
-            topic: 'scheduleWalk'
-          };
 
-          return admin.messaging().send(message)
-            .then((response) => {
-              // Response is a message ID string.
-              console.log('Successfully sent message:', response);
-              return response;
-            })
-            .catch((error) => {
-              console.log('Error sending message:', error);
-              return error;
-            });
-        }
-        // else it means that it has been deleted, we sent walk withdrawn
-        else if(document === null){
+        if(document === null){
            var deletedMessage = {
                notification: {
                    title: "Scheduled Walk Withdrawn",
@@ -109,6 +89,32 @@ exports.sendNotificationsForWalkProposal = functions.firestore
               return deletedError;
             });
         }
+        // if document exists, meaing it is newly added, we sent walk scheduled
+        else if (document.status === "scheduled") {
+          const owner = document.proposerName;
+          const routeName = document.route.routeName;
+          const date = document.date;
+          var message = {
+            notification: {
+              title: routeName+ ": " + date,
+              body: owner + " has scheduled a walk"
+            },
+            topic: 'scheduleWalk'
+          };
+
+          return admin.messaging().send(message)
+            .then((response) => {
+              // Response is a message ID string.
+              console.log('Successfully sent message:', response);
+              return response;
+            })
+            .catch((error) => {
+              console.log('Error sending message:', error);
+              return error;
+            });
+        }
+        // else it means that it has been deleted, we sent walk withdrawn
+
         return "document was null or emtpy";
       });
 
