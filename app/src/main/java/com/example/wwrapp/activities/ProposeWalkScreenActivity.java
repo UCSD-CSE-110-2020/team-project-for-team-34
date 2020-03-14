@@ -3,6 +3,7 @@ package com.example.wwrapp.activities;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
@@ -20,6 +21,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.wwrapp.R;
 import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.ProposeWalk;
+import com.example.wwrapp.models.ProposeWalkUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.WWRConstants;
@@ -29,6 +31,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -98,15 +101,21 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH)
-                            .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                    ProposeWalk walk = new ProposeWalk(mRoute, mUser.getEmail());
+                                    ProposeWalk walk = new ProposeWalk(mRoute, mUser.getEmail(), mUser.getName());
+                                    subscribeToNotificationsTopicInvitation();
+                                    walk.setStatus(FirestoreConstants.FIRESTORE_ROUTE_STATUS_PROPOSED);
                                     if (task.isSuccessful()) {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
-                                            if(document.get("email") != null && ((String)document.get("email")) != "") {
+                                            Log.d(TAG, "Document data -> " + document.getData());
+                                            if(!document.get(AbstractUser.FIELD_TEAM_NAME).toString().isEmpty()) {
                                                 Log.d(TAG, document.get("email") + " added to route");
-                                                walk.addUser((String)document.get("email"));
+                                                String name = document.getString(ProposeWalkUser.FIELD_NAME);
+                                                String email = document.getString(ProposeWalkUser.FIELD_EMAIL);
+                                                walk.addUser(email, name);
                                             }
                                         }
                                         walk.setDate(dateShow.getText().toString());
@@ -114,11 +123,18 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
                                         mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                                                 .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                                                 .collection(FirestoreConstants.FIRESTORE_COLLECTION_PROPOSED_WALK_PATH)
-                                                .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK).set(walk)
+                                                .document(FirestoreConstants.FIRE_STORE_DOCUMENT_PROPOSED_WALK)
+                                                .set(walk)
                                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                     @Override
                                                     public void onSuccess(Void aVoid) {
                                                         Log.d(TAG, "Team Proposed Walk Updated");
+                                                        Intent outgoingIntent =
+                                                                new Intent(ProposeWalkScreenActivity.this,
+                                                                        ProposedWalkActivity.class);
+                                                        outgoingIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                                                        outgoingIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                                        startActivity(outgoingIntent);
                                                         finish();
                                                     }
                                                 });
@@ -220,5 +236,18 @@ public class ProposeWalkScreenActivity extends AppCompatActivity {
         else {
             return true;
         }
+    }
+
+    private void subscribeToNotificationsTopicInvitation(){
+        FirebaseMessaging.getInstance().subscribeToTopic(FirestoreConstants.NOTIFICATION_PROPOSE_WALK_INV)
+                .addOnCompleteListener(task -> {
+                            String msg = "Subscribed to notifications for propose walk acceptance";
+                            if (!task.isSuccessful()) {
+                                msg = "Subscribe to notifications failed";
+                            }
+                            Log.d(TAG, msg);
+                            Toast.makeText(ProposeWalkScreenActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        }
+                );
     }
 }

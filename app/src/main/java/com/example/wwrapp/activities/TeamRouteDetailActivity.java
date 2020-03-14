@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
@@ -30,16 +31,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Detailed information page for a Route
- * TODO: Using RouteDetailActivity as a reference, correct this class
  */
 public class TeamRouteDetailActivity extends AppCompatActivity {
     private static final String TAG = "TeamRouteDetailActivity";
     private static final int START_EXISTING_WALK_REQUEST_CODE = 1;
+    private static final String DENY_PROPOSAL_TOAST = "You cannot propose a walk unless you are on a team";
+
 
     private ToggleButton mFavoriteBtn;
 
@@ -77,6 +80,10 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
         proposeWalkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mUser.getTeamName().isEmpty()) {
+                    Toast.makeText(TeamRouteDetailActivity.this, DENY_PROPOSAL_TOAST, Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Intent intent = new Intent(TeamRouteDetailActivity.this, ProposeWalkScreenActivity.class);
                 intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, mRoute);
                 intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
@@ -97,8 +104,6 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
 
         TextView startingPointText = findViewById(R.id.starting_point_text_view);
         startingPointText.setText(mRoute.getStartingPoint());
-
-        // TODO: Substitute route stats if applicable
 
         Context currentContext = this;
         TextView routeDateText = findViewById(R.id.route_detail_date);
@@ -127,30 +132,49 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
                                 // Check which data can be substituted
 
                                 // If the user has their own rating, display that instead
-                                Map<String, Boolean> favoriters = (Map<String, Boolean>) (document.get(Route.FIELD_FAVORITERS));
-                                if (favoriters.containsKey(mUser.getEmail())) {
-                                    boolean isFavorite = favoriters.get(mUser.getEmail());
-                                    if (isFavorite) {
-                                        mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_on));
-                                        mFavoriteBtn.setChecked(true);
-                                    } else {
-                                        mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_off));
-                                        mFavoriteBtn.setChecked(false);
-                                    }
+                                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                                        .document(routeDocName)
+                                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_FAVORITERS_PATH)
+                                        .document(mUser.getEmail())
+                                        .get()
+                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onComplete(@android.support.annotation.NonNull Task<DocumentSnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    DocumentSnapshot document = task.getResult();
+                                                    if (document.exists()) {
+                                                        // If the user has their own rating
+                                                        Log.d(TAG, "User has own rating");
+                                                        Map<String, Object> map = (Map<String, Object>) (document.getData());
+                                                        boolean isFavorite = (Boolean) (map.get(mUser.getEmail()));
+                                                        if (isFavorite) {
+                                                            mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_on));
+                                                            mFavoriteBtn.setChecked(true);
+                                                        } else {
+                                                            mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_off));
+                                                            mFavoriteBtn.setChecked(false);
+                                                        }
+                                                    } else {
+                                                        // User doesn't have their own rating
+                                                        Log.d(TAG, "User does not have own rating");
+                                                        boolean isOwnerFavorite = mRoute.isFavorite();
+                                                        if (isOwnerFavorite) {
+                                                            mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_on));
+                                                            mFavoriteBtn.setChecked(true);
+                                                        } else {
+                                                            mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_off));
+                                                            mFavoriteBtn.setChecked(false);
+                                                        }
 
-                                } else {
-                                    // If the user doesn't have their own rating, substitute the owner's.
-                                    Log.d(TAG, "Current user " + mUser.getEmail() + " has NOT favorited route ");
+                                                    }
+                                                } else {
+                                                    Log.e(TAG, "get failed with ", task.getException());
+                                                }
+                                            }
+                                        });
 
-                                    boolean isOwnerFavorite = mRoute.isFavorite();
-                                    if (isOwnerFavorite) {
-                                        mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_on));
-                                        mFavoriteBtn.setChecked(true);
-                                    } else {
-                                        mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_off));
-                                        mFavoriteBtn.setChecked(false);
-                                    }
-                                }
 
                                 // If the user has walked this route before, display their stats
                                 mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
@@ -167,13 +191,11 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
                                                     DocumentSnapshot document = task.getResult();
                                                     if (document.exists()) {
                                                         // If user has walked before
-                                                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                                        Log.d(TAG, "User has walked this route before");
                                                         Walk walk = document.toObject(Walk.class);
                                                         routeMilesText.setText(String.valueOf(walk.getMiles()));
                                                         routeStepsText.setText(String.valueOf(walk.getSteps()));
                                                         routeDateText.setText(walk.getDate());
-
-                                                        // TODO: Display a check mark if the user has walked this route
                                                         Log.d(TAG, "Current user " + mUser.getEmail() + " has walked route before");
                                                     } else {
                                                         // If user has not walked before
@@ -200,7 +222,6 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
                 });
 
 
-        // TODO: Respond to changes
         mFavoriteBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -208,53 +229,54 @@ public class TeamRouteDetailActivity extends AppCompatActivity {
                     mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_on));
 
                     // Update favorite rating
-                    mRoute.putFavoriter(mUser.getEmail(), true);
-                    Map<String, Boolean> updatedFavoriters = mRoute.getFavoriters();
-
-                    // Get the nested field to update
-                    String updateField = RouteDocumentNameUtils.getNestedFieldName(Route.FIELD_FAVORITERS, mUser.getEmail());
-                    Log.d(TAG, "Update field is " + updateField);
+                    Map<String, Boolean> map = new HashMap<>();
+                    map.put(mUser.getEmail(), true);
 
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
                             .document(routeDocName)
-                            .update(updateField, true)
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_FAVORITERS_PATH)
+                            .document(mUser.getEmail())
+                            .set(map)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-                                    Log.d(TAG, "Successfully updated user as route favoriter in team collection");
+                                    Log.d(TAG, "Successfully updated user as route favoriter");
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Log.w(TAG, "Error writing favoriter to team collection", e);
+                                    Log.w(TAG, "Error writing favoriter", e);
                                 }
                             });
 
                 } else {
                     mFavoriteBtn.setBackgroundDrawable(ContextCompat.getDrawable(currentContext, R.drawable.ic_star_off));
 
-                    // Get the nested field to update
-                    String updateField = RouteDocumentNameUtils.getNestedFieldName(Route.FIELD_FAVORITERS, mUser.getEmail());
-                    Log.d(TAG, "Update field is " + updateField);
+                    // Update favorite rating
+                    Map<String, Boolean> map = new HashMap<>();
+                    map.put(mUser.getEmail(), false);
+
 
                     mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
                             .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
                             .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
                             .document(routeDocName)
-                            .update(updateField, false)
+                            .collection(FirestoreConstants.FIRESTORE_COLLECTION_ROUTES_FAVORITERS_PATH)
+                            .document(mUser.getEmail())
+                            .set(map)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
-                                    Log.d(TAG, "Successfully updated user as route un-favoriter in team collection");
+                                    Log.d(TAG, "Successfully updated user as route un-favoriter");
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Log.w(TAG, "Error writing favoriter to team collection", e);
+                                    Log.w(TAG, "Error writing un-favoriter", e);
                                 }
                             });
                 }

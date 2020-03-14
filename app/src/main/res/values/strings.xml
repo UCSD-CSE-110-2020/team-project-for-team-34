@@ -106,6 +106,7 @@
     <string name="propose_time_input">Click Here to select Time</string>
     <string name="startingPoint">starting point</string>
     <string name="proposed_walk">Proposed Walk</string>
+    <string name="proposed_walks">Proposed Walks</string>
 
 
 </resources>

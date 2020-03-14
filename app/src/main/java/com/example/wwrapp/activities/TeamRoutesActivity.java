@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +15,7 @@ import com.example.wwrapp.R;
 import com.example.wwrapp.adapters.TeamRouteAdapter;
 import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
+import com.example.wwrapp.models.WWRUser;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.RouteDocumentNameUtils;
@@ -40,13 +39,12 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
 
     private TeamRouteAdapter mTeammateRouteAdapter;
     private RecyclerView mTeammateRoutesRecycler;
-    private TextView mEmptyStringView;
 
     private FirebaseFirestore mFirestore;
     private Query mQuery;
     private AbstractUser mUser;
     private static boolean mEmpty;
-    private static boolean disablemUser =false;
+    private static boolean disablemUser = false;
 
     // For testing purposes
     private static boolean testTeammateRoute = false;
@@ -64,13 +62,36 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
 
         // Get the user
         mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mFirestore = FirebaseFirestore.getInstance();
 
         if (IS_TESTING_EMPTY) {
             mEmpty = true;
             return;
         }
-        // Set up Firestore and query for the routes to display
-        initFirestore();
+
+        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                .document(mUser.getEmail())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                mUser = document.toObject(WWRUser.class);
+                                // Set up Firestore and query for the routes to display
+                                initFirestore();
+                            } else {
+                                Log.d(TAG, "No such document");
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    }
+                });
+
+
 
         FirebaseFirestore.setLoggingEnabled(true);
     }
@@ -119,43 +140,12 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
         return mEmpty;
     }
 
-    // TODO: Why is this here?
-    private void checkIfEmpty() {
-        if (mQuery == null) {
-            Log.d(TAG, "checkIfEmpty: Query is empty");
-            mEmpty = true;
-        } else {
-            mQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        boolean isEmpty = true;
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            isEmpty = false;
-                        }
-                        mEmpty = isEmpty;
-                    } else {
-                        Log.d(TAG, "Error getting documents: ", task.getException());
-                    }
-                }
-            });
-        }
-    }
 
-    private void hideOrShowEmptyString() {
-        mEmptyStringView = findViewById(R.id.emptyStringView);
-
-        if (mEmpty) {
-            mEmptyStringView.setVisibility(View.VISIBLE);
-        } else {
-            mEmptyStringView.setVisibility(View.GONE);
-        }
-    }
 
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
-        checkIfEmpty();
-        hideOrShowEmptyString();
+        // checkIfEmpty();
+        // hideOrShowEmptyString();
         if (mQuery == null) {
             Log.w(TAG, "No query!!!");
         } else {
@@ -172,6 +162,7 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
 
             // Make this activity listen for changes to the adapter
             mTeammateRouteAdapter.setOnRouteSelectedListener(this);
+            mTeammateRouteAdapter.startListening();
         }
     }
 
@@ -230,6 +221,22 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
                         });
             } else {
                 Log.w(TAG, "Result code is not handled");
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAMS_PATH)
+                        .document(FirestoreConstants.FIRESTORE_DOCUMENT_TEAM_PATH)
+                        .collection(FirestoreConstants.FIRESTORE_COLLECTION_TEAM_ROUTES_PATH)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                    }
+                                } else {
+                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                }
+                            }
+                        });
             }
         } else {
             Log.w(TAG, "Request code is not handled");

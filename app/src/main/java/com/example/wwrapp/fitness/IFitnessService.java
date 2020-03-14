@@ -9,4 +9,8 @@ public interface IFitnessService {
     void setup();
     void startFitnessService(Activity activity);
     void stopFitnessService();
+    void addSteps(long steps);
+    void setTime(long milliseconds);
+    long getTime();
+    boolean isMockingTime();
 }

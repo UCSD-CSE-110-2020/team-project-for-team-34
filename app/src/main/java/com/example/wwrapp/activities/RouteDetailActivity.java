@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
@@ -35,6 +36,8 @@ import java.util.List;
 public class RouteDetailActivity extends AppCompatActivity {
     private static final String TAG = "RouteDetailActivity";
     private static final int START_EXISTING_WALK_REQUEST_CODE = 1;
+
+    private static final String DENY_PROPOSAL_TOAST = "You cannot propose a walk unless you are on a team";
 
     private ToggleButton mFavoriteBtn;
 
@@ -71,6 +74,23 @@ public class RouteDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startWalkActivity(route);
+            }
+        });
+
+        // Register the "propose" walk button
+        Button proposeWalkBtn = findViewById(R.id.proposeBtn);
+        proposeWalkBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mUser.getTeamName().isEmpty()) {
+                    Toast.makeText(RouteDetailActivity.this, DENY_PROPOSAL_TOAST, Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                Intent intent = new Intent(RouteDetailActivity.this, ProposeWalkScreenActivity.class);
+                intent.putExtra(WWRConstants.EXTRA_ROUTE_OBJECT_KEY, route);
+                intent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
+                startActivity(intent);
             }
         });
 
@@ -303,7 +323,7 @@ public class RouteDetailActivity extends AppCompatActivity {
                 route.setDateOfLastWalk(mWalk.getDate());
 
                 // Update the walkers for the route
-                route.putWalker(mUser.getEmail(), mWalk);
+                route.setWalked(true);
 
                 // Return data to the routes activity
                 returnToRoutesActivity(route);

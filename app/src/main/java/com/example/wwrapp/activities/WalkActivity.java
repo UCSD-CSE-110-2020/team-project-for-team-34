@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.wwrapp.R;
+import com.example.wwrapp.fitness.FitnessApplication;
 import com.example.wwrapp.fitness.FitnessServiceFactory;
 import com.example.wwrapp.fitness.IFitnessObserver;
 import com.example.wwrapp.fitness.IFitnessService;
@@ -21,6 +22,7 @@ import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.models.WalkBuilder;
+import com.example.wwrapp.utils.DateTimeUtils;
 import com.example.wwrapp.utils.StepsAndMilesConverter;
 import com.example.wwrapp.utils.WWRConstants;
 
@@ -186,6 +188,11 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
         // Pass the Walk data onto the next Activity
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
 
+        // Use mocked time, if mocking
+        if (FitnessApplication.getDummyFitnessServiceInstance().isMockingTime()) {
+            mDateTime = DateTimeUtils.getDateTimeFromMillis(FitnessApplication.getDummyFitnessServiceInstance().getTime());
+        }
+
         // Convert LocalDateTime to String
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);
         String formattedDate = mDateTime.format(dateTimeFormatter);
@@ -222,6 +229,11 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
 
+        // Use mocked time, if mocking
+        if (FitnessApplication.getDummyFitnessServiceInstance().isMockingTime()) {
+            mDateTime = DateTimeUtils.getDateTimeFromMillis(FitnessApplication.getDummyFitnessServiceInstance().getTime());
+        }
+
         // Convert LocalDateTime to String
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);
         String formattedDate = mDateTime.format(dateTimeFormatter);
@@ -255,6 +267,11 @@ public class WalkActivity extends AppCompatActivity implements IFitnessObserver 
 //        mStepsTaken = 100;
 
         String duration = String.format("%d hours, %d minutes, %d seconds", mHours, mMinutes, mSeconds);
+
+        // Use mocked time, if mocking
+        if (FitnessApplication.getDummyFitnessServiceInstance().isMockingTime()) {
+            mDateTime = DateTimeUtils.getDateTimeFromMillis(FitnessApplication.getDummyFitnessServiceInstance().getTime());
+        }
 
         // Convert LocalDateTime to String
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(WWRConstants.DATE_FORMATTER_PATTERN_DETAILED);

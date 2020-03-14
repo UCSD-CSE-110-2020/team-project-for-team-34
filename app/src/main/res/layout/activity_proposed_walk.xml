@@ -113,6 +113,16 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:id="@+id/proposeOrScheduled"
+            android:text="PROPOSED"
+            android:textColor= "#000"
+            android:textSize="15sp"
+
+            />
+        <TextView
             android:id="@+id/route_detail_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -188,8 +198,16 @@
         android:text="Decline (BAD ROUTE)"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/badTimeBtn"
-        app:layout_constraintTop_toBottomOf="@+id/response_Layout" />
+        app:layout_constraintStart_toEndOf="@id/badTimeBtn" />
+
+    <Button
+        android:id="@+id/withdrawBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Withdraw Walk"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
 
     <Button
         android:id="@+id/acceptBtn"
@@ -198,8 +216,15 @@
         android:text="Accept"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/badTimeBtn"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/response_Layout" />
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/scheduleBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Schedule Walk"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <LinearLayout
         android:id="@+id/tag_layout"
@@ -249,8 +274,7 @@
         android:text="Decline (BAD TIME)"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/badRouteBtn"
-        app:layout_constraintStart_toEndOf="@+id/acceptBtn"
-        app:layout_constraintTop_toBottomOf="@+id/response_Layout" />
+        app:layout_constraintStart_toEndOf="@+id/acceptBtn" />
 
     <LinearLayout
         android:id="@+id/response_Layout"

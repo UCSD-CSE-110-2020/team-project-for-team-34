@@ -36,6 +36,9 @@ public final class WWRConstants {
     public static final String EXTRA_TEAM_ROUTE_DETAIL_ACTIVITY_CALLER_ID =
             "com.example.wwrapp.EXTRA_ROUTE_ACTIVITY";
 
+    public static final String EXTRA_SCHEDULE_WALK_ACTIVITY_CALLER_ID =
+            "com.example.wwrapp.SCHEDULE_WALK_ACTIVITY_CALLER_ID";
+
     public static final String EXTRA_SET_USER_ACTIVITY_CALLER_ID = "com.example.wwrapp.EXTRA_SET_USER_ACTIVITY";
 
     // Keys
@@ -121,7 +124,6 @@ public final class WWRConstants {
 
     // User Factory keys/types
     public static final String GOOGLE_USER_FACTORY_KEY = "com.example.wwrapp.GOOGLE_USER_FACTORY_KEY";
-    public static final String MOCK_USER_FACTORY_KEY = "com.example.wwrapp.MOCK_USER_FACTORY_KEY";
     public static final String WWR_USER_FACTORY_KEY = "com.example.wwrapp.WWR_USER_FACTORY_KEY";
 
 
@@ -130,6 +132,7 @@ public final class WWRConstants {
     public static final long NO_MOCK_TIME = -1;
 
     // Reasons for proposed walk
+    public static final int PROPOSED_WALK_PENDING_STATUS = 0;
     public static final int PROPOSED_WALK_ACCEPT_STATUS = 1;
     public static final int PROPOSED_WALK_BAD_ROUTE_STATUS = 2;
     public static final int PROPOSED_WALK_BAD_TIME_STATUS = 3;

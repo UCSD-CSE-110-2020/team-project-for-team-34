@@ -18,7 +18,21 @@ public class FirestoreConstants {
     public static final String FIRESTORE_COLLECTION_TEAM_MEMBERS_PATH = "teamMembers"; // teams/team/teamMembers
     public static final String FIRESTORE_COLLECTION_TEAM_ROUTES_PATH = "teamRoutes"; // teams/team/teamRoutes
 
+    // "routes" related
     public static final String FIRESTORE_COLLECTION_ROUTES_WALKERS_PATH = "walkers"; // teams/team/teamRoutes/someRoute/walkers
+    public static final String FIRESTORE_COLLECTION_ROUTES_FAVORITERS_PATH = "favoriters"; // teams/team/teamRoutes/someRoute/favoriters
+
+    // proposed-scheduled related
+    public static final String FIRESTORE_ROUTE_STATUS_PROPOSED = "proposed";
+    public static final String FIRESTORE_ROUTE_STATUS_SCHEDULED = "scheduled";
+    public static final String FIRESTORE_ROUTE_STATUS_WITHDRAWN = "withdrawn";
+
+
+    public static final String FIRESTORE_ROUTE_INVITEE_STATUS_PENDING = "pending";
+    public static final String FIRESTORE_ROUTE_INVITEE_STATUS_ACCEPTED = "accepted";
+    public static final String FIRESTORE_ROUTE_INVITEE_STATUS_DECLINED_NOT_A_GOOD_ROUTE = "declined (not a good route for me)";
+    public static final String FIRESTORE_ROUTE_INVITEE_STATUS_DECLINED_BAD_TIME = "declined (bad time)";
+
     public static final String FIRESTORE_COLLECTION_PROPOSED_WALK_PATH = "proposedWalk";
     public static final String FIRE_STORE_DOCUMENT_PROPOSED_WALK = "proposedWalkData";
 
@@ -47,6 +61,15 @@ public class FirestoreConstants {
 
     public static final String THIRD_MOCK_USER_NAME = "thirdMockName";
     public static final String THIRD_MOCK_USER_EMAIL = "thirdMockEmail";
+
+
+    // For notification constant
+    public static final String NOTIFICATION_PROPOSE_WALK = "proposeWalk";
+    public static final String NOTIFICATION_PROPOSE_WALK_INV = "proposeWalkInvitation";
+    public static final String NOTIFICATION_PROPOSE_WALK_KEY = "/topics/proposeWalk";
+    public static final String NOTIFICATION_PROPOSE_WALK_INV_KEY = "topics/proposeWalkInvitation";
+    public static final String NOTIFICATION_SCHEDULE_WALK = "scheduleWalk";
+    public static final String NOTIFICATION_SCHEDULE_WALK_KEY = "topics/scheduleWalk";
 
 //    public static final String FIRESTORE_DOCUMENT_ROUTE_NAME = "routeName";
 //    public static final String FIRESTORE_DOCUMENT_STARTING_POINT = "startingPoint";

@@ -1,17 +1,13 @@
 package com.example.wwrapp.models;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Builder pattern for Route objects
  */
 public class RouteBuilder {
     private Route route; // route to build
-    private Map<String, Walk> walkers;
-    private Map<String, Boolean> favoriters;
     private List<String> tags;
 
     private static final String DEFAULT_STRING_FIELD_VALUE = "";
@@ -19,18 +15,13 @@ public class RouteBuilder {
     public RouteBuilder() {
         // Initialize an empty route: fields will be added later
         route = new Route();
-
-        walkers = new HashMap<>();
-        favoriters = new HashMap<>();
         tags = new ArrayList<>();
-
-        route.setWalkers(walkers);
-        route.setFavoriters(favoriters);
         route.setTags(tags);
     }
 
     /**
      * Returns the built Route
+     *
      * @return the built Route
      */
     public Route getRoute() {
@@ -49,6 +40,17 @@ public class RouteBuilder {
         }
 
         return route;
+    }
+
+    /**
+     * Replaces the route being built with the given one
+     *
+     * @param route
+     * @return
+     */
+    public RouteBuilder setRoute(Route route) {
+        this.route = route;
+        return this;
     }
 
     public RouteBuilder setRouteName(String name) {
@@ -70,6 +72,7 @@ public class RouteBuilder {
         route.setMiles(miles);
         return this;
     }
+
     public RouteBuilder setDateOfLastWalk(String dateOfLastWalk) {
         route.setDateOfLastWalk(dateOfLastWalk);
         return this;
@@ -77,6 +80,11 @@ public class RouteBuilder {
 
     public RouteBuilder setFavorite(boolean favorite) {
         route.setFavorite(favorite);
+        return this;
+    }
+
+    public RouteBuilder setWalked(boolean walked) {
+        route.setWalked(walked);
         return this;
     }
 
@@ -106,19 +114,28 @@ public class RouteBuilder {
         return this;
     }
 
-    public RouteBuilder setWalkers(Map<String, Walk> walkers) {
-        route.setWalkers(walkers);
-        return this;
-    }
-
-    public RouteBuilder setFavoriters(Map<String, Boolean> favoriters) {
-        route.setFavoriters(favoriters);
-        return this;
-    }
-
     public RouteBuilder setDurationOfLastWalk(String duration) {
         route.setDurationOfLastWalk(duration);
         return this;
     }
 
+    public RouteBuilder setProposerEmail(String email) {
+        route.setProposerEmail(email);
+        return this;
+    }
+
+    public RouteBuilder setProposerName(String name) {
+        route.setProposerName(name);
+        return this;
+    }
+
+    public RouteBuilder setProposedDateTime(String dateTime) {
+        route.setProposedDateTime(dateTime);
+        return this;
+    }
+
+    public RouteBuilder setStatus(String status) {
+        route.setStatus(status);
+        return this;
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.wwrapp;
+package com.example.wwrapp.activities;
 
 
 import android.view.View;
@@ -10,31 +10,32 @@ import androidx.test.filters.LargeTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.dannyroa.espresso_samples.RecyclerViewMatcher;
-import com.example.wwrapp.activities.HomeScreenActivity;
-import com.example.wwrapp.activities.RoutesActivity;
+import com.example.wwrapp.R;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.pressBack;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withClassName;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.is;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class RoutesActivityTest {
+public class MyFavoriteButtonTest {
 
     @Rule
     public ActivityTestRule<HomeScreenActivity> mActivityTestRule = new ActivityTestRule<>(HomeScreenActivity.class);
@@ -43,33 +44,47 @@ public class RoutesActivityTest {
     public static void initialize() {
         HomeScreenActivity.setIgnoreHeight(true);
         HomeScreenActivity.setEnableFitnessRunner(false);
-        RoutesActivity.setIsTest(true);
+        //RoutesActivity.setIsTest(true);
+        HomeScreenActivity.disableUser(true);
+        RoutesActivity.disableUser(true);
+        EnterWalkInformationActivity.disableUser(true);
     }
 
-    public static RecyclerViewMatcher withRecyclerView(final int recyclerViewId) {
-        return new RecyclerViewMatcher(recyclerViewId);
-    }
-
-    @Ignore
     @Test
-    public void routesActivityTest() {
-        ViewInteraction appCompatButton = onView(
-                allOf(withId(R.id.routeScreenButton),
+    public void myFavoriteButtonTest() {
+
+        ViewInteraction appCompatButton3 = onView(
+                allOf(withId(R.id.routeScreenButton), withText("Go to Routes"),
                         isDisplayed()));
-        appCompatButton.perform(click());
+        appCompatButton3.perform(click());
 
+        ViewInteraction appCompatButton4 = onView(
+                allOf(withId(R.id.addNewRouteButton), withText("+"),
+                        isDisplayed()));
+        appCompatButton4.perform(click());
 
-        onView(withRecyclerView(R.id.recycler_view_route).atPosition(0))
-                .check(matches(hasDescendant(withText("route"))));
+        ViewInteraction appCompatEditText3 = onView(
+                allOf(withId(R.id.route_name_edit_text),
+                        isDisplayed()));
+        appCompatEditText3.perform(replaceText("test1"), closeSoftKeyboard());
 
-        onView(withRecyclerView(R.id.recycler_view_route).atPosition(0))
-                .check(matches(hasDescendant(withText("staring"))));
+        ViewInteraction appCompatEditText4 = onView(
+                allOf(withId(R.id.starting_point_edit_text),
+                        isDisplayed()));
+        appCompatEditText4.perform(replaceText("1"), closeSoftKeyboard());
 
-        onView(withRecyclerView(R.id.recycler_view_route).atPosition(0))
-                .check(matches(hasDescendant(withText("10"))));
+        ViewInteraction appCompatButton5 = onView(
+                allOf(withId(R.id.enter_walk_info_done_button), withText("Done"),
+                        isDisplayed()));
+        appCompatButton5.perform(click());
 
-        onView(withRecyclerView(R.id.recycler_view_route).atPosition(0))
-                .check(matches(hasDescendant(withText("10.0"))));
+        pressBack();
+
+        ViewInteraction appCompatButton6 = onView(
+                allOf(withId(R.id.routeScreenButton), withText("Go to Routes"),
+                        isDisplayed()));
+        appCompatButton6.check(matches(isDisplayed()));
+
     }
 
     private static Matcher<View> childAtPosition(

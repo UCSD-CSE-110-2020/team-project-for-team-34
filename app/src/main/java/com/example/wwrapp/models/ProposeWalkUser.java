@@ -7,8 +7,13 @@ import java.io.Serializable;
 public class ProposeWalkUser implements Serializable {
 
     private static boolean DEFAULT_PENDING = true;
-    private static int DEFAULT_REASON = 0;
+    public static int DEFAULT_REASON = 0;
 
+    public static String FIELD_NAME = "name";
+    public static String FIELD_EMAIL = "email";
+
+
+    private String name;
     private String email;
     private boolean isPending;
     private int reason;
@@ -16,12 +21,14 @@ public class ProposeWalkUser implements Serializable {
     public ProposeWalkUser(){}
 
     public ProposeWalkUser(AbstractUser user) {
+        name = user.getName();
         email = user.getEmail();
         isPending = DEFAULT_PENDING;
         reason = DEFAULT_REASON;
     }
 
-    public ProposeWalkUser(String userEmail) {
+    public ProposeWalkUser(String userEmail, String userName) {
+        name = userName;
         email = userEmail;
         isPending = DEFAULT_PENDING;
         reason = DEFAULT_REASON;
@@ -31,8 +38,12 @@ public class ProposeWalkUser implements Serializable {
         return reason;
     }
 
-    public Boolean getIsPending() {
+    public boolean getIsPending() {
         return isPending;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getEmail() {
