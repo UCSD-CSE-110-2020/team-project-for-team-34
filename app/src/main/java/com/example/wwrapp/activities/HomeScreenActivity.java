@@ -346,6 +346,30 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         Log.d(TAG, "In method onResume");
 
         if (!disablemUser) {
+
+            if (mUser != null) {
+                // Fetch the user
+                mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                        .document(mUser.getEmail())
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@androidx.annotation.NonNull Task<DocumentSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    DocumentSnapshot document = task.getResult();
+                                    if (document.exists()) {
+                                        Log.d(TAG, "Pulled user from Firestore ");
+                                        mUser = document.toObject(WWRUser.class);
+                                    } else {
+                                        Log.w(TAG, "No user exists!");
+                                    }
+                                } else {
+                                    Log.d(TAG, "get failed with ", task.getException());
+                                }
+                            }
+                        });
+            }
+
             // Re-register this activity as an observer if it has been un-registered.
             if (!mIsObserving) {
                 // The current value of the key tells us which fitness service we last started.
@@ -358,6 +382,18 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     getSharedPreferences(WWRConstants.SHARED_PREFERENCES_TOTAL_STEPS_FILE_NAME, MODE_PRIVATE));
             updateHomeDisplay(mDailyTotalSteps, mDailyTotalMiles, mLastWalkSteps, mLastWalkMiles, mLastWalkTime);
             Log.d(TAG, " daily steps = " + mDailyTotalSteps);
+
+
+
+
+
+
+
+
+
+
+
+
         }
     }
 

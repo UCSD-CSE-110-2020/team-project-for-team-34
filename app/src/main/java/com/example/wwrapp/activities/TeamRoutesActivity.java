@@ -15,6 +15,7 @@ import com.example.wwrapp.R;
 import com.example.wwrapp.adapters.TeamRouteAdapter;
 import com.example.wwrapp.models.AbstractUser;
 import com.example.wwrapp.models.Route;
+import com.example.wwrapp.models.WWRUser;
 import com.example.wwrapp.models.Walk;
 import com.example.wwrapp.utils.FirestoreConstants;
 import com.example.wwrapp.utils.RouteDocumentNameUtils;
@@ -43,7 +44,7 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
     private Query mQuery;
     private AbstractUser mUser;
     private static boolean mEmpty;
-    private static boolean disablemUser =false;
+    private static boolean disablemUser = false;
 
     // For testing purposes
     private static boolean testTeammateRoute = false;
@@ -66,8 +67,30 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
             mEmpty = true;
             return;
         }
-        // Set up Firestore and query for the routes to display
-        initFirestore();
+
+        mFirestore.collection(FirestoreConstants.FIRESTORE_COLLECTION_USERS_PATH)
+                .document(mUser.getEmail())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                mUser = document.toObject(WWRUser.class);
+                                // Set up Firestore and query for the routes to display
+                                initFirestore();
+                            } else {
+                                Log.d(TAG, "No such document");
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                        }
+                    }
+                });
+
+
 
         FirebaseFirestore.setLoggingEnabled(true);
     }
