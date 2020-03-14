@@ -93,7 +93,7 @@ exports.sendNotificationsForWalkProposal = functions.firestore
                       console.log('Error sending message:', error);
                       return error;
                     });
-             } else {
+             } else if (document.status === "withdrawn") {
                     var deletedMessage = {
                         notification: {
                             title: "Scheduled Walk Withdrawn",
