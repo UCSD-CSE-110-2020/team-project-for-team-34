@@ -115,10 +115,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
 
-         clearHeightSharedPreferences();
-         clearLastWalkSharedPreferences();
-         clearLoginSharedPreferences();
-
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
 
