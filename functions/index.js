@@ -71,49 +71,52 @@ exports.sendNotificationsForWalkProposal = functions.firestore
 
 
         if(document !== documentBefore){
-           var deletedMessage = {
-               notification: {
-                   title: "Scheduled Walk Withdrawn",
-                   body: "The owner has withdrawn the walk"
-               },
-              topic: 'scheduleWalk'
-           };
+            if (document.status === "scheduled") {
+                  const owner = document.proposerName;
+                  const routeName = document.route.routeName;
+                  const date = document.date;
+                  var message = {
+                    notification: {
+                      title: routeName+ ": " + date,
+                      body: owner + " has scheduled a walk"
+                    },
+                    topic: 'scheduleWalk'
+                  };
 
-          return admin.messaging().send(deletedMessage)
-            .then((deletedResponse) => {
-              // Response is a message ID string.
-              console.log('Successfully sent deleted message:', deletedResponse);
-              return deletedResponse;
-            })
-            .catch((deletedError) => {
-              console.log('Error sending message:', deletedError);
-              return deletedError;
-            });
+                  return admin.messaging().send(message)
+                    .then((response) => {
+                      // Response is a message ID string.
+                      console.log('Successfully sent message:', response);
+                      return response;
+                    })
+                    .catch((error) => {
+                      console.log('Error sending message:', error);
+                      return error;
+                    });
+             } else {
+                    var deletedMessage = {
+                        notification: {
+                            title: "Scheduled Walk Withdrawn",
+                            body: "The owner has withdrawn the walk"
+                        },
+                       topic: 'scheduleWalk'
+                    };
+
+                   return admin.messaging().send(deletedMessage)
+                     .then((deletedResponse) => {
+                       // Response is a message ID string.
+                       console.log('Successfully sent deleted message:', deletedResponse);
+                       return deletedResponse;
+                     })
+                     .catch((deletedError) => {
+                       console.log('Error sending message:', deletedError);
+                       return deletedError;
+                     });
+             }
+
         }
         // if document exists, meaing it is newly added, we sent walk scheduled
-        else if (document.status === "scheduled") {
-          const owner = document.proposerName;
-          const routeName = document.route.routeName;
-          const date = document.date;
-          var message = {
-            notification: {
-              title: routeName+ ": " + date,
-              body: owner + " has scheduled a walk"
-            },
-            topic: 'scheduleWalk'
-          };
 
-          return admin.messaging().send(message)
-            .then((response) => {
-              // Response is a message ID string.
-              console.log('Successfully sent message:', response);
-              return response;
-            })
-            .catch((error) => {
-              console.log('Error sending message:', error);
-              return error;
-            });
-        }
         // else it means that it has been deleted, we sent walk withdrawn
 
         return "document was null or emtpy";
