@@ -67,9 +67,10 @@ exports.sendNotificationsForWalkProposal = functions.firestore
         // Get an object with the current document value.
         // If the document does not exist, it has been deleted.
         const document = change.after.data();
+        const documentBefore = change.before.data();
 
 
-        if(document === null){
+        if(document !== documentBefore){
            var deletedMessage = {
                notification: {
                    title: "Scheduled Walk Withdrawn",
