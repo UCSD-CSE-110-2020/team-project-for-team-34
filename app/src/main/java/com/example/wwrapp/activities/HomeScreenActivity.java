@@ -68,7 +68,7 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
     // True to enable the FitnessRunner, false otherwise
     private static boolean sEnableFitnessRunner = false;
     // TODO: Reset to true
-    private static boolean sIgnoreHeight = true;
+    private static boolean sIgnoreHeight = false;
 
     public static boolean IS_MOCKING = true;
 
@@ -115,10 +115,9 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
         setContentView(R.layout.activity_home_screen);
         Log.d(TAG, "In method onCreate");
 
-
-//        clearHeightSharedPreferences();
-//        clearLastWalkSharedPreferences();
-//        clearLoginSharedPreferences();
+         clearHeightSharedPreferences();
+         clearLastWalkSharedPreferences();
+         clearLoginSharedPreferences();
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
@@ -196,14 +195,6 @@ public class HomeScreenActivity extends AppCompatActivity implements IFitnessObs
                     if (bundle.get(key) != null) {
                         Log.d(TAG, "key: " + key + ", value: " + bundle.get(key).toString());
                         // here we will determine which notification the user tap on.
-
-                        // if propose walk invitation notification is clicked, go to
-                        if(bundle.get(key).toString().equals(FirestoreConstants.NOTIFICATION_PROPOSE_WALK_KEY)){
-                            assert mUser != null;
-                            Intent outgoingIntent = new Intent();
-                            outgoingIntent.putExtra(WWRConstants.EXTRA_USER_KEY, mUser);
-                            startActivity(outgoingIntent);
-                        }
 
                         // if someone hits accept/decline walk invitation
                     } else {

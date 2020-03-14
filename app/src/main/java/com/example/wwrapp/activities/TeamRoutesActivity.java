@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,7 +38,6 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
 
     private TeamRouteAdapter mTeammateRouteAdapter;
     private RecyclerView mTeammateRoutesRecycler;
-    private TextView mEmptyStringView;
 
     private FirebaseFirestore mFirestore;
     private Query mQuery;
@@ -119,38 +116,7 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
         return mEmpty;
     }
 
-    // TODO: Why is this here?
-    private void checkIfEmpty() {
-        if (mQuery == null) {
-            Log.d(TAG, "checkIfEmpty: Query is empty");
-            mEmpty = true;
-        } else {
-            mQuery.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        boolean isEmpty = true;
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            isEmpty = false;
-                        }
-                        mEmpty = isEmpty;
-                    } else {
-                        Log.d(TAG, "Error getting documents: ", task.getException());
-                    }
-                }
-            });
-        }
-    }
 
-    private void hideOrShowEmptyString() {
-        mEmptyStringView = findViewById(R.id.emptyStringView);
-
-        if (mEmpty) {
-            mEmptyStringView.setVisibility(View.VISIBLE);
-        } else {
-            mEmptyStringView.setVisibility(View.GONE);
-        }
-    }
 
     private void initRecyclerView() {
         Log.d(TAG, "initRecyclerView: init recyclerview");
