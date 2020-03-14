@@ -162,6 +162,7 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
 
             // Make this activity listen for changes to the adapter
             mTeammateRouteAdapter.setOnRouteSelectedListener(this);
+            mTeammateRouteAdapter.startListening();
         }
     }
 
