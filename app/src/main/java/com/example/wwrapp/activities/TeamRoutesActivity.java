@@ -62,6 +62,7 @@ public class TeamRoutesActivity extends AppCompatActivity implements TeamRouteAd
 
         // Get the user
         mUser = (AbstractUser) (getIntent().getSerializableExtra(WWRConstants.EXTRA_USER_KEY));
+        mFirestore = FirebaseFirestore.getInstance();
 
         if (IS_TESTING_EMPTY) {
             mEmpty = true;
